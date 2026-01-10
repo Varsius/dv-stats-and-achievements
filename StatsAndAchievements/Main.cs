@@ -1,0 +1,69 @@
+using dnlib;
+using HarmonyLib;
+using System;
+using System.Diagnostics;
+using System.Reflection;
+using UnityEngine;
+using UnityModManagerNet;
+using static UnityModManagerNet.UnityModManager;
+using DV.Simulation;
+using DV.Customization;
+
+namespace StatsAndAchievements;
+
+[EnableReloading]
+public class Main
+{
+	public static UnityModManager.ModEntry ModEntry { get; private set; } = null!;
+
+
+	/// Log a message only when compiled with debug profile.
+	[Conditional("DEBUG")]
+	public static void Debug(string msg) => ModEntry.Logger.Log("[Debug] " + msg);
+	public static void Log(string msg) => ModEntry.Logger.Log(msg);
+	public static void Warning(string msg) => ModEntry.Logger.Warning(msg);
+	public static void Error(string msg) => ModEntry.Logger.Error(msg);
+
+	private static Harmony? _harmony;
+	private static GameObject? watchGO;
+	private static AchievementManager achievementManager;
+
+
+	private static bool Load(UnityModManager.ModEntry modEntry)
+	{
+		ModEntry = modEntry;
+
+		try
+		{
+			_harmony = new Harmony(modEntry.Info.Id);
+			_harmony.PatchAll(Assembly.GetExecutingAssembly());
+
+			watchGO = new GameObject("TODO");
+			UnityEngine.Object.DontDestroyOnLoad(watchGO);
+			watchGO.AddComponent<Watch>();
+
+			achievementManager = new AchievementManager(new AchievementListener[] {
+				new FooAchievement()
+			});
+
+			modEntry.OnUnload = Unload;
+			return true;
+		}
+		catch (Exception ex)
+		{
+			modEntry.Logger.LogException($"Failed to load {modEntry.Info.DisplayName}:", ex);
+			_harmony?.UnpatchAll(modEntry.Info.Id);
+			return false;
+		}
+	}
+
+	private static bool Unload(UnityModManager.ModEntry modEntry)
+	{
+		_harmony?.UnpatchAll(modEntry.Info.Id);
+		if (watchGO != null)
+		{
+			GameObject.Destroy(watchGO);
+		}
+		return true;
+	}
+}
