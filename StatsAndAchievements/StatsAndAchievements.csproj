@@ -10,8 +10,23 @@
 	<!-- Derail Valley -->
 	<ItemGroup>
 		<Reference Include="Assembly-CSharp" />
+		<Reference Include="CareerManagerAPI">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\Mods\CareerManagerAPI\CareerManagerAPI.dll</HintPath>
+		</Reference>
+		<Reference Include="DV.Inventory">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.Inventory.dll</HintPath>
+		</Reference>
 		<Reference Include="DV.Simulation">
 		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.Simulation.dll</HintPath>
+		</Reference>
+		<Reference Include="DV.UI">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.UI.dll</HintPath>
+		</Reference>
+		<Reference Include="DV.UIFramework">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.UIFramework.dll</HintPath>
+		</Reference>
+		<Reference Include="DV.Utils">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.Utils.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 

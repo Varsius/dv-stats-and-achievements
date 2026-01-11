@@ -1,4 +1,7 @@
 using dnlib;
+using DV.Customization;
+using DV.ServicePenalty.UI;
+using DV.Simulation;
 using HarmonyLib;
 using System;
 using System.Diagnostics;
@@ -6,8 +9,9 @@ using System.Reflection;
 using UnityEngine;
 using UnityModManagerNet;
 using static UnityModManagerNet.UnityModManager;
-using DV.Simulation;
-using DV.Customization;
+using CareerManagerAPI;
+using StatsAndAchievements.Events;
+using StatsAndAchievements.Achievements;
 
 namespace StatsAndAchievements;
 
@@ -38,13 +42,20 @@ public class Main
 			_harmony = new Harmony(modEntry.Info.Id);
 			_harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-			watchGO = new GameObject("TODO");
+			watchGO = new GameObject("SAAEventWatch");
 			UnityEngine.Object.DontDestroyOnLoad(watchGO);
-			watchGO.AddComponent<Watch>();
+			watchGO.AddComponent<Events.EventWatch>();
 
 			achievementManager = new AchievementManager(new AchievementListener[] {
-				new FooAchievement()
+				new FooAchievementListener(),
+				new BarAchievementListener()
 			});
+
+			CareerManagerAPI.CareerManagerAPI.CareerManagerAwake += (tracker, locationName, station, trainCar) => 
+			{
+				tracker.TryAddToMainScreen<CareerManagerScreens.AchievementScreen>("Achievements", null,
+					after: CareerManagerLocalization.STATS);
+			};
 
 			modEntry.OnUnload = Unload;
 			return true;

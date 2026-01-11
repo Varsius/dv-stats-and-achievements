@@ -1,19 +1,25 @@
 using DV.Customization;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
-using static System.Net.Mime.MediaTypeNames;
 
-namespace StatsAndAchievements
+namespace StatsAndAchievements.Events
 {
-	internal class Watch : MonoBehaviour
+	internal class EventWatch : MonoBehaviour
 	{
+		// TODO: this class needs to be refactored,
+		// ideally I want all state variables to be defined in
+		// their respective checks.
 		private float _elapsed;
 		private float _previousSpeed;
+		private float _previousHorn;
 		private static TrainCar _trainCar;
-		private Action? _unsubscribeFromAllTrainCarEvents;
+		private Action? _unsubscribeFromTrainCarEvents;
 
 		public static event Action<float> SpeedIncreased;
 		public static event Action Honked;
+		public static event Action HonkStarted;
+		public static event Action HonkEnded;
 
 		void OnEnable()
 		{
@@ -24,41 +30,46 @@ namespace StatsAndAchievements
 			PlayerManager.CarChanged += OnCarChanged;
 		}
 
+		void OnDisable()
+		{
+			Main.Log("watch disabled");
+			_unsubscribeFromTrainCarEvents?.Invoke();
+		}
+
 		private void OnCarChanged(TrainCar newCar)
 		{
-			_unsubscribeFromAllTrainCarEvents?.Invoke();
-			_unsubscribeFromAllTrainCarEvents = null;
+			_unsubscribeFromTrainCarEvents?.Invoke();
+			_unsubscribeFromTrainCarEvents = null;
 
 			if (newCar == null)
 			{
 				return;
 			}
 			_trainCar = newCar;
-			_unsubscribeFromAllTrainCarEvents = SubscribeToTrainCarEvents(newCar);
+			_unsubscribeFromTrainCarEvents = SubscribeToTrainCarEvents(newCar);
 		}
 
 		private Action SubscribeToTrainCarEvents(TrainCar trainCar)
 		{
 			var simFlow = trainCar.SimController.simFlow;
-			Action? unsubscribeHornHorn = null;
-			Action? unsubscribeSandAmount = null;
+			var unsubscribeActions = new List<Action>();
 
 			if (simFlow.TryGetPort("horn.HORN", out var simPortHornHorn))
 			{
 				simPortHornHorn.ValueUpdatedInternally += CheckHornHorn;
-				unsubscribeHornHorn = () => simPortHornHorn.ValueUpdatedInternally -= CheckHornHorn;
+				unsubscribeActions.Add(() => simPortHornHorn.ValueUpdatedInternally -= CheckHornHorn);
 			}
 
 			if (simFlow.TryGetPort("sand.AMOUNT", out var simPortSandAmount))
 			{
 				simPortSandAmount.ValueUpdatedInternally += CheckSandAmount;
-				unsubscribeHornHorn = () => simPortSandAmount.ValueUpdatedInternally -= CheckSandAmount;
+				unsubscribeActions.Add(() => simPortSandAmount.ValueUpdatedInternally -= CheckSandAmount);
 			}
 
 			return () =>
 			{
-				unsubscribeHornHorn?.Invoke();
-				unsubscribeSandAmount?.Invoke();
+				foreach (var unsubscribeAction in unsubscribeActions)
+					unsubscribeAction();
 			};
 		}
 
@@ -78,10 +89,9 @@ namespace StatsAndAchievements
 
 		private void CheckSpeedIncreased(TrainCar trainCar)
 		{
-			float currentSpeed = _trainCar.GetVelocity().magnitude;
+			float currentSpeed = _trainCar.GetVelocity().magnitude * 3.6f;
 			if (currentSpeed > _previousSpeed)
 			{
-				Main.Log($"Speed increased: {currentSpeed}");
 				SpeedIncreased?.Invoke(currentSpeed);
 			}
 			_previousSpeed = currentSpeed;
@@ -89,7 +99,17 @@ namespace StatsAndAchievements
 
 		private void CheckHornHorn(float value)
 		{
-			;
+			if (value <= 0.1f && _previousHorn > 0.1f)
+			{
+				Main.Log("Honk end");
+				HonkEnded?.Invoke();
+			}
+			if (value > 0.1f && _previousHorn <= 0.1f)
+			{
+				Main.Log("Honk start");
+				HonkStarted?.Invoke();
+			}
+			_previousHorn = value;
 		}
 
 		private void CheckSandAmount(float value)
