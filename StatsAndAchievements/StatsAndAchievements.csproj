@@ -10,24 +10,13 @@
 	<!-- Derail Valley -->
 	<ItemGroup>
 		<Reference Include="Assembly-CSharp" />
-		<Reference Include="CareerManagerAPI">
-		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\Mods\CareerManagerAPI\CareerManagerAPI.dll</HintPath>
-		</Reference>
-		<Reference Include="DV.Inventory">
-		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.Inventory.dll</HintPath>
-		</Reference>
-		<Reference Include="DV.Simulation">
-		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.Simulation.dll</HintPath>
-		</Reference>
-		<Reference Include="DV.UI">
-		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.UI.dll</HintPath>
-		</Reference>
-		<Reference Include="DV.UIFramework">
-		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.UIFramework.dll</HintPath>
-		</Reference>
-		<Reference Include="DV.Utils">
-		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.Utils.dll</HintPath>
-		</Reference>
+		<Reference Include="CareerManagerAPI" />
+		<Reference Include="DV.Inventory" />
+		<Reference Include="DV.Simulation" />
+		<Reference Include="DV.UI" />
+		<Reference Include="DV.UIFramework" />
+		<Reference Include="DV.Utils" />
+		<Reference Include="Newtonsoft.Json"/>
 	</ItemGroup>
 
 	<!-- Unity -->
@@ -38,7 +27,16 @@
 
 	<!-- Mod Loader -->
 	<ItemGroup>
+		<PackageReference Include="Krafs.Publicizer" Version="2.3.0">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="UnityModManager" Version="0.27.2" />
+	</ItemGroup>
+
+	<!-- Publicizer -->
+	<ItemGroup>
+		<Publicize Include="Assembly-CSharp" IncludeCompilerGeneratedMembers="false" />
 	</ItemGroup>
 
 	<!-- Null Checking -->

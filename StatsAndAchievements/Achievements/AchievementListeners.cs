@@ -14,7 +14,7 @@ namespace StatsAndAchievements.Achievements
 
 		protected override void OnSpeedIncreased(float speed)
 		{
-			if (IsUnlocked) return;
+			if (IsUnlocked()) return;
 
 			if (speed > 20)
 			{
@@ -31,14 +31,14 @@ namespace StatsAndAchievements.Achievements
 
 		protected override void OnHonkStarted()
 		{
-			if (IsUnlocked) return;
+			if (IsUnlocked()) return;
 
 			_honkStartedAt = Time.time;
 		}
 
 		protected override void OnHonkEnded()
 		{
-			if (IsUnlocked) return;
+			if (IsUnlocked()) return;
 
 			if (Time.time - _honkStartedAt > 5f)
 			{

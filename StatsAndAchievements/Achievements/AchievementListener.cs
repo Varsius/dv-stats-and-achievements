@@ -1,4 +1,5 @@
 using DV.InventorySystem;
+using DV.JObjectExtstensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,11 @@ namespace StatsAndAchievements.Achievements
 		public abstract string Id { get; }
 
 		// TODO: look this up in save data
-		protected bool IsUnlocked = false;
+		protected bool IsUnlocked() {
+			bool? unlocked = Main.saaSaveData.GetBool($"{Id}_unlocked");
+			return unlocked.HasValue && unlocked.Value;
+		}
+
 		protected string Progress = "0/10";
 
 		private List<Action> unsubscribeActions = new List<Action>();
@@ -34,12 +39,10 @@ namespace StatsAndAchievements.Achievements
 
 		protected void TriggerUnlock()
 		{
-			if (IsUnlocked) return;
+			if (IsUnlocked()) return;
 
-			// TODO: Store in save data
+			Main.saaSaveData.SetBool($"{Id}_unlocked", true);
 
-			// TODO: remove
-			IsUnlocked = true;
 			_manager.NotifyUnlocked(Id);
 		}
 
@@ -64,8 +67,8 @@ namespace StatsAndAchievements.Achievements
 			unsubscribeActions.Add(() => Events.EventWatch.HonkEnded -= OnHonkEnded);
 
 
-			Inventory.Instance.MoneyChanged += OnMoneyChanged;
-			unsubscribeActions.Add(() => Inventory.Instance.MoneyChanged -= OnMoneyChanged);
+			//Inventory.Instance.MoneyChanged += OnMoneyChanged;
+			//unsubscribeActions.Add(() => Inventory.Instance.MoneyChanged -= OnMoneyChanged);
 		}
 
 		// Common hooks

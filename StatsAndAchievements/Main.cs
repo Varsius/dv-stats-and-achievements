@@ -12,6 +12,7 @@ using static UnityModManagerNet.UnityModManager;
 using CareerManagerAPI;
 using StatsAndAchievements.Events;
 using StatsAndAchievements.Achievements;
+using Newtonsoft.Json.Linq;
 
 namespace StatsAndAchievements;
 
@@ -31,7 +32,7 @@ public class Main
 	private static Harmony? _harmony;
 	private static GameObject? watchGO;
 	private static AchievementManager achievementManager;
-
+	public static JObject saaSaveData = new JObject();
 
 	private static bool Load(UnityModManager.ModEntry modEntry)
 	{
