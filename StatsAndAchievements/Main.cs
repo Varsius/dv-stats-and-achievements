@@ -31,7 +31,7 @@ public class Main
 
 	private static Harmony? _harmony;
 	private static GameObject? watchGO;
-	private static AchievementManager achievementManager;
+	public static AchievementManager? achievementManager;
 	public static JObject saaSaveData = new JObject();
 
 	private static bool Load(UnityModManager.ModEntry modEntry)
@@ -47,10 +47,10 @@ public class Main
 			UnityEngine.Object.DontDestroyOnLoad(watchGO);
 			watchGO.AddComponent<Events.EventWatch>();
 
-			achievementManager = new AchievementManager(new AchievementListener[] {
+			achievementManager = new AchievementManager([
 				new FooAchievementListener(),
 				new BarAchievementListener()
-			});
+			]);
 
 			CareerManagerAPI.CareerManagerAPI.CareerManagerAwake += (tracker, locationName, station, trainCar) => 
 			{
