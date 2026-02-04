@@ -14,7 +14,7 @@ namespace StatsAndAchievements.Achievements
 		public abstract string Id { get; }
 
 		// TODO: look this up in save data
-		protected bool IsUnlocked() {
+		public bool IsUnlocked() {
 			bool? unlocked = Main.saaSaveData.GetBool($"{Id}_unlocked");
 			return unlocked.HasValue && unlocked.Value;
 		}

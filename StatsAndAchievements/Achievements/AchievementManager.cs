@@ -14,7 +14,7 @@ namespace StatsAndAchievements.Achievements
 {
 	public class AchievementManager
 	{
-		private readonly Dictionary<string, AchievementListener> _listeners = new();
+		public readonly Dictionary<string, AchievementListener> _listeners = new();
 
 		// Other components (like the UI) can subscribe to this,
 		// in order to get notified on each newly unlocked achievement

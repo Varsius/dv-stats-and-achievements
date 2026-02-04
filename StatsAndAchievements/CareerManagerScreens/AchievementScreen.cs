@@ -1,6 +1,11 @@
+using DV.JObjectExtstensions;
+using DV.Localization;
 using DV.ServicePenalty.UI;
 using DV.Teleporters;
+using DV.ThingTypes;
 using JetBrains.Annotations;
+using Newtonsoft.Json.Linq;
+using StatsAndAchievements.Achievements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,10 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using DV.ThingTypes;
-using DV.Localization;
-using Newtonsoft.Json.Linq;
-using DV.JObjectExtstensions;
+using static UnityModManagerNet.UnityModManager.Repository;
 
 namespace StatsAndAchievements.CareerManagerScreens;
 
@@ -62,13 +64,36 @@ public class AchievementScreen : ModularScreenHost
 			Exit();
 			return;
 		}
-		Title.text = "ACHIEVEMENTS";
+		Title.text = "Achievements";
 
-		Scroller?.SetOptions(MainOptions.Select<string, (LinesScrollerScreen.OptionParser?, LinesScrollerScreen.OptionParser?, LinesScrollerScreen.CanEnter?)>(s => (tmPro =>
+		var options = new List<(
+			LinesScrollerScreen.OptionParser?,
+			LinesScrollerScreen.OptionParser?,
+			LinesScrollerScreen.CanEnter?
+		)>();
+
+		foreach (KeyValuePair<string, AchievementListener> entry in Main.achievementManager._listeners)
 		{
-			tmPro.text = s;
-		}, null, null)));
+			options.Add((
+				tmPro =>
+				{
+					tmPro.text = entry.Value.Id;
+				},
+				tmPro =>
+				{
+					if (entry.Value.IsUnlocked())
+					{
+						tmPro.text = "★Unlocked";
+					} else
+					{
+						tmPro.text = "Unlocked";
+					}
+				},
+				null
+			));
+		}
 
+		Scroller?.SetOptions(options);
 	}
 	private void OnClear()
 	{

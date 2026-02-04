@@ -31,7 +31,7 @@ public class Main
 
 	private static Harmony? _harmony;
 	private static GameObject? watchGO;
-	public static AchievementManager? achievementManager;
+	public static AchievementManager achievementManager;
 	public static JObject saaSaveData = new JObject();
 
 	private static bool Load(UnityModManager.ModEntry modEntry)
