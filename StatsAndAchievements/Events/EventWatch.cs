@@ -58,12 +58,19 @@ namespace StatsAndAchievements.Events
 			{
 				simPortHornHorn.ValueUpdatedInternally += CheckHornHorn;
 				unsubscribeActions.Add(() => simPortHornHorn.ValueUpdatedInternally -= CheckHornHorn);
+			} else
+			{
+				Main.Warning("Could not get simPort horn.Horn");
 			}
 
 			if (simFlow.TryGetPort("sand.AMOUNT", out var simPortSandAmount))
 			{
 				simPortSandAmount.ValueUpdatedInternally += CheckSandAmount;
 				unsubscribeActions.Add(() => simPortSandAmount.ValueUpdatedInternally -= CheckSandAmount);
+			}
+			else
+			{
+				Main.Warning("Could not get simPort sand.AMOUNT");
 			}
 
 			return () =>

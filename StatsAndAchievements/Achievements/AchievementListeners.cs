@@ -10,7 +10,7 @@ namespace StatsAndAchievements.Achievements
 {
 	public sealed class FooAchievementListener : AchievementListener
 	{
-		public override string Id => "foo";
+		public override string Id => "foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo";
 
 		protected override void OnSpeedIncreased(float speed)
 		{

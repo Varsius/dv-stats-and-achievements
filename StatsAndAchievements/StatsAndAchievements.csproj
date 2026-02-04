@@ -10,26 +10,55 @@
 	<!-- Derail Valley -->
 	<ItemGroup>
 		<Reference Include="Assembly-CSharp" />
-		<Reference Include="CareerManagerAPI" />
-		<Reference Include="DV.Inventory" />
-		<Reference Include="DV.Simulation" />
-		<Reference Include="DV.UI" />
-		<Reference Include="DV.UIFramework" />
-		<Reference Include="DV.Utils" />
-		<Reference Include="Newtonsoft.Json"/>
+		<Reference Include="CareerManagerAPI">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\Mods\CareerManagerAPI\CareerManagerAPI.dll</HintPath>
+		</Reference>
+		<Reference Include="DV.Inventory">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.Inventory.dll</HintPath>
+		</Reference>
+		<Reference Include="DV.Localization">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.Localization.dll</HintPath>
+		</Reference>
+		<Reference Include="DV.Simulation">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.Simulation.dll</HintPath>
+		</Reference>
+		<Reference Include="DV.ThingTypes">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.ThingTypes.dll</HintPath>
+		</Reference>
+		<Reference Include="DV.UI">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.UI.dll</HintPath>
+		</Reference>
+		<Reference Include="DV.UIFramework">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.UIFramework.dll</HintPath>
+		</Reference>
+		<Reference Include="DV.Utils">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\DV.Utils.dll</HintPath>
+		</Reference>
+		<Reference Include="Newtonsoft.Json">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\Newtonsoft.Json.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.TextMeshPro">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<!-- Unity -->
 	<ItemGroup>
 		<Reference Include="UnityEngine" />
 		<Reference Include="UnityEngine.CoreModule" />
+		<Reference Include="UnityEngine.JSONSerializeModule">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UI">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\UnityEngine.UI.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<!-- Mod Loader -->
 	<ItemGroup>
 		<PackageReference Include="Krafs.Publicizer" Version="2.3.0">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="UnityModManager" Version="0.27.2" />
 	</ItemGroup>
@@ -38,6 +67,8 @@
 	<ItemGroup>
 		<Publicize Include="Assembly-CSharp" IncludeCompilerGeneratedMembers="false" />
 	</ItemGroup>
+
+
 
 	<!-- Null Checking -->
 	<ItemGroup>
