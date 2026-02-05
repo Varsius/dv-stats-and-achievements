@@ -72,7 +72,7 @@ public class LinesScrollerScreen((TextMeshPro lhs, TextMeshPro rhs)[] range, Col
 	private (Color deselect, Color select) TextColors { get; } = (regularColor, highlightColor);
 	private int RangeSelectedIndex { get; set; } = -1;
 	private int ScrollOffset { get; set; } = 0;
-	private bool ColorRHS { get; set; } = false;
+	private bool ColorRHS { get; set; } = true;
 
 	private (OptionParser? lhs, OptionParser? rhs, CanEnter? canEnter)[]? options;
 

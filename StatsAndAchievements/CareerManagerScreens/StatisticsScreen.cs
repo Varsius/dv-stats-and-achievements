@@ -17,9 +17,9 @@ using static UnityModManagerNet.UnityModManager.Repository;
 
 namespace StatsAndAchievements.CareerManagerScreens;
 
-public class AchievementScreen : ModularScreenHost
+public class StatisticsScreen : ModularScreenHost
 {
-	public AchievementScreen()
+	public StatisticsScreen()
 	{
 		Show = OnShow;
 		Hide = OnHide;
@@ -36,7 +36,7 @@ public class AchievementScreen : ModularScreenHost
 			Exit();
 			return;
 		}
-		Title.text = "Achievements";
+		Title.text = "Statistics";
 
 		var options = new List<(
 			LinesScrollerScreen.OptionParser?,
@@ -47,32 +47,19 @@ public class AchievementScreen : ModularScreenHost
 		foreach (KeyValuePair<string, AchievementListener> entry in Main.achievementManager._listeners)
 		{
 			AchievementListener listener = entry.Value;
+			if (listener.Type == Achievements.AchievementType.Condition)
+			{
+				continue;
+			}
+			ProgressAchievementListener progressListener  = (ProgressAchievementListener)listener;
 			options.Add((
 				tmPro =>
 				{
-					if (listener.IsUnlocked())
-					{
-						tmPro.text = $"★{listener.Title}";
-					} else
-					{
-						tmPro.text = listener.Title;
-					}
-						
-						
+					tmPro.text = progressListener.ValueName();
 				},
 				tmPro =>
 				{
-					if (listener.IsUnlocked())
-					{
-						tmPro.text = "Unlocked";
-					} else if (listener.Type == Achievements.AchievementType.Progress)
-					{
-						tmPro.text = $"{((ProgressAchievementListener)listener).Progress()}";
-					}
-					else
-					{
-						tmPro.text = "";
-					}
+					tmPro.text = progressListener.Value();
 				},
 				null
 			));
@@ -91,7 +78,6 @@ public class AchievementScreen : ModularScreenHost
 				Scroller?.Down();
 				break;
 			case InputAction.PrintInfo:
-				Main.Log($"Print Achievement Info {Scroller?.SelectedIndex}");
 				break;
 			case InputAction.Cancel:
 				Exit();

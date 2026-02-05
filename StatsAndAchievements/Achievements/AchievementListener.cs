@@ -8,18 +8,25 @@ using System.Threading.Tasks;
 
 namespace StatsAndAchievements.Achievements
 {
+
+	public enum AchievementType
+	{
+		Progress,
+		Condition
+	}
 	public abstract class AchievementListener
 	{
 		private AchievementManager _manager;
 		public abstract string Id { get; }
+		public abstract string Title { get; }
+		public abstract string Description { get; }
+		public abstract AchievementType Type { get; }
 
 		// TODO: look this up in save data
 		public bool IsUnlocked() {
 			bool? unlocked = Main.saaSaveData.GetBool($"{Id}_unlocked");
 			return unlocked.HasValue && unlocked.Value;
 		}
-
-		protected string Progress = "0/10";
 
 		private List<Action> unsubscribeActions = new List<Action>();
 
@@ -77,5 +84,22 @@ namespace StatsAndAchievements.Achievements
 		protected virtual void OnHonkStarted() { }
 		protected virtual void OnHonkEnded() { }
 		protected virtual void OnMoneyChanged(double previousAmount, double currentAmoung) { }
+	}
+
+	public abstract class ProgressAchievementListener : AchievementListener
+	{
+		public abstract string Value();
+		public abstract string ValueName();
+		public abstract string Target();
+		public virtual string Progress()
+		{
+			return $"{this.Value()}/{this.Target()}";
+		}
+		public override AchievementType Type => AchievementType.Progress;
+	}
+
+	public abstract class ConditionAchievementListener : AchievementListener
+	{
+		public override AchievementType Type => AchievementType.Condition;
 	}
 }

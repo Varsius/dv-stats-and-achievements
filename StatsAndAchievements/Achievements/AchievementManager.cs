@@ -36,8 +36,8 @@ namespace StatsAndAchievements.Achievements
 
 		internal void NotifyUnlocked(string achievementId)
 		{
-			SingletonBehaviour<ACanvasController<CanvasController.ElementType>>.Instance.NotificationManager.ShowNotification($"Unlocked {achievementId}", localize: false, duration: 10f);
-			Main.Log($"Achievement unlocked: {achievementId}");
+			SingletonBehaviour<ACanvasController<CanvasController.ElementType>>.Instance.NotificationManager.ShowNotification($"Unlocked {_listeners[achievementId].Title}", localize: false, duration: 10f);
+			Main.Log($"Achievement unlocked: {_listeners[achievementId].Title}");
 			Unlocked?.Invoke(achievementId);
 		}
 
