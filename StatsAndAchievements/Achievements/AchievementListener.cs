@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DV.Logic.Job;
 
 namespace StatsAndAchievements.Achievements
 {
@@ -76,7 +77,10 @@ namespace StatsAndAchievements.Achievements
 			Events.Actions.LicenseAcquired += OnLicenseAcquired;
 			unsubscribeActions.Add(() => Events.Actions.LicenseAcquired -= OnLicenseAcquired);
 
+			Events.Actions.JobCompletion += OnJobCompletion;
+			unsubscribeActions.Add(() => Events.Actions.JobCompletion -= OnJobCompletion);
 
+			// The inventory instance does not exist yet
 			//Inventory.Instance.MoneyChanged += OnMoneyChanged;
 			//unsubscribeActions.Add(() => Inventory.Instance.MoneyChanged -= OnMoneyChanged);
 		}
@@ -88,6 +92,7 @@ namespace StatsAndAchievements.Achievements
 		protected virtual void OnHonkEnded() { }
 		protected virtual void OnMoneyChanged(double previousAmount, double currentAmount) { }
 		protected virtual void OnLicenseAcquired(string licenseName) { }
+		protected virtual void OnJobCompletion(Job job) { }
 	}
 
 	public abstract class ProgressAchievementListener : AchievementListener

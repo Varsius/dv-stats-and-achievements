@@ -49,7 +49,9 @@ public class Main
 			achievementManager = new AchievementManager([
 				new SpeedDemonAchievementListener(),
 				new MaximumHonkAchievementListener(),
-				new TheEndAchievementListener()
+				new TheEndAchievementListener(),
+				new ScroogeMcDuckAchievementListener(),
+				new AllRounderAchievementListener()
 			]);
 
 			CareerManagerAPI.CareerManagerAPI.CareerManagerAwake += (tracker, locationName, station, trainCar) => 
