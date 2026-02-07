@@ -33,9 +33,6 @@ public class Main
 	private static GameObject? watchGO;
 	public static AchievementManager achievementManager;
 	public static JObject saaSaveData = new JObject();
-
-	public static event Action<string> LicenseAcquired;
-
 	private static bool Load(UnityModManager.ModEntry modEntry)
 	{
 		ModEntry = modEntry;
@@ -51,7 +48,8 @@ public class Main
 
 			achievementManager = new AchievementManager([
 				new SpeedDemonAchievementListener(),
-				new MaximumHonkAchievementListener()
+				new MaximumHonkAchievementListener(),
+				new TheEndAchievementListener()
 			]);
 
 			CareerManagerAPI.CareerManagerAPI.CareerManagerAwake += (tracker, locationName, station, trainCar) => 

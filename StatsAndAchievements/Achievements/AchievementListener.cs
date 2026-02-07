@@ -73,6 +73,9 @@ namespace StatsAndAchievements.Achievements
 			Events.EventWatch.HonkEnded += OnHonkEnded;
 			unsubscribeActions.Add(() => Events.EventWatch.HonkEnded -= OnHonkEnded);
 
+			Events.Actions.LicenseAcquired += OnLicenseAcquired;
+			unsubscribeActions.Add(() => Events.Actions.LicenseAcquired -= OnLicenseAcquired);
+
 
 			//Inventory.Instance.MoneyChanged += OnMoneyChanged;
 			//unsubscribeActions.Add(() => Inventory.Instance.MoneyChanged -= OnMoneyChanged);
@@ -83,7 +86,8 @@ namespace StatsAndAchievements.Achievements
 		protected virtual void OnHonked() { }
 		protected virtual void OnHonkStarted() { }
 		protected virtual void OnHonkEnded() { }
-		protected virtual void OnMoneyChanged(double previousAmount, double currentAmoung) { }
+		protected virtual void OnMoneyChanged(double previousAmount, double currentAmount) { }
+		protected virtual void OnLicenseAcquired(string licenseName) { }
 	}
 
 	public abstract class ProgressAchievementListener : AchievementListener

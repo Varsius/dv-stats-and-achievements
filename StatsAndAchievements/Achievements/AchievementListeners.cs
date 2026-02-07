@@ -1,4 +1,5 @@
 using DV.JObjectExtstensions;
+using DV.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -74,6 +75,28 @@ namespace StatsAndAchievements.Achievements
 			if (IsUnlocked()) return;
 
 			if (Time.time - _honkStartedAt > 5f)
+			{
+				TriggerUnlock();
+			}
+		}
+	}
+
+	public sealed class TheEndAchievementListener : ConditionAchievementListener
+	{
+		public override string Id => "the_end";
+		public override string Title => "The End?";
+		public override string Description => @"
+			Acquire all licenses
+			";
+
+		protected override void OnLicenseAcquired(String licenseName)
+		{
+			if (IsUnlocked()) return;
+
+			int acquiredLicensesCount = SingletonBehaviour<LicenseManager>.Instance.GetNumberOfAcquiredGeneralLicenses() + SingletonBehaviour<LicenseManager>.Instance.GetNumberOfAcquiredJobLicenses();
+			int allLicensesCount = SingletonBehaviour<LicenseManager>.Instance.AllLicensesCount;
+
+			if (acquiredLicensesCount >= allLicensesCount)
 			{
 				TriggerUnlock();
 			}

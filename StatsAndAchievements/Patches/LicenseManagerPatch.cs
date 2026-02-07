@@ -9,20 +9,20 @@ using System.Threading.Tasks;
 namespace StatsAndAchievements.Patches;
 
 [HarmonyPatch(typeof(LicenseManager))]
-internal class LicenseManagerPatch
+internal static class LicenseManagerPatch
 {
-	[HarmonyPatch(nameof(LicenseManager.AcquireGeneralLicense))]
+	[HarmonyPatch(nameof(LicenseManager.AcquireGeneralLicense), new[] { typeof(GeneralLicenseType_v2) })]
 	[HarmonyPostfix]
-	public static void AcquireGeneralLicensePatch(GeneralLicenseType_v2 license)
+	private static void AcquireGeneralLicensePostfix(GeneralLicenseType_v2 license)
 	{
-		Main.Log($"Acquire General License {license.name}");
-		// Main.LicenseAcquired?.Invoke(license.name);
+		Events.Actions.InvokeLicenseAcquired(license.name);
 	}
 
-	[HarmonyPatch(nameof(LicenseManager.AcquireJobLicense))]
+	[HarmonyPatch(nameof(LicenseManager.AcquireJobLicense), new[] { typeof(JobLicenseType_v2) })]
 	[HarmonyPostfix]
-	public static void AcquireJobLicensePatch(GeneralLicenseType_v2 license)
+	private static void AcquireJobLicensePostfix(JobLicenseType_v2 newLicense)
 	{
-		Main.Log($"Acquire Job License {license.name}");
+		Events.Actions.InvokeLicenseAcquired(newLicense.name);
 	}
 }
+
