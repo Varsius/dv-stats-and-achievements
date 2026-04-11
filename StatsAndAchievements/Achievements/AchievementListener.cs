@@ -29,20 +29,21 @@ namespace StatsAndAchievements.Achievements
 			return unlocked.HasValue && unlocked.Value;
 		}
 
-		private List<Action> unsubscribeActions = new List<Action>();
-
-		~AchievementListener()
-		{
-			Main.Log($"Destructor {Id}");
-			foreach (var unsubscribeAction in unsubscribeActions)
-				unsubscribeAction();
-		}
+		private readonly List<Action> unsubscribeActions = new List<Action>();
 
 		internal void Attach(AchievementManager manager)
 		{
 			_manager = manager;
 
 			SubscribeToEvents();
+		}
+
+		internal void Detach()
+		{
+			foreach (var unsubscribeAction in unsubscribeActions)
+				unsubscribeAction();
+
+			unsubscribeActions.Clear();
 		}
 
 		protected void TriggerUnlock()
@@ -56,34 +57,49 @@ namespace StatsAndAchievements.Achievements
 
 		protected virtual void SubscribeToEvents()
 		{
-			// TODO: for the MVP subscribe to all events
-			// With this, all hooks that an achievement does not use will just translate to an empty function being called.
-			// If this turns out to hurt the performance, implement event subscription in each achievement individually.
-
-			// TODO: write a meta function that combines subscribing and adding to the unsubscribeActions list
-
-			Events.EventWatch.SpeedIncreased += OnSpeedIncreased;
-			unsubscribeActions.Add(() => Events.EventWatch.SpeedIncreased -= OnSpeedIncreased);
-
-			Events.EventWatch.Honked += OnHonked;
-			unsubscribeActions.Add(() => Events.EventWatch.Honked -= OnHonked);
-
-			Events.EventWatch.HonkStarted += OnHonkStarted;
-			unsubscribeActions.Add(() => Events.EventWatch.HonkStarted -= OnHonkStarted);
-
-			Events.EventWatch.HonkEnded += OnHonkEnded;
-			unsubscribeActions.Add(() => Events.EventWatch.HonkEnded -= OnHonkEnded);
-
-			Events.Actions.LicenseAcquired += OnLicenseAcquired;
-			unsubscribeActions.Add(() => Events.Actions.LicenseAcquired -= OnLicenseAcquired);
-
-			Events.Actions.JobCompletion += OnJobCompletion;
-			unsubscribeActions.Add(() => Events.Actions.JobCompletion -= OnJobCompletion);
-
-			// TODO: The inventory instance does not exist yet
-			//Inventory.Instance.MoneyChanged += OnMoneyChanged;
-			//unsubscribeActions.Add(() => Inventory.Instance.MoneyChanged -= OnMoneyChanged);
 		}
+
+		protected void Subscribe(Action subscribe, Action unsubscribe)
+		{
+			subscribe();
+			unsubscribeActions.Add(unsubscribe);
+		}
+
+		protected void SubscribeToSpeedIncreased(Action<float> listener) =>
+			Subscribe(
+				() => Events.EventWatch.SpeedIncreased += listener,
+				() => Events.EventWatch.SpeedIncreased -= listener
+			);
+
+		protected void SubscribeToHonked(Action listener) =>
+			Subscribe(
+				() => Events.EventWatch.Honked += listener,
+				() => Events.EventWatch.Honked -= listener
+			);
+
+		protected void SubscribeToHonkStarted(Action listener) =>
+			Subscribe(
+				() => Events.EventWatch.HonkStarted += listener,
+				() => Events.EventWatch.HonkStarted -= listener
+			);
+
+		protected void SubscribeToHonkEnded(Action listener) =>
+			Subscribe(
+				() => Events.EventWatch.HonkEnded += listener,
+				() => Events.EventWatch.HonkEnded -= listener
+			);
+
+		protected void SubscribeToLicenseAcquired(Action<string> listener) =>
+			Subscribe(
+				() => Events.Actions.LicenseAcquired += listener,
+				() => Events.Actions.LicenseAcquired -= listener
+			);
+
+		protected void SubscribeToJobCompletion(Action<Job> listener) =>
+			Subscribe(
+				() => Events.Actions.JobCompletion += listener,
+				() => Events.Actions.JobCompletion -= listener
+			);
 
 		// Common hooks
 		protected virtual void OnSpeedIncreased(float speed) { }

@@ -52,5 +52,11 @@ namespace StatsAndAchievements.Achievements
 			SingletonBehaviour<ACanvasController<CanvasController.ElementType>>.Instance.NotificationManager.ShowNotification($"{achievementId}: {progress}", localize: false, duration: 5f);
 			Main.Log($"Achievement progress: {achievementId} - {progress}");
 		}
+
+		internal void Detach()
+		{
+			foreach (var listener in _listeners.Values)
+				listener.Detach();
+		}
 	}
 }

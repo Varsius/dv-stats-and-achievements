@@ -37,6 +37,11 @@ namespace StatsAndAchievements.Achievements
 			}
 		}
 
+		protected override void SubscribeToEvents()
+		{
+			SubscribeToSpeedIncreased(OnSpeedIncreased);
+		}
+
 		protected override void OnSpeedIncreased(float speed)
 		{
 			if (speed <= this.maxSpeed)
@@ -63,6 +68,12 @@ namespace StatsAndAchievements.Achievements
 			";
 
 		private float _honkStartedAt = 0.0f;
+
+		protected override void SubscribeToEvents()
+		{
+			SubscribeToHonkStarted(OnHonkStarted);
+			SubscribeToHonkEnded(OnHonkEnded);
+		}
 
 		protected override void OnHonkStarted()
 		{
@@ -91,6 +102,11 @@ namespace StatsAndAchievements.Achievements
 		public override string Description => @"
 			Acquire all licenses
 			";
+
+		protected override void SubscribeToEvents()
+		{
+			SubscribeToLicenseAcquired(OnLicenseAcquired);
+		}
 
 		protected override void OnLicenseAcquired(String licenseName)
 		{
@@ -131,6 +147,11 @@ namespace StatsAndAchievements.Achievements
 			{
 				this.moneyEarned = 0.0f;
 			}
+		}
+
+		protected override void SubscribeToEvents()
+		{
+			SubscribeToJobCompletion(OnJobCompletion);
 		}
 
 		protected override void OnJobCompletion(Job job)
@@ -199,6 +220,11 @@ namespace StatsAndAchievements.Achievements
 			{
 				this.hasCompletedShuntingUnload = false;
 			}
+		}
+
+		protected override void SubscribeToEvents()
+		{
+			SubscribeToJobCompletion(OnJobCompletion);
 		}
 
 		protected override void OnJobCompletion(Job job)

@@ -84,6 +84,9 @@ public class Main
 
 	private static bool Unload(UnityModManager.ModEntry modEntry)
 	{
+		if (achievementManager != null)
+			achievementManager.Detach();
+
 		_harmony?.UnpatchAll(modEntry.Info.Id);
 		if (watchGO != null)
 		{
