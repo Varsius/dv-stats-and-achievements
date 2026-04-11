@@ -47,16 +47,22 @@ public class Main
 			watchGO.AddComponent<Events.EventWatch>();
 
 			achievementManager = new AchievementManager([
-				new SpeedDemonAchievementListener(),
-				new MaximumHonkAchievementListener(),
-				new TheEndAchievementListener(),
-				new ScroogeMcDuckAchievementListener(),
-				new AllRounderAchievementListener()
+				new AchievementCategory("career", "Career", [
+					new AllRounderAchievementListener(),
+					new TheEndAchievementListener()
+				]),
+				new AchievementCategory("advanced", "Advanced", [
+					new SpeedDemonAchievementListener(),
+					new MaximumHonkAchievementListener()
+				]),
+				new AchievementCategory("milestones", "Milestones", [
+					new ScroogeMcDuckAchievementListener()
+				])
 			]);
 
 			CareerManagerAPI.CareerManagerAPI.CareerManagerAwake += (tracker, locationName, station, trainCar) => 
 			{
-				tracker.TryAddToMainScreen<CareerManagerScreens.AchievementScreen>("Achievements", null,
+				tracker.TryAddToMainScreen<CareerManagerScreens.AchievementCategoryScreen>("Achievements", null,
 					after: CareerManagerLocalization.STATS);
 				tracker.TryAddToMainScreen<CareerManagerScreens.StatisticsScreen>("Statistics", null,
 					after: CareerManagerLocalization.STATS);

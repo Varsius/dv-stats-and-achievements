@@ -1,42 +1,42 @@
-using DV.JObjectExtstensions;
-using DV.Localization;
 using DV.ServicePenalty.UI;
-using DV.Teleporters;
-using DV.ThingTypes;
-using JetBrains.Annotations;
-using Newtonsoft.Json.Linq;
 using StatsAndAchievements.Achievements;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TMPro;
-using UnityEngine;
-using static UnityModManagerNet.UnityModManager.Repository;
 
 namespace StatsAndAchievements.CareerManagerScreens;
 
-public class AchievementScreen : ModularScreenHost
+public class AchievementScreen : IModularScreen
 {
-	public AchievementScreen()
+	private readonly ModularScreenHost _host;
+	private readonly AchievementCategory _category;
+	private IReadOnlyList<AchievementListener> _achievements = [];
+
+	public IModularScreen? Parent { get; }
+	public ModularScreenHost? Host => _host;
+	public IModularScreen.ShowScreen? Show { get; }
+	public IModularScreen.HideScreen? Hide { get; }
+	public IModularScreen.ScreenInput? Input { get; }
+
+	public AchievementScreen(IModularScreen parent, ModularScreenHost host, AchievementCategory category)
 	{
+		Parent = parent;
+		_host = host;
+		_category = category;
 		Show = OnShow;
 		Hide = OnHide;
 		Input = OnInput;
-		Clear += OnClear;
 	}
 
 
 
 	private void OnShow(IModularScreen? previous)
 	{
-		if (Title == null)
+		if (_host.Title == null)
 		{
-			Exit();
+			_host.Exit();
 			return;
 		}
-		Title.text = "Achievements";
+		_host.Title.text = _category.Title;
+		_achievements = _category.Achievements;
 
 		var options = new List<(
 			LinesScrollerScreen.OptionParser?,
@@ -44,28 +44,27 @@ public class AchievementScreen : ModularScreenHost
 			LinesScrollerScreen.CanEnter?
 		)>();
 
-		foreach (KeyValuePair<string, AchievementListener> entry in Main.achievementManager._listeners)
+		foreach (AchievementListener listener in _achievements)
 		{
-			AchievementListener listener = entry.Value;
 			options.Add((
 				tmPro =>
 				{
 					if (listener.IsUnlocked())
 					{
 						tmPro.text = $"★{listener.Title}";
-					} else
+					}
+					else
 					{
 						tmPro.text = listener.Title;
 					}
-						
-						
 				},
 				tmPro =>
 				{
 					if (listener.IsUnlocked())
 					{
 						tmPro.text = "Unlocked";
-					} else if (listener.Type == Achievements.AchievementType.Progress)
+					}
+					else if (listener.Type == Achievements.AchievementType.Progress)
 					{
 						tmPro.text = $"{((ProgressAchievementListener)listener).Progress()}";
 					}
@@ -78,23 +77,34 @@ public class AchievementScreen : ModularScreenHost
 			));
 		}
 
-		Scroller?.SetOptions(options);
+		_host.Scroller?.SetOptions(options);
 	}
+
+	private void OnHide(IModularScreen? next)
+	{
+	}
+
 	private void OnInput(InputAction action)
 	{
 		switch (action)
 		{
 			case InputAction.Up:
-				Scroller?.Up();
+				_host.Scroller?.Up();
 				break;
 			case InputAction.Down:
-				Scroller?.Down();
+				_host.Scroller?.Down();
 				break;
 			case InputAction.PrintInfo:
-				Main.Log($"Print Achievement Info {Scroller?.SelectedIndex}");
+				if (_host.Scroller == null || _host.Scroller.SelectedIndex < 0 || _host.Scroller.SelectedIndex >= _achievements.Count)
+					return;
+
+				_host.SwitchToScreen(new AchievementDescriptionScreen(this, _host, _achievements[_host.Scroller.SelectedIndex]));
 				break;
 			case InputAction.Cancel:
-				Exit();
+				if (Parent == null)
+					_host.Exit();
+				else
+					_host.SwitchToScreen(Parent);
 				break;
 		}
 	}
