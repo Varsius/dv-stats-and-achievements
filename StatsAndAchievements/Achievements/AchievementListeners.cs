@@ -82,6 +82,8 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
+	// This achievement is implemented as a conditional achievement, since the total amount of licenses
+	// is already tracked in the vanilla stats menu
 	public sealed class TheEndAchievementListener : ConditionAchievementListener
 	{
 		public override string Id => "the_end";
@@ -109,12 +111,12 @@ namespace StatsAndAchievements.Achievements
 		public override string Id => "scrooge_mc_duck";
 		public override string Title => "Scrooge McDuck";
 		public override string Description => @"
-			Earn $1.000.000 throughout your carreer
+			Earn $1,000,000 throughout your carreer
 			";
 
-		public override string Value() => $"${(int)this.moneyEarned}";
+		public override string Value() => $"${(int)this.moneyEarned}"; // TODO: thousand seperator (see Varsius' KittyCat PR)
 		public override string ValueName() => "Money Earned";
-		public override string Target() => "100 km/h";
+		public override string Target() => "$1,000,000";
 
 		private float moneyEarned;
 

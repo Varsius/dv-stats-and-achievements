@@ -52,6 +52,9 @@
 		<Reference Include="UnityEngine.UI">
 		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\UnityEngine.UI.dll</HintPath>
 		</Reference>
+		<Reference Include="WorldStreamer">
+		  <HintPath>D:\SteamLibrary\steamapps\common\Derail Valley\DerailValley_Data\Managed\WorldStreamer.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 	<!-- Mod Loader -->
