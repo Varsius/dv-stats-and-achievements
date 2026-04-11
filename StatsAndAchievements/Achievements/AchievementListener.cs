@@ -23,8 +23,8 @@ namespace StatsAndAchievements.Achievements
 		public abstract string Description { get; }
 		public abstract AchievementType Type { get; }
 
-		// TODO: look this up in save data
-		public bool IsUnlocked() {
+		public bool IsUnlocked()
+		{
 			bool? unlocked = Main.saaSaveData.GetBool($"{Id}_unlocked");
 			return unlocked.HasValue && unlocked.Value;
 		}
@@ -80,7 +80,7 @@ namespace StatsAndAchievements.Achievements
 			Events.Actions.JobCompletion += OnJobCompletion;
 			unsubscribeActions.Add(() => Events.Actions.JobCompletion -= OnJobCompletion);
 
-			// The inventory instance does not exist yet
+			// TODO: The inventory instance does not exist yet
 			//Inventory.Instance.MoneyChanged += OnMoneyChanged;
 			//unsubscribeActions.Add(() => Inventory.Instance.MoneyChanged -= OnMoneyChanged);
 		}

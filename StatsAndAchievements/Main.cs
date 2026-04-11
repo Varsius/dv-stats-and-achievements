@@ -46,6 +46,7 @@ public class Main
 			UnityEngine.Object.DontDestroyOnLoad(watchGO);
 			watchGO.AddComponent<Events.EventWatch>();
 
+			// TODO: the mod should contain config options to enable/disable each category
 			achievementManager = new AchievementManager([
 				new AchievementCategory("career", "Career", [
 					new AllRounderAchievementListener(),
@@ -58,13 +59,15 @@ public class Main
 				new AchievementCategory("milestones", "Milestones", [
 					new ScroogeMcDuckAchievementListener()
 				])
+				// TODO: "Secret" and "Steam Engine Connoisseur" categories (see ACHIEVEMENTS.md)
 			]);
 
-			CareerManagerAPI.CareerManagerAPI.CareerManagerAwake += (tracker, locationName, station, trainCar) => 
+			CareerManagerAPI.CareerManagerAPI.CareerManagerAwake += (tracker, locationName, station, trainCar) =>
 			{
 				tracker.TryAddToMainScreen<CareerManagerScreens.AchievementCategoryScreen>("Achievements", null,
 					after: CareerManagerLocalization.STATS);
-				tracker.TryAddToMainScreen<CareerManagerScreens.StatisticsScreen>("Statistics", null,
+				// TODO: ideally this should extend/replace the original "Stats" screen
+				tracker.TryAddToMainScreen<CareerManagerScreens.StatisticsScreen>("Advanced Stats", null,
 					after: CareerManagerLocalization.STATS);
 			};
 

@@ -37,6 +37,7 @@ public class AchievementCategoryScreen : ModularScreenHost
 		{
 			options.Add((
 				tmPro => { tmPro.text = category.Title; },
+				// TODO: the right sight should show a percantage of unlocked achievement in this category
 				tmPro => { tmPro.text = $"{category.Achievements.Count} achievements"; },
 				null
 			));
@@ -55,7 +56,7 @@ public class AchievementCategoryScreen : ModularScreenHost
 			case InputAction.Down:
 				Scroller?.Down();
 				break;
-			case InputAction.PrintInfo:
+			case InputAction.Confirm:
 				if (Scroller == null || Scroller.SelectedIndex < 0 || Scroller.SelectedIndex >= _categories.Count)
 					return;
 

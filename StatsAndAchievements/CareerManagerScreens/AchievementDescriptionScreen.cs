@@ -36,7 +36,7 @@ public class AchievementDescriptionScreen : IModularScreen
 		if (_host.Subtitle != null)
 			_host.Subtitle.text = GetStatusText();
 
-		_host.Paragraphs.ParagraphA.text = _achievement.Description.Trim();
+		_host.Paragraphs.ParagraphB.text = _achievement.Description.Trim();
 	}
 
 	private void OnHide(IModularScreen? next)
@@ -48,6 +48,7 @@ public class AchievementDescriptionScreen : IModularScreen
 		switch (action)
 		{
 			case InputAction.PrintInfo:
+				// TODO: print "license info"-like object that shows the achievement description (and progress)
 				break;
 			case InputAction.Cancel:
 				if (Parent == null)

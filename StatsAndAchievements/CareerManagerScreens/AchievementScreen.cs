@@ -94,11 +94,14 @@ public class AchievementScreen : IModularScreen
 			case InputAction.Down:
 				_host.Scroller?.Down();
 				break;
-			case InputAction.PrintInfo:
+			case InputAction.Confirm:
 				if (_host.Scroller == null || _host.Scroller.SelectedIndex < 0 || _host.Scroller.SelectedIndex >= _achievements.Count)
 					return;
 
 				_host.SwitchToScreen(new AchievementDescriptionScreen(this, _host, _achievements[_host.Scroller.SelectedIndex]));
+				break;
+			case InputAction.PrintInfo:
+				// TODO: print "license info"-like object that shows the achievement description (and progress)
 				break;
 			case InputAction.Cancel:
 				if (Parent == null)
