@@ -170,13 +170,17 @@ namespace StatsAndAchievements.Achievements
 	}
 
 	// TODO: When we are able to detect if passenger jobs is installed alongside this mod, then conditionally include regional/express job
-	public sealed class AllRounderAchievementListener : ConditionAchievementListener
+	public sealed class AllRounderAchievementListener : ProgressAchievementListener
 	{
 		public override string Id => "all_rounder";
 		public override string Title => "All-Rounder";
 		public override string Description => @"
 			Complete a job of each type
 			";
+
+		public override string Value() => $"{CompletedJobTypeCount()}";
+		public override string ValueName() => "Job Types Completed";
+		public override string Target() => "4";
 
 		private bool hasCompletedTransport;
 		private bool hasCompletedEmptytHaul;
@@ -259,6 +263,22 @@ namespace StatsAndAchievements.Achievements
 			{
 				TriggerUnlock();
 			}
+		}
+
+		private int CompletedJobTypeCount()
+		{
+			int completedJobTypeCount = 0;
+
+			if (hasCompletedTransport)
+				completedJobTypeCount++;
+			if (hasCompletedEmptytHaul)
+				completedJobTypeCount++;
+			if (hasCompletedShuntingLoad)
+				completedJobTypeCount++;
+			if (hasCompletedShuntingUnload)
+				completedJobTypeCount++;
+
+			return completedJobTypeCount;
 		}
 	}
 }
