@@ -29,9 +29,11 @@ namespace StatsAndAchievements.Achievements
 		public SpeedDemonAchievementListener()
 		{
 			float? maxSpeed = Main.saaSaveData.GetFloat($"{Id}_max_speed");
-			if (maxSpeed.HasValue) {
+			if (maxSpeed.HasValue)
+			{
 				this.maxSpeed = maxSpeed.Value;
-			} else
+			}
+			else
 			{
 				this.maxSpeed = 0.0f;
 			}
@@ -46,7 +48,7 @@ namespace StatsAndAchievements.Achievements
 		{
 			if (speed <= this.maxSpeed)
 			{
-					return;
+				return;
 			}
 
 			this.maxSpeed = speed;
@@ -59,6 +61,7 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
+	// TODO: trigger while honking and not only when the honking ends
 	public sealed class MaximumHonkAchievementListener : ConditionAchievementListener
 	{
 		public override string Id => "maximum_honk";
@@ -166,6 +169,7 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
+	// TODO: When we are able to detect if passenger jobs is installed alongside this mod, then conditionally include regional/express job
 	public sealed class AllRounderAchievementListener : ConditionAchievementListener
 	{
 		public override string Id => "all_rounder";
@@ -231,7 +235,8 @@ namespace StatsAndAchievements.Achievements
 		{
 			if (IsUnlocked()) return;
 
-			switch (job.jobType) {
+			switch (job.jobType)
+			{
 				case DV.ThingTypes.JobType.Transport:
 					hasCompletedTransport = true;
 					Main.saaSaveData.SetBool($"{Id}_completed_transport", hasCompletedTransport);

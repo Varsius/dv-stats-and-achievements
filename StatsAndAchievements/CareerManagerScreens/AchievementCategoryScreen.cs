@@ -1,6 +1,7 @@
 using DV.ServicePenalty.UI;
 using StatsAndAchievements.Achievements;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace StatsAndAchievements.CareerManagerScreens;
 
@@ -24,7 +25,7 @@ public class AchievementCategoryScreen : ModularScreenHost
 			return;
 		}
 
-		Title.text = "Achievements";
+		Title.text = "Achievements"; // TODO: include overall percentage of unlocked achievements in all categories
 		_categories = Main.achievementManager.Categories;
 
 		var options = new List<(
@@ -37,13 +38,25 @@ public class AchievementCategoryScreen : ModularScreenHost
 		{
 			options.Add((
 				tmPro => { tmPro.text = category.Title; },
-				// TODO: the right sight should show a percantage of unlocked achievement in this category
-				tmPro => { tmPro.text = $"{category.Achievements.Count} achievements"; },
+				tmPro => { tmPro.text = GetCategoryProgressText(category); },
 				null
 			));
 		}
 
 		Scroller?.SetOptions(options);
+	}
+
+	private static string GetCategoryProgressText(AchievementCategory category)
+	{
+		int achievementCount = category.Achievements.Count;
+		if (achievementCount == 0)
+		{
+			return "0%";
+		}
+
+		int unlockedCount = category.Achievements.Count(achievement => achievement.IsUnlocked());
+		int unlockedPercentage = unlockedCount * 100 / achievementCount;
+		return $"{unlockedPercentage}%";
 	}
 
 	private void OnInput(InputAction action)
