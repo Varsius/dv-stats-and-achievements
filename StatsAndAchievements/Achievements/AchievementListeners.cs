@@ -169,6 +169,25 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
+	public sealed class TheEngineerAchievementListener : ConditionAchievementListener
+	{
+		public override string Id => "the_engineer";
+		public override string Title => "The Engineer";
+		public override string Description => @"
+			Complete your first manual service
+			";
+
+		protected override void SubscribeToEvents()
+		{
+			SubscribeToPitStopCheckout(OnPitStopCheckout);
+		}
+
+		protected override void OnPitStopCheckout(float amount, bool hasPaid)
+		{
+			TriggerUnlock();
+		}
+	}
+
 	// TODO: When we are able to detect if passenger jobs is installed alongside this mod, then conditionally include regional/express job
 	public sealed class AllRounderAchievementListener : ProgressAchievementListener
 	{

@@ -101,6 +101,12 @@ namespace StatsAndAchievements.Achievements
 				() => Events.Actions.JobCompletion -= listener
 			);
 
+		protected void SubscribeToPitStopCheckout(Action<float, bool> listener) =>
+			Subscribe(
+				() => LocoResourceModule.LocoResourceBoughtGlobalEvent += listener,
+				() => LocoResourceModule.LocoResourceBoughtGlobalEvent -= listener
+			);
+
 		// Common hooks
 		protected virtual void OnSpeedIncreased(float speed) { }
 		protected virtual void OnHonked() { }
@@ -109,6 +115,7 @@ namespace StatsAndAchievements.Achievements
 		protected virtual void OnMoneyChanged(double previousAmount, double currentAmount) { }
 		protected virtual void OnLicenseAcquired(string licenseName) { }
 		protected virtual void OnJobCompletion(Job job) { }
+		protected virtual void OnPitStopCheckout(float amount, bool hasPaid) { }
 	}
 
 	public abstract class ProgressAchievementListener : AchievementListener
