@@ -1,0 +1,11 @@
+<Project>
+    <PropertyGroup>
+        <DvInstallDir>C:\Program Files (x86)\Steam\steamapps\common\Derail Valley</DvInstallDir>
+        <ReferencePath>
+            $(DvInstallDir)\DerailValley_Data\Managed\;
+            $(DvInstallDir)\DerailValley_Data\Managed\UnityModManager\;
+			$(DvInstallDir)\Mods\CareerManagerAPI\;
+        </ReferencePath>
+        <AssemblySearchPaths>$(AssemblySearchPaths);$(ReferencePath);</AssemblySearchPaths>
+    </PropertyGroup>
+</Project>
