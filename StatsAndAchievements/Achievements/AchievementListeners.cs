@@ -1,8 +1,8 @@
 using DV.JObjectExtstensions;
 using DV.Logic.Job;
+using DV.ThingTypes;
 using DV.Utils;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -298,6 +298,70 @@ namespace StatsAndAchievements.Achievements
 				completedJobTypeCount++;
 
 			return completedJobTypeCount;
+		}
+	}
+
+	public sealed class FirstHazmatJobCompletionAchievementListener : ConditionAchievementListener
+	{
+		public override string Id => "first_hazmat_job_completion";
+		public override string Title => "Handle With Care";
+		public override string Description => @"
+			Complete your first hazmat job
+			";
+
+		protected override void SubscribeToEvents()
+		{
+			SubscribeToJobCompletion(OnJobCompletion);
+		}
+
+		protected override void OnJobCompletion(Job job)
+		{
+			if (IsUnlocked()) return;
+
+			if (JobHasHazmatLicenseRequirement(job))
+			{
+				TriggerUnlock();
+			}
+		}
+
+		private static bool JobHasHazmatLicenseRequirement(Job job)
+		{
+			if (job is null) return false;
+
+			const JobLicenses hazmatLicenses = JobLicenses.Hazmat1 | JobLicenses.Hazmat2 | JobLicenses.Hazmat3;
+			return (job.requiredLicenses & hazmatLicenses) != 0;
+		}
+	}
+
+	public sealed class FirstMilitaryJobCompletionAchievementListener : ConditionAchievementListener
+	{
+		public override string Id => "first_military_job_completion";
+		public override string Title => "Classified Cargo";
+		public override string Description => @"
+			Complete your first military job
+			";
+
+		protected override void SubscribeToEvents()
+		{
+			SubscribeToJobCompletion(OnJobCompletion);
+		}
+
+		protected override void OnJobCompletion(Job job)
+		{
+			if (IsUnlocked()) return;
+
+			if (JobHasMilitaryLicenseRequirement(job))
+			{
+				TriggerUnlock();
+			}
+		}
+
+		private static bool JobHasMilitaryLicenseRequirement(Job job)
+		{
+			if (job is null) return false;
+
+			const JobLicenses militaryLicenses = JobLicenses.Military1 | JobLicenses.Military2 | JobLicenses.Military3;
+			return (job.requiredLicenses & militaryLicenses) != 0;
 		}
 	}
 }

@@ -19,7 +19,7 @@ Complete the museum
 ### The End? ✅
 Buy all licenses
 
-### The Mechanic
+### The Mechanic ✅
 Do manual service 
 
 ### Graphic Design is my Passion
@@ -31,10 +31,10 @@ Buy everything in the garages
 ### TODO Title
 Drive every possible vehicle (locomotives + work trains)
 
-### TODO Title
+### TODO Title ✅
 First hazmat job completion
 
-### TODO Title
+### TODO Title ✅
 First military job completion
 
 ### TODO Title
