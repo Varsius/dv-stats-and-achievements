@@ -25,7 +25,7 @@ Do manual service
 ### Graphic Design is my Passion ✅ (untested)
 Do a paint job
 
-### Garage Sale Enthusiast ✅ (untested)
+### Garage Sale Enthusiast ❌ (not working)
 Buy everything in the garages
 
 ### TODO Title

@@ -209,13 +209,34 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
-	public sealed class GarageSaleEnthusiastAchievementListener : ConditionAchievementListener
+	// TODO: does not work
+	// The Garage enum contains 11 values (including relics/museum locos and flat car)
+	// Tracking does not work nicely, seams to look at UnlockablesManager from previous save game?
+	public sealed class GarageSaleEnthusiastAchievementListener : ProgressAchievementListener
 	{
 		public override string Id => "garage_sale_enthusiast";
 		public override string Title => "Garage Sale Enthusiast";
 		public override string Description => @"
 			Buy everything in the garages
 			";
+		public override string Value() => $"{unlockedGaragesCount}";
+		public override string ValueName() => "Garages Unlocked";
+		public override string Target() => "4";
+
+		private int unlockedGaragesCount;
+
+		public GarageSaleEnthusiastAchievementListener()
+		{
+			float? unlockedGaragesCount = Main.saaSaveData.GetFloat($"{Id}_unlocked_garages_count");
+			if (unlockedGaragesCount.HasValue)
+			{
+				this.unlockedGaragesCount = (int)unlockedGaragesCount.Value;
+			}
+			else
+			{
+				this.unlockedGaragesCount = 0;
+			}
+		}
 
 		protected override void SubscribeToEvents()
 		{
@@ -224,7 +245,13 @@ namespace StatsAndAchievements.Achievements
 
 		protected override void OnUnlockedGaragesChanged(int unlockedGaragesCount)
 		{
-			if (IsUnlocked()) return;
+			if (unlockedGaragesCount <= this.unlockedGaragesCount)
+			{
+				if (IsUnlocked()) return;
+			}
+
+			this.unlockedGaragesCount = unlockedGaragesCount;
+			Main.saaSaveData.SetFloat($"{Id}_unlocked_garages_count", unlockedGaragesCount);
 
 			if (unlockedGaragesCount >= 4)
 			{

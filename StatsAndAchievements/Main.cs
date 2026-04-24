@@ -55,7 +55,7 @@ public class Main
 					new TheEndAchievementListener(),
 					new TheEngineerAchievementListener(),
 					new GraphicDesignIsMyPassionAchievementListener(),
-					new GarageSaleEnthusiastAchievementListener()
+					// TODO: fix. new GarageSaleEnthusiastAchievementListener()
 				]),
 				new AchievementCategory("advanced", "Advanced", [
 					new SpeedDemonAchievementListener(),

@@ -2,6 +2,7 @@ using DV.Customization;
 using DV.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace StatsAndAchievements.Events
@@ -61,7 +62,8 @@ namespace StatsAndAchievements.Events
 			{
 				simPortHornHorn.ValueUpdatedInternally += CheckHornHorn;
 				unsubscribeActions.Add(() => simPortHornHorn.ValueUpdatedInternally -= CheckHornHorn);
-			} else
+			}
+			else
 			{
 				Main.Warning("Could not get simPort horn.Horn");
 			}
@@ -144,6 +146,7 @@ namespace StatsAndAchievements.Events
 				return;
 			}
 
+			Main.Debug($"Unlocked garages ({unlockedGaragesCount}): {string.Join(", ", unlockablesManager.UnlockedGarages.Select(garage => garage.ToString()))}");
 			_previousUnlockedGarages = unlockedGaragesCount;
 			UnlockedGaragesChanged?.Invoke(unlockedGaragesCount);
 		}
@@ -156,7 +159,7 @@ namespace StatsAndAchievements.Events
 			}
 
 			Vector3 playerPosition = PlayerManager.PlayerTransform.position;
-			Main.Debug($"Player position: {playerPosition.x}, {playerPosition.y}, {playerPosition.z}");
+			//Main.Debug($"Player position: {playerPosition.x}, {playerPosition.y}, {playerPosition.z}");
 			Actions.InvokePlayerPositionChanged(playerPosition);
 		}
 	}
