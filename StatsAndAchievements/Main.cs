@@ -63,8 +63,11 @@ public class Main
 				]),
 				new AchievementCategory("milestones", "Milestones", [
 					new ScroogeMcDuckAchievementListener()
+				]),
+				new AchievementCategory("secret", "Secret", [
+					new HomeSweetHomeAchievementListener()
 				])
-		// TODO: "Secret" and "Steam Engine Connoisseur" categories (see ACHIEVEMENTS.md)
+		// TODO: "Steam Engine Connoisseur" category (see ACHIEVEMENTS.md)
 		]);
 
 			CareerManagerAPI.CareerManagerAPI.CareerManagerAwake += (tracker, locationName, station, trainCar) =>

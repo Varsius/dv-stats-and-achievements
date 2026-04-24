@@ -97,6 +97,7 @@ namespace StatsAndAchievements.Events
 			}
 
 			CheckUnlockedGarages();
+			CheckPlayerPosition();
 		}
 
 		private void CheckSpeedIncreased(TrainCar trainCar)
@@ -145,6 +146,18 @@ namespace StatsAndAchievements.Events
 
 			_previousUnlockedGarages = unlockedGaragesCount;
 			UnlockedGaragesChanged?.Invoke(unlockedGaragesCount);
+		}
+
+		private void CheckPlayerPosition()
+		{
+			if (PlayerManager.PlayerTransform == null)
+			{
+				return;
+			}
+
+			Vector3 playerPosition = PlayerManager.PlayerTransform.position;
+			Main.Debug($"Player position: {playerPosition.x}, {playerPosition.y}, {playerPosition.z}");
+			Actions.InvokePlayerPositionChanged(playerPosition);
 		}
 	}
 }

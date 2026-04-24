@@ -80,7 +80,7 @@ Complete XXX orders
 
 # Secret
 
-### Home Sweet Home
+### Home Sweet Home ✅
 Visit your home garage
 
 ### Shopaholic

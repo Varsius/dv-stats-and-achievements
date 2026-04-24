@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DV.Logic.Job;
+using UnityEngine;
 
 namespace StatsAndAchievements.Achievements
 {
@@ -113,6 +114,12 @@ namespace StatsAndAchievements.Achievements
 				() => Events.Actions.PaintJobApplied -= listener
 			);
 
+		protected void SubscribeToPlayerPositionChanged(Action<Vector3> listener) =>
+			Subscribe(
+				() => Events.Actions.PlayerPositionChanged += listener,
+				() => Events.Actions.PlayerPositionChanged -= listener
+			);
+
 		protected void SubscribeToPitStopCheckout(Action<float, bool> listener) =>
 			Subscribe(
 				() => LocoResourceModule.LocoResourceBoughtGlobalEvent += listener,
@@ -129,6 +136,7 @@ namespace StatsAndAchievements.Achievements
 		protected virtual void OnLicenseAcquired(string licenseName) { }
 		protected virtual void OnJobCompletion(Job job) { }
 		protected virtual void OnPaintJobApplied() { }
+		protected virtual void OnPlayerPositionChanged(Vector3 playerPosition) { }
 		protected virtual void OnPitStopCheckout(float amount, bool hasPaid) { }
 	}
 

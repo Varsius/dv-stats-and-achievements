@@ -233,6 +233,34 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
+	public sealed class HomeSweetHomeAchievementListener : ConditionAchievementListener
+	{
+		public override string Id => "home_sweet_home";
+		public override string Title => "Home Sweet Home";
+		public override string Description => @"
+			Visit your home garage
+			";
+
+		private static readonly Vector3 HomeGaragePosition = new Vector3(768.1255f, 155.95f, 216.2065f);
+		private const float UnlockRadius = 5.0f;
+
+		protected override void SubscribeToEvents()
+		{
+			SubscribeToPlayerPositionChanged(OnPlayerPositionChanged);
+		}
+
+		protected override void OnPlayerPositionChanged(Vector3 playerPosition)
+		{
+			if (IsUnlocked()) return;
+
+			float distanceSquared = (playerPosition - HomeGaragePosition).sqrMagnitude;
+			if (distanceSquared <= UnlockRadius * UnlockRadius)
+			{
+				TriggerUnlock();
+			}
+		}
+	}
+
 	// TODO: When we are able to detect if passenger jobs is installed alongside this mod, then conditionally include regional/express job
 	public sealed class AllRounderAchievementListener : ProgressAchievementListener
 	{
