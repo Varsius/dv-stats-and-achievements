@@ -404,7 +404,7 @@ namespace StatsAndAchievements.Achievements
 	public sealed class FirstHazmatJobCompletionAchievementListener : ConditionAchievementListener
 	{
 		public override string Id => "first_hazmat_job_completion";
-		public override string Title => "Handle With Care";
+		public override string Title => "No Smoking on Job Site";
 		public override string Description => @"
 			Complete your first hazmat job
 			";
@@ -462,6 +462,37 @@ namespace StatsAndAchievements.Achievements
 
 			const JobLicenses militaryLicenses = JobLicenses.Military1 | JobLicenses.Military2 | JobLicenses.Military3;
 			return (job.requiredLicenses & militaryLicenses) != 0;
+		}
+	}
+
+	public sealed class FirstFragileJobCompletionAchievementListener : ConditionAchievementListener
+	{
+		public override string Id => "first_fragile_job_completion";
+		public override string Title => "Handle With Care";
+		public override string Description => @"
+			Complete your first fragile job
+			";
+
+		protected override void SubscribeToEvents()
+		{
+			SubscribeToJobCompletion(OnJobCompletion);
+		}
+
+		protected override void OnJobCompletion(Job job)
+		{
+			if (IsUnlocked()) return;
+
+			if (JobHasFragileLicenseRequirement(job))
+			{
+				TriggerUnlock();
+			}
+		}
+
+		private static bool JobHasFragileLicenseRequirement(Job job)
+		{
+			if (job is null) return false;
+
+			return (job.requiredLicenses & JobLicenses.Fragile) != 0;
 		}
 	}
 }

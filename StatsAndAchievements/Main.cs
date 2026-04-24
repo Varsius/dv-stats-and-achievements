@@ -48,10 +48,11 @@ public class Main
 
 			// TODO: the mod should contain config options to enable/disable each category
 			achievementManager = new AchievementManager([
-			new AchievementCategory("career", "Career", [
+				new AchievementCategory("career", "Career", [
 					new AllRounderAchievementListener(),
 					new FirstHazmatJobCompletionAchievementListener(),
 					new FirstMilitaryJobCompletionAchievementListener(),
+					new FirstFragileJobCompletionAchievementListener(),
 					new TheEndAchievementListener(),
 					new TheEngineerAchievementListener(),
 					new GraphicDesignIsMyPassionAchievementListener(),

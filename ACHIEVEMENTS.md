@@ -28,22 +28,19 @@ Do a paint job
 ### Garage Sale Enthusiast ❌ (not working)
 Buy everything in the garages
 
-### TODO Title
+### TODO Title (Jack of All Trades)
 Drive every possible vehicle (locomotives + work trains)
 
-### Handle With Care ✅
+### No Smoking on Job Site ✅
 First hazmat job completion
 
 ### Classified Cargo ✅
 First military job completion
 
-### TODO Title
+### Handle With Care ✅
 First fragile job completion
 
-### On Time (TODO Title)
-Complete a job within the time bonus
-
-### TODO Title
+### TODO Title (Steam Starter Kit, Fully Equipped)
 Everything you need to drive a steamer, including license, shovel, lighter and oil
 
 ### Hot & Spicy
@@ -64,10 +61,10 @@ the same cargo
 ### Above Average
 Operate a train with at least 20 cars
 
-### TODO Title
-Use multi-unit to connect (6) or more locomotives
+### Four of a Kind
+Use multi-unit to connect (4) or more locomotives
 
-### Just in time
+### Right on Schedule
 Complete a job in the exact time bonus
 
 # Milestones
@@ -95,7 +92,8 @@ Complete a job in more than 3x the time bonus
 ### TM Says No
 Pop the TM (Traction Motor?) breaker
 
-###
+### Gaslighting
+Use the lighter to cause an explosion of a hazmat cargo that leaks
 
 # Steam Engine Connoisseur
 
