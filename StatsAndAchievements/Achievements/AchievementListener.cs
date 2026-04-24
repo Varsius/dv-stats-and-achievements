@@ -89,6 +89,12 @@ namespace StatsAndAchievements.Achievements
 				() => Events.EventWatch.HonkEnded -= listener
 			);
 
+		protected void SubscribeToUnlockedGaragesChanged(Action<int> listener) =>
+			Subscribe(
+				() => Events.EventWatch.UnlockedGaragesChanged += listener,
+				() => Events.EventWatch.UnlockedGaragesChanged -= listener
+			);
+
 		protected void SubscribeToLicenseAcquired(Action<string> listener) =>
 			Subscribe(
 				() => Events.Actions.LicenseAcquired += listener,
@@ -118,6 +124,7 @@ namespace StatsAndAchievements.Achievements
 		protected virtual void OnHonked() { }
 		protected virtual void OnHonkStarted() { }
 		protected virtual void OnHonkEnded() { }
+		protected virtual void OnUnlockedGaragesChanged(int unlockedGaragesCount) { }
 		protected virtual void OnMoneyChanged(double previousAmount, double currentAmount) { }
 		protected virtual void OnLicenseAcquired(string licenseName) { }
 		protected virtual void OnJobCompletion(Job job) { }

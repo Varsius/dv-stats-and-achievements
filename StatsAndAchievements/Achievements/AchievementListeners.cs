@@ -209,6 +209,30 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
+	public sealed class GarageSaleEnthusiastAchievementListener : ConditionAchievementListener
+	{
+		public override string Id => "garage_sale_enthusiast";
+		public override string Title => "Garage Sale Enthusiast";
+		public override string Description => @"
+			Buy everything in the garages
+			";
+
+		protected override void SubscribeToEvents()
+		{
+			SubscribeToUnlockedGaragesChanged(OnUnlockedGaragesChanged);
+		}
+
+		protected override void OnUnlockedGaragesChanged(int unlockedGaragesCount)
+		{
+			if (IsUnlocked()) return;
+
+			if (unlockedGaragesCount >= 4)
+			{
+				TriggerUnlock();
+			}
+		}
+	}
+
 	// TODO: When we are able to detect if passenger jobs is installed alongside this mod, then conditionally include regional/express job
 	public sealed class AllRounderAchievementListener : ProgressAchievementListener
 	{

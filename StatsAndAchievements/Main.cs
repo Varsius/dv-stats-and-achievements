@@ -54,7 +54,8 @@ public class Main
 					new FirstMilitaryJobCompletionAchievementListener(),
 					new TheEndAchievementListener(),
 					new TheEngineerAchievementListener(),
-					new GraphicDesignIsMyPassionAchievementListener()
+					new GraphicDesignIsMyPassionAchievementListener(),
+					new GarageSaleEnthusiastAchievementListener()
 				]),
 				new AchievementCategory("advanced", "Advanced", [
 					new SpeedDemonAchievementListener(),

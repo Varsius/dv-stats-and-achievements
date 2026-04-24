@@ -1,4 +1,5 @@
 using DV.Customization;
+using DV.Utils;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,6 +14,7 @@ namespace StatsAndAchievements.Events
 		private float _elapsed;
 		private float _previousSpeed;
 		private float _previousHorn;
+		private int _previousUnlockedGarages = -1;
 		private static TrainCar _trainCar;
 		private Action? _unsubscribeFromTrainCarEvents;
 
@@ -20,6 +22,7 @@ namespace StatsAndAchievements.Events
 		public static event Action Honked;
 		public static event Action HonkStarted;
 		public static event Action HonkEnded;
+		public static event Action<int> UnlockedGaragesChanged;
 
 		void OnEnable()
 		{
@@ -92,6 +95,8 @@ namespace StatsAndAchievements.Events
 			{
 				CheckSpeedIncreased(_trainCar);
 			}
+
+			CheckUnlockedGarages();
 		}
 
 		private void CheckSpeedIncreased(TrainCar trainCar)
@@ -122,6 +127,24 @@ namespace StatsAndAchievements.Events
 		private void CheckSandAmount(float value)
 		{
 			;
+		}
+
+		private void CheckUnlockedGarages()
+		{
+			var unlockablesManager = SingletonBehaviour<UnlockablesManager>.Instance;
+			if (unlockablesManager == null)
+			{
+				return;
+			}
+
+			int unlockedGaragesCount = unlockablesManager.UnlockedGarages.Count;
+			if (unlockedGaragesCount == _previousUnlockedGarages)
+			{
+				return;
+			}
+
+			_previousUnlockedGarages = unlockedGaragesCount;
+			UnlockedGaragesChanged?.Invoke(unlockedGaragesCount);
 		}
 	}
 }
