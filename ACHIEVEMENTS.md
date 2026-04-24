@@ -22,7 +22,7 @@ Buy all licenses
 ### The Mechanic ✅
 Do manual service 
 
-### Graphic Design is my Passion
+### Graphic Design is my Passion ✅ (untested)
 Do a paint job
 
 ### Garage Sale Enthusiast

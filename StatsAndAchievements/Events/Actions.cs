@@ -11,6 +11,7 @@ namespace StatsAndAchievements.Events
 	{
 		public static event Action<string> LicenseAcquired;
 		public static event Action<Job> JobCompletion;
+		public static event Action PaintJobApplied;
 
 		public static void InvokeLicenseAcquired(string licenseName)
 		{
@@ -20,6 +21,11 @@ namespace StatsAndAchievements.Events
 		public static void InvokeJobCompletion(Job job)
 		{
 			JobCompletion?.Invoke(job);
+		}
+
+		public static void InvokePaintJobApplied()
+		{
+			PaintJobApplied?.Invoke();
 		}
 	}
 }

@@ -188,6 +188,27 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
+	public sealed class GraphicDesignIsMyPassionAchievementListener : ConditionAchievementListener
+	{
+		public override string Id => "graphic_design_is_my_passion";
+		public override string Title => "Graphic Design is my Passion";
+		public override string Description => @"
+			Do a paint job
+			";
+
+		protected override void SubscribeToEvents()
+		{
+			SubscribeToPaintJobApplied(OnPaintJobApplied);
+		}
+
+		protected override void OnPaintJobApplied()
+		{
+			if (IsUnlocked()) return;
+
+			TriggerUnlock();
+		}
+	}
+
 	// TODO: When we are able to detect if passenger jobs is installed alongside this mod, then conditionally include regional/express job
 	public sealed class AllRounderAchievementListener : ProgressAchievementListener
 	{

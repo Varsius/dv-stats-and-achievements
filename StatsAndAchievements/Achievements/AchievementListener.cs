@@ -101,6 +101,12 @@ namespace StatsAndAchievements.Achievements
 				() => Events.Actions.JobCompletion -= listener
 			);
 
+		protected void SubscribeToPaintJobApplied(Action listener) =>
+			Subscribe(
+				() => Events.Actions.PaintJobApplied += listener,
+				() => Events.Actions.PaintJobApplied -= listener
+			);
+
 		protected void SubscribeToPitStopCheckout(Action<float, bool> listener) =>
 			Subscribe(
 				() => LocoResourceModule.LocoResourceBoughtGlobalEvent += listener,
@@ -115,6 +121,7 @@ namespace StatsAndAchievements.Achievements
 		protected virtual void OnMoneyChanged(double previousAmount, double currentAmount) { }
 		protected virtual void OnLicenseAcquired(string licenseName) { }
 		protected virtual void OnJobCompletion(Job job) { }
+		protected virtual void OnPaintJobApplied() { }
 		protected virtual void OnPitStopCheckout(float amount, bool hasPaid) { }
 	}
 

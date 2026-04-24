@@ -48,12 +48,13 @@ public class Main
 
 			// TODO: the mod should contain config options to enable/disable each category
 			achievementManager = new AchievementManager([
-				new AchievementCategory("career", "Career", [
+			new AchievementCategory("career", "Career", [
 					new AllRounderAchievementListener(),
 					new FirstHazmatJobCompletionAchievementListener(),
 					new FirstMilitaryJobCompletionAchievementListener(),
 					new TheEndAchievementListener(),
-					new TheEngineerAchievementListener()
+					new TheEngineerAchievementListener(),
+					new GraphicDesignIsMyPassionAchievementListener()
 				]),
 				new AchievementCategory("advanced", "Advanced", [
 					new SpeedDemonAchievementListener(),
@@ -62,8 +63,8 @@ public class Main
 				new AchievementCategory("milestones", "Milestones", [
 					new ScroogeMcDuckAchievementListener()
 				])
-				// TODO: "Secret" and "Steam Engine Connoisseur" categories (see ACHIEVEMENTS.md)
-			]);
+		// TODO: "Secret" and "Steam Engine Connoisseur" categories (see ACHIEVEMENTS.md)
+		]);
 
 			CareerManagerAPI.CareerManagerAPI.CareerManagerAwake += (tracker, locationName, station, trainCar) =>
 			{
