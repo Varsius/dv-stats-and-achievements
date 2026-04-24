@@ -31,10 +31,10 @@ Buy everything in the garages
 ### TODO Title
 Drive every possible vehicle (locomotives + work trains)
 
-### TODO Title ✅
+### Handle With Care ✅
 First hazmat job completion
 
-### TODO Title ✅
+### Classified Cargo ✅
 First military job completion
 
 ### TODO Title
@@ -67,6 +67,9 @@ Operate a train with at least 20 cars
 ### TODO Title
 Use multi-unit to connect (6) or more locomotives
 
+### Just in time
+Complete a job in the exact time bonus
+
 # Milestones
 
 ### Drive XXX kilometers
@@ -87,7 +90,7 @@ Visit your home garage
 Buy every purchasable item in the game
 
 ### Scenic Route
-Complete a job in more then 3x the time bonus
+Complete a job in more than 3x the time bonus
 
 ### TM Says No
 Pop the TM (Traction Motor?) breaker
