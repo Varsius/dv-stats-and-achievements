@@ -39,9 +39,9 @@ namespace StatsAndAchievements.Events
 			PlayerPositionChanged?.Invoke(playerPosition);
 		}
 
-		public static void InvokeItemAcquired(string itemId)
+		public static void InvokeItemAcquired(string itemName)
 		{
-			ItemAcquired?.Invoke(itemId);
+			ItemAcquired?.Invoke(itemName);
 		}
 	}
 }
