@@ -169,6 +169,109 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
+	public sealed class VisitAllStationsAchievementListener : ProgressAchievementListener
+	{
+		public override string Id => "visit_all_stations";
+		public override string Title => "Visit all stations";
+		public override string Description
+		{
+			get
+			{
+				var remainingStations = GetRemainingStationNames();
+				if (remainingStations.Count == 0)
+				{
+					return "Visit all stations";
+				}
+
+				return $"Visit all stations\n\nNot visited yet: {string.Join(", ", remainingStations)}";
+			}
+		}
+
+		public override string Value() => $"{VisitedStationCount()}";
+		public override string ValueName() => "Stations Visited";
+		public override string Target() => $"{KnownStationCount()}";
+
+		private const float VisitRadius = 150.0f;
+		private readonly Dictionary<string, Vector3> _stationPositions = new Dictionary<string, Vector3>();
+		private readonly HashSet<string> _visitedStations = new HashSet<string>();
+
+		public VisitAllStationsAchievementListener()
+		{
+			foreach (StationController stationController in StationController.allStations.Where((x) => { return x != null; }).ToList())
+			{
+				string stationName = stationController.stationInfo.YardID.Trim();
+				_stationPositions[stationName] = stationController.transform.position;
+
+				if (Main.saaSaveData.GetBool(GetVisitedKey(stationName)) == true)
+				{
+					_visitedStations.Add(stationName);
+				}
+			}
+		}
+
+		protected override void SubscribeToEvents()
+		{
+			SubscribeToPlayerPositionChanged(OnPlayerPositionChanged);
+		}
+
+		protected override void OnPlayerPositionChanged(Vector3 playerPosition)
+		{
+			if (_stationPositions.Count == 0)
+			{
+				return;
+			}
+
+			string? closestStationName = null;
+			float closestDistance = float.MaxValue;
+
+			foreach (KeyValuePair<string, Vector3> station in _stationPositions)
+			{
+				float distance = Vector3.Distance(playerPosition, station.Value);
+				if (distance < closestDistance)
+				{
+					closestDistance = distance;
+					closestStationName = station.Key;
+				}
+
+				if (distance <= VisitRadius && _visitedStations.Add(station.Key))
+				{
+					Main.saaSaveData.SetBool(GetVisitedKey(station.Key), true);
+					break;
+				}
+			}
+
+			if (closestStationName != null)
+			{
+				Main.Debug($"Visit all stations: closest station is {closestStationName} at {closestDistance:F1}m");
+			}
+
+			if (!IsUnlocked() && _stationPositions.Count > 0 && _visitedStations.Count >= _stationPositions.Count)
+			{
+				TriggerUnlock();
+			}
+		}
+
+		private List<string> GetRemainingStationNames()
+		{
+			return _stationPositions.Keys
+				.Where(stationName => !_visitedStations.Contains(stationName))
+				.OrderBy(stationName => stationName)
+				.ToList();
+		}
+
+		private int KnownStationCount()
+		{
+			return _stationPositions.Count;
+		}
+
+		private int VisitedStationCount()
+		{
+			return _stationPositions.Keys.Count(stationName => _visitedStations.Contains(stationName));
+		}
+
+		private string GetVisitedKey(string stationName) => $"{Id}_visited_{stationName}";
+	}
+
 	public sealed class TheEngineerAchievementListener : ConditionAchievementListener
 	{
 		public override string Id => "the_engineer";

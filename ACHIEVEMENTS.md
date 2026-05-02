@@ -10,7 +10,7 @@
 ### Allrounder ✅
 Complete a job of each type: transport, empty haul, shunting load, shunting unload
 
-### Visit all stations
+### Visit all stations ✅ (untested)
 Visit all stations
 
 ### Complete the museum

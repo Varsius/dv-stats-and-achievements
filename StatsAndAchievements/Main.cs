@@ -50,6 +50,7 @@ public class Main
 			achievementManager = new AchievementManager([
 				new AchievementCategory("career", "Career", [
 					new AllRounderAchievementListener(),
+					new VisitAllStationsAchievementListener(),
 					new FirstHazmatJobCompletionAchievementListener(),
 					new FirstMilitaryJobCompletionAchievementListener(),
 					new FirstFragileJobCompletionAchievementListener(),
