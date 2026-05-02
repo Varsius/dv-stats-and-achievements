@@ -27,6 +27,7 @@ internal static class WorldStreamingInitPatch
             new AchievementCategory("career", "Career", [
                 new AllRounderAchievementListener(),
                 new VisitAllStationsAchievementListener(),
+                new CompleteTheMuseumAchievementListener(),
                 new DriveEveryVehicleAchievementListener(),
                 new FirstHazmatJobCompletionAchievementListener(),
                 new FirstMilitaryJobCompletionAchievementListener(),

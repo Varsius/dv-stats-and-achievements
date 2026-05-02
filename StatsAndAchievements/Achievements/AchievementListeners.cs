@@ -1,5 +1,6 @@
 using DV.JObjectExtstensions;
 using DV.Logic.Job;
+using DV.LocoRestoration;
 using DV.ThingTypes;
 using DV.ThingTypes.TransitionHelpers;
 using DV.Utils;
@@ -266,6 +267,44 @@ namespace StatsAndAchievements.Achievements
 		}
 
 		private string GetVisitedKey(string stationName) => $"{Id}_visited_{stationName}";
+	}
+
+	public sealed class CompleteTheMuseumAchievementListener : ConditionAchievementListener
+	{
+		public override string Id => "complete_the_museum";
+		public override string Title => "Complete the Museum";
+		public override string Description => @"
+			Complete all locomotive restorations
+			";
+
+		protected override void SubscribeToEvents()
+		{
+			foreach (LocoRestorationController controller in LocoRestorationController.allLocoRestorationControllers)
+			{
+				Subscribe(
+					() => controller.StateChanged += OnRestorationStateChanged,
+					() => controller.StateChanged -= OnRestorationStateChanged
+				);
+			}
+
+			CheckMuseumCompletion();
+		}
+
+		private void OnRestorationStateChanged(LocoRestorationController controller, TrainCarLivery locoLivery, LocoRestorationController.RestorationState restorationState)
+		{
+			CheckMuseumCompletion();
+		}
+
+		private void CheckMuseumCompletion()
+		{
+			if (IsUnlocked()) return;
+			if (LocoRestorationController.allLocoRestorationControllers.Count == 0) return;
+
+			if (LocoRestorationController.allLocoRestorationControllers.All(controller => controller.State == LocoRestorationController.RestorationState.S10_PaintJobDone))
+			{
+				TriggerUnlock();
+			}
+		}
 	}
 
 	public sealed class DriveEveryVehicleAchievementListener : ProgressAchievementListener

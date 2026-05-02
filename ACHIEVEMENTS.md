@@ -13,7 +13,7 @@ Complete a job of each type: transport, empty haul, shunting load, shunting unlo
 ### Traveling Salesman ✅
 Visit all stations
 
-### Complete the museum
+### Complete the museum ✅ (untesed)
 Complete the museum
 
 ### The End? ✅
