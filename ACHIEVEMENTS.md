@@ -10,7 +10,7 @@
 ### Allrounder ✅
 Complete a job of each type: transport, empty haul, shunting load, shunting unload
 
-### Visit all stations ✅ (untested)
+### Traveling Salesman ✅
 Visit all stations
 
 ### Complete the museum
@@ -28,7 +28,7 @@ Do a paint job
 ### Garage Sale Enthusiast ❌ (not working)
 Buy everything in the garages
 
-### TODO Title (Jack of All Trades)
+### Jack of All Trades ✅
 Drive every possible vehicle (locomotives + work trains)
 
 ### No Smoking on Job Site ✅

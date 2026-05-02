@@ -31,7 +31,7 @@ public class Main
 
 	private static Harmony? _harmony;
 	private static GameObject? watchGO;
-	public static AchievementManager achievementManager;
+	public static AchievementManager achievementManager = null!;
 	public static JObject saaSaveData = new JObject();
 	private static bool Load(UnityModManager.ModEntry modEntry)
 	{
@@ -45,32 +45,6 @@ public class Main
 			watchGO = new GameObject("SAAEventWatch");
 			UnityEngine.Object.DontDestroyOnLoad(watchGO);
 			watchGO.AddComponent<Events.EventWatch>();
-
-			// TODO: the mod should contain config options to enable/disable each category
-			achievementManager = new AchievementManager([
-				new AchievementCategory("career", "Career", [
-					new AllRounderAchievementListener(),
-					new VisitAllStationsAchievementListener(),
-					new FirstHazmatJobCompletionAchievementListener(),
-					new FirstMilitaryJobCompletionAchievementListener(),
-					new FirstFragileJobCompletionAchievementListener(),
-					new TheEndAchievementListener(),
-					new TheEngineerAchievementListener(),
-					new GraphicDesignIsMyPassionAchievementListener(),
-					// TODO: fix. new GarageSaleEnthusiastAchievementListener()
-				]),
-				new AchievementCategory("advanced", "Advanced", [
-					new SpeedDemonAchievementListener(),
-					new MaximumHonkAchievementListener()
-				]),
-				new AchievementCategory("milestones", "Milestones", [
-					new ScroogeMcDuckAchievementListener()
-				]),
-				new AchievementCategory("secret", "Secret", [
-					new HomeSweetHomeAchievementListener()
-				])
-		// TODO: "Steam Engine Connoisseur" category (see ACHIEVEMENTS.md)
-		]);
 
 			CareerManagerAPI.CareerManagerAPI.CareerManagerAwake += (tracker, locationName, station, trainCar) =>
 			{

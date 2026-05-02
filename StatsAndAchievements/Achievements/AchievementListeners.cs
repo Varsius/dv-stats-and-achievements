@@ -1,6 +1,7 @@
 using DV.JObjectExtstensions;
 using DV.Logic.Job;
 using DV.ThingTypes;
+using DV.ThingTypes.TransitionHelpers;
 using DV.Utils;
 using System;
 using System.Collections.Generic;
@@ -172,7 +173,7 @@ namespace StatsAndAchievements.Achievements
 	public sealed class VisitAllStationsAchievementListener : ProgressAchievementListener
 	{
 		public override string Id => "visit_all_stations";
-		public override string Title => "Visit all stations";
+		public override string Title => "Traveling Salesman";
 		public override string Description
 		{
 			get
@@ -191,8 +192,7 @@ namespace StatsAndAchievements.Achievements
 		public override string ValueName() => "Stations Visited";
 		public override string Target() => $"{KnownStationCount()}";
 
-		private const float VisitRadius = 150.0f;
-		private readonly Dictionary<string, Vector3> _stationPositions = new Dictionary<string, Vector3>();
+		private readonly Dictionary<string, StationController> _stations = new Dictionary<string, StationController>();
 		private readonly HashSet<string> _visitedStations = new HashSet<string>();
 
 		public VisitAllStationsAchievementListener()
@@ -200,7 +200,7 @@ namespace StatsAndAchievements.Achievements
 			foreach (StationController stationController in StationController.allStations.Where((x) => { return x != null; }).ToList())
 			{
 				string stationName = stationController.stationInfo.YardID.Trim();
-				_stationPositions[stationName] = stationController.transform.position;
+				_stations[stationName] = stationController;
 
 				if (Main.saaSaveData.GetBool(GetVisitedKey(stationName)) == true)
 				{
@@ -216,7 +216,7 @@ namespace StatsAndAchievements.Achievements
 
 		protected override void OnPlayerPositionChanged(Vector3 playerPosition)
 		{
-			if (_stationPositions.Count == 0)
+			if (_stations.Count == 0)
 			{
 				return;
 			}
@@ -224,28 +224,24 @@ namespace StatsAndAchievements.Achievements
 			string? closestStationName = null;
 			float closestDistance = float.MaxValue;
 
-			foreach (KeyValuePair<string, Vector3> station in _stationPositions)
+			foreach (KeyValuePair<string, StationController> station in _stations)
 			{
-				float distance = Vector3.Distance(playerPosition, station.Value);
+				float distanceSquared = station.Value.stationRange.PlayerSqrDistanceFromStationOffice;
+				float distance = Mathf.Sqrt(distanceSquared);
 				if (distance < closestDistance)
 				{
 					closestDistance = distance;
 					closestStationName = station.Key;
 				}
 
-				if (distance <= VisitRadius && _visitedStations.Add(station.Key))
+				if (station.Value.stationRange.IsPlayerInRangeForBookletGeneration(distanceSquared) && _visitedStations.Add(station.Key))
 				{
 					Main.saaSaveData.SetBool(GetVisitedKey(station.Key), true);
 					break;
 				}
 			}
 
-			if (closestStationName != null)
-			{
-				Main.Debug($"Visit all stations: closest station is {closestStationName} at {closestDistance:F1}m");
-			}
-
-			if (!IsUnlocked() && _stationPositions.Count > 0 && _visitedStations.Count >= _stationPositions.Count)
+			if (!IsUnlocked() && _stations.Count > 0 && _visitedStations.Count >= _stations.Count)
 			{
 				TriggerUnlock();
 			}
@@ -253,7 +249,7 @@ namespace StatsAndAchievements.Achievements
 
 		private List<string> GetRemainingStationNames()
 		{
-			return _stationPositions.Keys
+			return _stations.Keys
 				.Where(stationName => !_visitedStations.Contains(stationName))
 				.OrderBy(stationName => stationName)
 				.ToList();
@@ -261,15 +257,146 @@ namespace StatsAndAchievements.Achievements
 
 		private int KnownStationCount()
 		{
-			return _stationPositions.Count;
+			return _stations.Count;
 		}
 
 		private int VisitedStationCount()
 		{
-			return _stationPositions.Keys.Count(stationName => _visitedStations.Contains(stationName));
+			return _stations.Keys.Count(stationName => _visitedStations.Contains(stationName));
 		}
 
 		private string GetVisitedKey(string stationName) => $"{Id}_visited_{stationName}";
+	}
+
+	public sealed class DriveEveryVehicleAchievementListener : ProgressAchievementListener
+	{
+		public override string Id => "drive_every_vehicle";
+		public override string Title => "Jack of All Trades";
+		public override string Description
+		{
+			get
+			{
+				var remainingVehicles = GetRemainingVehicleNames();
+				if (remainingVehicles.Count == 0)
+				{
+					return "Operate every drivable vehicle";
+				}
+
+				return $"Operate every drivable vehicle\n\nNot operated yet: {string.Join(", ", remainingVehicles)}";
+			}
+		}
+
+		public override string Value() => $"{OperatedVehicleCount()}";
+		public override string ValueName() => "Vehicles Operated";
+		public override string Target() => $"{TrackableVehicles.Count}";
+
+		private static readonly Dictionary<TrainCarType, string> TrackableVehicles = new Dictionary<TrainCarType, string>
+		{
+			{ TrainCarType.LocoShunter, "DE2 Shunter" },
+			{ TrainCarType.LocoSteamHeavy, "282 Steam Locomotive" },
+			{ TrainCarType.LocoS060, "S060 Steam Locomotive" },
+			{ TrainCarType.LocoRailbus, "Railbus" },
+			{ TrainCarType.LocoDM1U, "DM1U" },
+			{ TrainCarType.LocoDiesel, "DE6" },
+			{ TrainCarType.LocoDH4, "DH4" },
+			{ TrainCarType.LocoDM3, "DM3" },
+			{ TrainCarType.LocoMicroshunter, "Microshunter" }
+		};
+
+		private static readonly Dictionary<TrainCarType, GeneralLicenseType?> RequiredLicenses = new Dictionary<TrainCarType, GeneralLicenseType?>
+		{
+			{ TrainCarType.LocoShunter, GeneralLicenseType.DE2 },
+			{ TrainCarType.LocoSteamHeavy, GeneralLicenseType.SH282 },
+			{ TrainCarType.LocoS060, GeneralLicenseType.S060 },
+			{ TrainCarType.LocoRailbus, null },
+			{ TrainCarType.LocoDM1U, null },
+			{ TrainCarType.LocoDiesel, GeneralLicenseType.DE6 },
+			{ TrainCarType.LocoDH4, GeneralLicenseType.DH4 },
+			{ TrainCarType.LocoDM3, GeneralLicenseType.DM3 },
+			{ TrainCarType.LocoMicroshunter, null }
+		};
+
+		private readonly HashSet<TrainCarType> _operatedVehicles = new HashSet<TrainCarType>();
+
+		public DriveEveryVehicleAchievementListener()
+		{
+			foreach (TrainCarType trainCarType in TrackableVehicles.Keys)
+			{
+				if (Main.saaSaveData.GetBool(GetOperatedKey(trainCarType)) == true)
+				{
+					_operatedVehicles.Add(trainCarType);
+				}
+			}
+		}
+
+		protected override void SubscribeToEvents()
+		{
+			SubscribeToCarChanged(OnCarChanged);
+
+			if (PlayerManager.Car != null)
+			{
+				OnCarChanged(PlayerManager.Car);
+			}
+		}
+
+		private void OnCarChanged(TrainCar trainCar)
+		{
+			TrainCarType trainCarType = trainCar.carType;
+
+			if (!TrackableVehicles.ContainsKey(trainCarType))
+			{
+				return;
+			}
+
+			if (!HasRequiredLicense(trainCarType))
+			{
+				Main.Debug($"Drive every vehicle: {TrackableVehicles[trainCarType]} did not count because the required license is missing");
+				return;
+			}
+
+			if (_operatedVehicles.Add(trainCarType))
+			{
+				Main.saaSaveData.SetBool(GetOperatedKey(trainCarType), true);
+			}
+
+			if (!IsUnlocked() && _operatedVehicles.Count >= TrackableVehicles.Count)
+			{
+				TriggerUnlock();
+			}
+		}
+
+		private List<string> GetRemainingVehicleNames()
+		{
+			return TrackableVehicles
+				.Where(vehicle => !_operatedVehicles.Contains(vehicle.Key))
+				.Select(vehicle => vehicle.Value)
+				.OrderBy(vehicleName => vehicleName)
+				.ToList();
+		}
+
+		private int OperatedVehicleCount()
+		{
+			return TrackableVehicles.Keys.Count(trainCarType => _operatedVehicles.Contains(trainCarType));
+		}
+
+		private static bool HasRequiredLicense(TrainCarType trainCarType)
+		{
+			LicenseManager? licenseManager = SingletonBehaviour<LicenseManager>.Instance;
+			if (licenseManager == null)
+			{
+				return false;
+			}
+
+			GeneralLicenseType? requiredLicense = RequiredLicenses[trainCarType];
+			if (!requiredLicense.HasValue)
+			{
+				return true;
+			}
+
+			return licenseManager.IsGeneralLicenseAcquired(requiredLicense.Value.ToV2());
+		}
+
+		private string GetOperatedKey(TrainCarType trainCarType) => $"{Id}_operated_{trainCarType}";
 	}
 
 	public sealed class TheEngineerAchievementListener : ConditionAchievementListener
