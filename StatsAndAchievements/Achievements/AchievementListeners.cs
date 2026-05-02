@@ -476,54 +476,99 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
-	// TODO: does not work
-	// The Garage enum contains 11 values (including relics/museum locos and flat car)
-	// Tracking does not work nicely, seams to look at UnlockablesManager from previous save game?
 	public sealed class GarageSaleEnthusiastAchievementListener : ProgressAchievementListener
 	{
 		public override string Id => "garage_sale_enthusiast";
 		public override string Title => "Garage Sale Enthusiast";
-		public override string Description => @"
-			Buy everything in the garages
-			";
-		public override string Value() => $"{unlockedGaragesCount}";
+		public override string Description
+		{
+			get
+			{
+				List<string> remainingGarages = GetRemainingGarageNames();
+				if (remainingGarages.Count == 0)
+				{
+					return "Buy everything in the garages";
+				}
+
+				return $"Buy everything in the garages\n\nNot unlocked yet: {string.Join(", ", remainingGarages)}";
+			}
+		}
+
+		public override string Value() => $"{_unlockedGarages.Count}";
 		public override string ValueName() => "Garages Unlocked";
 		public override string Target() => "4";
 
-		private int unlockedGaragesCount;
-
-		public GarageSaleEnthusiastAchievementListener()
+		// As of may 2026, the `Garage` enum contains entries that are not related to an actual garage.
+		// Hard-coding the required garages should only fail, if new garages are introduces or if there is a custom map with different garages.
+		// If this should be the case, the `PadlockKeyType` enum might come in handy.
+		private static readonly Dictionary<Garage, string> TrackableGarages = new Dictionary<Garage, string>
 		{
-			float? unlockedGaragesCount = Main.saaSaveData.GetFloat($"{Id}_unlocked_garages_count");
-			if (unlockedGaragesCount.HasValue)
-			{
-				this.unlockedGaragesCount = (int)unlockedGaragesCount.Value;
-			}
-			else
-			{
-				this.unlockedGaragesCount = 0;
-			}
-		}
+			{ Garage.Bob, "BE2 Microshunter" },
+			{ Garage.Caboose, "Caboose" },
+			{ Garage.DM1U, "DM1U" },
+			{ Garage.DE6_Slug, "DE6 Slug" }
+		};
+
+		private readonly HashSet<Garage> _unlockedGarages = new HashSet<Garage>();
 
 		protected override void SubscribeToEvents()
 		{
-			SubscribeToUnlockedGaragesChanged(OnUnlockedGaragesChanged);
-		}
-
-		protected override void OnUnlockedGaragesChanged(int unlockedGaragesCount)
-		{
-			if (unlockedGaragesCount <= this.unlockedGaragesCount)
+			LicenseManager? licenseManager = SingletonBehaviour<LicenseManager>.Instance;
+			if (licenseManager == null)
 			{
-				if (IsUnlocked()) return;
+				Main.Warning("Garage Sale Enthusiast: LicenseManager instance was not available.");
+				return;
 			}
 
-			this.unlockedGaragesCount = unlockedGaragesCount;
-			Main.saaSaveData.SetFloat($"{Id}_unlocked_garages_count", unlockedGaragesCount);
+			Subscribe(
+				() => licenseManager.GarageUnlocked += OnGarageUnlocked,
+				() => licenseManager.GarageUnlocked -= OnGarageUnlocked
+			);
 
-			if (unlockedGaragesCount >= 4)
+			RefreshUnlockedGarages(licenseManager);
+		}
+
+		private void OnGarageUnlocked(GarageType_v2 unlockedGarage)
+		{
+			LicenseManager? licenseManager = SingletonBehaviour<LicenseManager>.Instance;
+			if (licenseManager == null)
+			{
+				return;
+			}
+
+			if (!TrackableGarages.Keys.Any(garage => garage.ToV2() == unlockedGarage))
+			{
+				return;
+			}
+
+			RefreshUnlockedGarages(licenseManager);
+		}
+
+		private void RefreshUnlockedGarages(LicenseManager licenseManager)
+		{
+			_unlockedGarages.Clear();
+
+			foreach (Garage garage in TrackableGarages.Keys)
+			{
+				if (licenseManager.GetUnlockedGarages().Contains(garage.ToV2()))
+				{
+					_unlockedGarages.Add(garage);
+				}
+			}
+
+			if (!IsUnlocked() && _unlockedGarages.Count >= TrackableGarages.Count)
 			{
 				TriggerUnlock();
 			}
+		}
+
+		private List<string> GetRemainingGarageNames()
+		{
+			return TrackableGarages
+				.Where(garage => !_unlockedGarages.Contains(garage.Key))
+				.Select(garage => garage.Value)
+				.OrderBy(garageName => garageName)
+				.ToList();
 		}
 	}
 

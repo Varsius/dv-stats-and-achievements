@@ -4,6 +4,7 @@
 - Implement all career achievements
 - Implement all milestones, advanced stats (think about missing ones: walk distance?, number of teleports)
 - Write the actual README.md
+- Playtest! Also look at achievement names/descriptions
 
 ## Roadmap
 - Booklets for achievement info and completion
@@ -13,3 +14,4 @@
 - Localization
 - Hot-Reloading of CareerManager
 - Give opinion and improvement suggestions on achievement unlocked notification (@Robert)
+- When going back in the CareerManager screens, the scroll index needs to be reset. Otherwise the previous screen is also "scrolled down"
