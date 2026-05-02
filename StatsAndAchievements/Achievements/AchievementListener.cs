@@ -3,6 +3,9 @@ using System;
 using System.Collections.Generic;
 using DV.Logic.Job;
 using UnityEngine;
+using DV.ThingTypes;
+using System.Runtime.InteropServices;
+using DV.Utils;
 
 namespace StatsAndAchievements.Achievements
 {
@@ -89,10 +92,22 @@ namespace StatsAndAchievements.Achievements
 				() => Events.EventWatch.UnlockedGaragesChanged -= listener
 			);
 
-		protected void SubscribeToLicenseAcquired(Action<string> listener) =>
+		protected void SubscribeToGeneralLicenseAcquired(Action<GeneralLicenseType_v2> listener) =>
 			Subscribe(
-				() => Events.Actions.LicenseAcquired += listener,
-				() => Events.Actions.LicenseAcquired -= listener
+				() => Events.Actions.GeneralLicenseAcquired += listener,
+				() => Events.Actions.GeneralLicenseAcquired -= listener
+			);
+
+		protected void SubscribeToItemAcquired(Action<string> listener) =>
+			Subscribe(
+				() => Events.Actions.ItemAcquired += listener,
+				() => Events.Actions.ItemAcquired -= listener
+			);
+
+		protected void SubscribeToJobLicenseAcquired(Action<JobLicenseType_v2> listener) =>
+			Subscribe(
+				() => Events.Actions.JobLicenseAcquired += listener,
+				() => Events.Actions.JobLicenseAcquired -= listener
 			);
 
 		protected void SubscribeToCarChanged(Action<TrainCar> listener) =>

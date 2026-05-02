@@ -1,3 +1,4 @@
+using DV.InventorySystem;
 using DV.JObjectExtstensions;
 using DV.Logic.Job;
 using DV.LocoRestoration;
@@ -108,7 +109,8 @@ namespace StatsAndAchievements.Achievements
 
 		protected override void SubscribeToEvents()
 		{
-			SubscribeToLicenseAcquired(OnLicenseAcquired);
+			SubscribeToGeneralLicenseAcquired(license => OnLicenseAcquired(license.name));
+			SubscribeToJobLicenseAcquired(license => OnLicenseAcquired(license.name));
 		}
 
 		protected override void OnLicenseAcquired(String licenseName)
@@ -122,6 +124,97 @@ namespace StatsAndAchievements.Achievements
 			{
 				TriggerUnlock();
 			}
+		}
+	}
+
+	// This achievement is implemented as a conditional achievement, since the total amount of licenses
+	// is already tracked in the vanilla stats menu
+	public sealed class SteamEngineRequirementsAchievementListener : ProgressAchievementListener
+	{
+		public override string Id => "steam_engine_requirements";
+		public override string Title => "Fully equipped";
+		public override string Description => @"
+			Acquire everything you need to drive a steamer, including the license, a shovel, a lighter and oil.
+		";
+
+		public override string Value() => $"{ProgressCount()}";
+		public override string ValueName() => "Job Types Completed";
+		public override string Target() => $"{TargetCount}";
+
+		private bool hasAcquiredSteamLicense;
+		private bool hasAcquiredShovel;
+		private bool hasAcquiredLighter;
+		private bool hasAcquiredOil;
+
+		private int TargetCount => 4;
+		private int ProgressCount()
+		{
+			int progressCount = 0;
+			if (hasAcquiredSteamLicense) progressCount++;
+			if (hasAcquiredShovel) progressCount++;
+			if (hasAcquiredLighter) progressCount++;
+			if (hasAcquiredOil) progressCount++;
+
+			return progressCount;
+		}
+
+		public SteamEngineRequirementsAchievementListener()
+		{
+			bool? hasAcquiredSteamLicense = Main.saaSaveData.GetBool($"{Id}_has_acquired_steam_license");
+			bool? hasAcquiredShovel = Main.saaSaveData.GetBool($"{Id}_has_acquired_shovel");
+			bool? hasAcquiredLighter = Main.saaSaveData.GetBool($"{Id}_has_acquired_lighter");
+			bool? hasAcquiredOil = Main.saaSaveData.GetBool($"{Id}_has_acquired_oiler");
+
+			this.hasAcquiredSteamLicense = hasAcquiredSteamLicense ?? false;
+			this.hasAcquiredShovel = hasAcquiredShovel ?? false;
+			this.hasAcquiredLighter = hasAcquiredLighter ?? false;
+			this.hasAcquiredOil = hasAcquiredOil ?? false;
+		}
+
+		protected override void SubscribeToEvents()
+		{
+			SubscribeToGeneralLicenseAcquired(OnGeneralLicenseAcquired);
+			SubscribeToItemAcquired(OnItemAcquired);
+		}
+
+		void OnGeneralLicenseAcquired(GeneralLicenseType_v2 license)
+		{
+			if (IsUnlocked()) return;
+
+			var steamer = GeneralLicenseType.S060 | GeneralLicenseType.SH282;
+			bool isSteamer = (license.v1 & steamer) != 0;
+			if (isSteamer)
+			{
+				hasAcquiredSteamLicense = true;
+				Main.saaSaveData.SetBool($"{Id}_has_acquired_steam_license", true);
+			}
+
+			if (ProgressCount() >= TargetCount) TriggerUnlock();
+		}
+
+		private void OnItemAcquired(string itemName)
+		{
+			if (IsUnlocked()) return;
+
+			if (itemName.ToLower().Contains("shovel"))
+			{
+				hasAcquiredShovel = true;
+				Main.saaSaveData.SetBool($"{Id}_has_acquired_shovel", true);
+			}
+
+			if (itemName.ToLower().Contains("lighter"))
+			{
+				hasAcquiredLighter = true;
+				Main.saaSaveData.SetBool($"{Id}_has_acquired_lighter", true);
+			}
+
+			if (itemName.ToLower().Contains("oiler"))
+			{
+				hasAcquiredOil = true;
+				Main.saaSaveData.SetBool($"{Id}_has_acquired_oiler", true);
+			}
+
+			if (ProgressCount() >= TargetCount) TriggerUnlock();
 		}
 	}
 

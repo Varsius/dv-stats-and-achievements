@@ -121,6 +121,7 @@ public class Main
 				typeof(TheEngineerAchievementListener),
 				typeof(GraphicDesignIsMyPassionAchievementListener),
 				typeof(GarageSaleEnthusiastAchievementListener)
+				typeof(SteamEngineRequirementsAchievementListener),
 			]));
 		}
 
