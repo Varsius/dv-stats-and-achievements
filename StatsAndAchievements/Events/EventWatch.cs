@@ -1,4 +1,3 @@
-using DV.Customization;
 using DV.Utils;
 using System;
 using System.Collections.Generic;
@@ -16,14 +15,13 @@ namespace StatsAndAchievements.Events
 		private float _previousSpeed;
 		private float _previousHorn;
 		private int _previousUnlockedGarages = -1;
-		private static TrainCar _trainCar;
+		private static TrainCar? _trainCar;
 		private Action? _unsubscribeFromTrainCarEvents;
 
-		public static event Action<float> SpeedIncreased;
-		public static event Action Honked;
-		public static event Action HonkStarted;
-		public static event Action HonkEnded;
-		public static event Action<int> UnlockedGaragesChanged;
+		public static event Action<float>? SpeedIncreased;
+		public static event Action? HonkStarted;
+		public static event Action? HonkEnded;
+		public static event Action<int>? UnlockedGaragesChanged;
 
 		void OnEnable()
 		{
@@ -40,15 +38,18 @@ namespace StatsAndAchievements.Events
 			_unsubscribeFromTrainCarEvents?.Invoke();
 		}
 
-		private void OnCarChanged(TrainCar newCar)
+		private void OnCarChanged(TrainCar? newCar)
 		{
 			_unsubscribeFromTrainCarEvents?.Invoke();
 			_unsubscribeFromTrainCarEvents = null;
+
+			_trainCar = null;
 
 			if (newCar == null)
 			{
 				return;
 			}
+
 			_trainCar = newCar;
 			_unsubscribeFromTrainCarEvents = SubscribeToTrainCarEvents(newCar);
 		}
@@ -104,7 +105,7 @@ namespace StatsAndAchievements.Events
 
 		private void CheckSpeedIncreased(TrainCar trainCar)
 		{
-			float currentSpeed = _trainCar.GetVelocity().magnitude * 3.6f;
+			float currentSpeed = trainCar.GetVelocity().magnitude * 3.6f;
 			if (currentSpeed > _previousSpeed)
 			{
 				SpeedIncreased?.Invoke(currentSpeed);

@@ -1,19 +1,6 @@
-using DV.JObjectExtstensions;
-using DV.Localization;
 using DV.ServicePenalty.UI;
-using DV.Teleporters;
-using DV.ThingTypes;
-using JetBrains.Annotations;
-using Newtonsoft.Json.Linq;
 using StatsAndAchievements.Achievements;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TMPro;
-using UnityEngine;
-using static UnityModManagerNet.UnityModManager.Repository;
 
 namespace StatsAndAchievements.CareerManagerScreens;
 
@@ -51,7 +38,7 @@ public class StatisticsScreen : ModularScreenHost
 			{
 				continue;
 			}
-			ProgressAchievementListener progressListener  = (ProgressAchievementListener)listener;
+			ProgressAchievementListener progressListener = (ProgressAchievementListener)listener;
 			options.Add((
 				tmPro =>
 				{

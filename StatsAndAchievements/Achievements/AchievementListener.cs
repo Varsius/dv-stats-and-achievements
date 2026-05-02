@@ -1,10 +1,6 @@
-using DV.InventorySystem;
 using DV.JObjectExtstensions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using DV.Logic.Job;
 using UnityEngine;
 
@@ -18,7 +14,7 @@ namespace StatsAndAchievements.Achievements
 	}
 	public abstract class AchievementListener
 	{
-		private AchievementManager _manager;
+		private AchievementManager? _manager;
 		public abstract string Id { get; }
 		public abstract string Title { get; }
 		public abstract string Description { get; }
@@ -56,7 +52,7 @@ namespace StatsAndAchievements.Achievements
 
 			Main.saaSaveData.SetBool($"{Id}_unlocked", true);
 
-			_manager.NotifyUnlocked(Id);
+			_manager!.NotifyUnlocked(Id);
 		}
 
 		protected virtual void SubscribeToEvents()
@@ -73,12 +69,6 @@ namespace StatsAndAchievements.Achievements
 			Subscribe(
 				() => Events.EventWatch.SpeedIncreased += listener,
 				() => Events.EventWatch.SpeedIncreased -= listener
-			);
-
-		protected void SubscribeToHonked(Action listener) =>
-			Subscribe(
-				() => Events.EventWatch.Honked += listener,
-				() => Events.EventWatch.Honked -= listener
 			);
 
 		protected void SubscribeToHonkStarted(Action listener) =>

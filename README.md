@@ -1,6 +1,5 @@
 ## TODO before initial release
 
-- Handle compiler warnings and cleanup unused imports
 - Save game management
 - Rework notification (@Robert)
 - Implement all career achievements

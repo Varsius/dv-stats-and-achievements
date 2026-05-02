@@ -1,7 +1,4 @@
-using dnlib;
-using DV.Customization;
 using DV.ServicePenalty.UI;
-using DV.Simulation;
 using HarmonyLib;
 using System;
 using System.Diagnostics;
@@ -9,8 +6,6 @@ using System.Reflection;
 using UnityEngine;
 using UnityModManagerNet;
 using static UnityModManagerNet.UnityModManager;
-using CareerManagerAPI;
-using StatsAndAchievements.Events;
 using StatsAndAchievements.Achievements;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;

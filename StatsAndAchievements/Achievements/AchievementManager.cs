@@ -1,14 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using DV.UI;
-using UnityEngine;
 using DV.Utils;
-using DV.UIFramework;
-using DV.InventorySystem;
-using StatsAndAchievements.Events;
 
 namespace StatsAndAchievements.Achievements
 {
@@ -20,7 +14,7 @@ namespace StatsAndAchievements.Achievements
 		// Other components (like the UI) can subscribe to this,
 		// in order to get notified on each newly unlocked achievement
 		// TODO: is this needed at all?
-		public event Action<string> Unlocked;
+		public event Action<string>? Unlocked;
 
 		public AchievementManager(IEnumerable<AchievementCategory> categories)
 		{

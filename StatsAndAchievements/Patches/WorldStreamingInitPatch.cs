@@ -1,6 +1,5 @@
 using System.Collections;
 using HarmonyLib;
-using StatsAndAchievements.Achievements;
 
 namespace StatsAndAchievements.Patches;
 
