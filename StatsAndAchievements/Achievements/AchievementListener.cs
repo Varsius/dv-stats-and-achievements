@@ -56,9 +56,7 @@ namespace StatsAndAchievements.Achievements
 			_manager!.NotifyUnlocked(Id);
 		}
 
-		protected virtual void SubscribeToEvents()
-		{
-		}
+		protected virtual void SubscribeToEvents() { }
 
 		protected void Subscribe(Action subscribe, Action unsubscribe)
 		{
@@ -137,19 +135,6 @@ namespace StatsAndAchievements.Achievements
 				() => Events.Actions.ItemAcquired += listener,
 				() => Events.Actions.ItemAcquired -= listener
 			);
-
-		// Common hooks
-		protected virtual void OnSpeedIncreased(float speed) { }
-		protected virtual void OnHonked() { }
-		protected virtual void OnHonkStarted() { }
-		protected virtual void OnHonkEnded() { }
-		protected virtual void OnUnlockedGaragesChanged(int unlockedGaragesCount) { }
-		protected virtual void OnMoneyChanged(double previousAmount, double currentAmount) { }
-		protected virtual void OnLicenseAcquired(string licenseName) { }
-		protected virtual void OnJobCompletion(Job job) { }
-		protected virtual void OnPaintJobApplied() { }
-		protected virtual void OnPlayerPositionChanged(Vector3 playerPosition) { }
-		protected virtual void OnPitStopCheckout(float amount, bool hasPaid) { }
 	}
 
 	public abstract class ProgressAchievementListener : AchievementListener
@@ -159,7 +144,7 @@ namespace StatsAndAchievements.Achievements
 		public abstract string Target();
 		public virtual string Progress()
 		{
-			return $"{this.Value()}/{this.Target()}";
+			return $"{Value()}/{Target()}";
 		}
 		public override AchievementType Type => AchievementType.Progress;
 	}
