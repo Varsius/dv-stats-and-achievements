@@ -5,7 +5,6 @@
 - Rework notification (@Robert)
 - Implement all career achievements
 - Implement all milestones, advanced stats (think about missing ones: walk distance?, number of teleports)
-- Settings to toggle achievement categories on and off
 - Write the actual README.md
 
 ## Roadmap

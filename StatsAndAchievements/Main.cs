@@ -13,6 +13,7 @@ using CareerManagerAPI;
 using StatsAndAchievements.Events;
 using StatsAndAchievements.Achievements;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace StatsAndAchievements;
 
@@ -32,6 +33,7 @@ public class Main
 	private static Harmony? _harmony;
 	private static GameObject? watchGO;
 	public static AchievementManager achievementManager = null!;
+	public static Settings settings = null!;
 	public static JObject saaSaveData = new JObject();
 	private static bool Load(UnityModManager.ModEntry modEntry)
 	{
@@ -39,6 +41,8 @@ public class Main
 
 		try
 		{
+			settings = UnityModManager.ModSettings.Load<Settings>(modEntry);
+
 			_harmony = new Harmony(modEntry.Info.Id);
 			_harmony.PatchAll(Assembly.GetExecutingAssembly());
 
@@ -55,6 +59,8 @@ public class Main
 					after: CareerManagerLocalization.STATS);
 			};
 
+			modEntry.OnGUI = DrawGUI;
+			modEntry.OnSaveGUI = SaveGUI;
 			modEntry.OnUnload = Unload;
 			return true;
 		}
@@ -77,5 +83,72 @@ public class Main
 			GameObject.Destroy(watchGO);
 		}
 		return true;
+	}
+
+	private static void DrawGUI(UnityModManager.ModEntry modEntry)
+	{
+		settings.Draw(modEntry);
+	}
+
+	private static void SaveGUI(UnityModManager.ModEntry modEntry)
+	{
+		settings.Save(modEntry);
+	}
+
+	public static void RebuildAchievementManager()
+	{
+		if (achievementManager != null)
+		{
+			achievementManager.Detach();
+		}
+
+		achievementManager = new AchievementManager(BuildAchievementCategories());
+	}
+
+	public static IReadOnlyList<AchievementCategory> BuildAchievementCategories()
+	{
+		List<AchievementCategory> categories = new List<AchievementCategory>();
+
+		if (settings.EnableCareerAchievements)
+		{
+			categories.Add(new AchievementCategory("career", "Career", [
+				new AllRounderAchievementListener(),
+				new VisitAllStationsAchievementListener(),
+				new CompleteTheMuseumAchievementListener(),
+				new DriveEveryVehicleAchievementListener(),
+				new FirstHazmatJobCompletionAchievementListener(),
+				new FirstMilitaryJobCompletionAchievementListener(),
+				new FirstFragileJobCompletionAchievementListener(),
+				new TheEndAchievementListener(),
+				new TheEngineerAchievementListener(),
+				new GraphicDesignIsMyPassionAchievementListener(),
+				// TODO: fix. new GarageSaleEnthusiastAchievementListener()
+			]));
+		}
+
+		if (settings.EnableAdvancedAchievements)
+		{
+			categories.Add(new AchievementCategory("advanced", "Advanced", [
+				new SpeedDemonAchievementListener(),
+				new MaximumHonkAchievementListener()
+			]));
+		}
+
+		if (settings.EnableMilestoneAchievements)
+		{
+			categories.Add(new AchievementCategory("milestones", "Milestones", [
+				new ScroogeMcDuckAchievementListener()
+			]));
+		}
+
+		if (settings.EnableSecretAchievements)
+		{
+			categories.Add(new AchievementCategory("secret", "Secret", [
+				new HomeSweetHomeAchievementListener()
+			]));
+		}
+
+		// TODO: "Steam Engine Connoisseur" category (see ACHIEVEMENTS.md)
+		return categories;
 	}
 }
