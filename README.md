@@ -13,3 +13,4 @@
 - Sound effect for achievement progress and completion
 - Progress notification for some achievements (not too spammy)
 - Garage achievement dynamic target count
+- Localization

@@ -32,11 +32,11 @@ public class AchievementDescriptionScreen : IModularScreen
 			return;
 		}
 
-		_host.Title.text = _achievement.Title;
+		_host.Title.text = _achievement.GetDisplayTitle();
 		if (_host.Subtitle != null)
 			_host.Subtitle.text = GetStatusText();
 
-		_host.Paragraphs.ParagraphB.text = _achievement.Description.Trim();
+		_host.Paragraphs.ParagraphB.text = _achievement.GetDisplayDescription().Trim();
 	}
 
 	private void OnHide(IModularScreen? next)

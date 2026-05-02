@@ -24,6 +24,9 @@ namespace StatsAndAchievements.Achievements
 		public abstract string Description { get; }
 		public abstract AchievementType Type { get; }
 
+		public virtual string GetDisplayTitle() => Title;
+		public virtual string GetDisplayDescription() => Description;
+
 		public bool IsUnlocked()
 		{
 			bool? unlocked = Main.saaSaveData.GetBool($"{Id}_unlocked");
@@ -155,5 +158,14 @@ namespace StatsAndAchievements.Achievements
 	public abstract class ConditionAchievementListener : AchievementListener
 	{
 		public override AchievementType Type => AchievementType.Condition;
+	}
+
+	public abstract class SecretConditionAchievementListener : ConditionAchievementListener
+	{
+		protected virtual string HiddenTitle => "???";
+		protected virtual string HiddenDescription => "Details for this achievement will be revealed once unlocked";
+
+		public override string GetDisplayTitle() => IsUnlocked() ? Title : HiddenTitle;
+		public override string GetDisplayDescription() => IsUnlocked() ? Description : HiddenDescription;
 	}
 }

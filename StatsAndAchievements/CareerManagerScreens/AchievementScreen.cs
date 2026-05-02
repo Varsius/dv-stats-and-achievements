@@ -51,11 +51,11 @@ public class AchievementScreen : IModularScreen
 				{
 					if (listener.IsUnlocked())
 					{
-						tmPro.text = $"★{listener.Title}";
+						tmPro.text = $"★{listener.GetDisplayTitle()}";
 					}
 					else
 					{
-						tmPro.text = listener.Title;
+						tmPro.text = listener.GetDisplayTitle();
 					}
 				},
 				tmPro =>

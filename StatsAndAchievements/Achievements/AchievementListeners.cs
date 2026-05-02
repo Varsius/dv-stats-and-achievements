@@ -260,7 +260,7 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
-	public sealed class HomeSweetHomeAchievementListener : ConditionAchievementListener
+	public sealed class HomeSweetHomeAchievementListener : SecretConditionAchievementListener
 	{
 		public override string Id => "home_sweet_home";
 		public override string Title => "Home Sweet Home";

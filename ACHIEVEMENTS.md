@@ -43,9 +43,6 @@ First fragile job completion
 ### TODO Title (Steam Starter Kit, Fully Equipped)
 Everything you need to drive a steamer, including license, shovel, lighter and oil
 
-### Hot & Spicy
-Breaks overheated
-
 # Advanced
 
 ### Dead Squirrel
@@ -94,6 +91,9 @@ Pop the TM (Traction Motor?) breaker
 
 ### Gaslighting
 Use the lighter to cause an explosion of a hazmat cargo that leaks
+
+### Hot & Spicy
+Breaks overheated
 
 # Steam Engine Connoisseur
 
