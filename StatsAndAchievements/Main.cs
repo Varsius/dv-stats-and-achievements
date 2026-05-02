@@ -62,6 +62,9 @@ public class Main
 			modEntry.OnGUI = DrawGUI;
 			modEntry.OnSaveGUI = SaveGUI;
 			modEntry.OnUnload = Unload;
+
+			Main.RebuildAchievementManager();
+
 			return true;
 		}
 		catch (Exception ex)
@@ -111,44 +114,69 @@ public class Main
 
 		if (settings.EnableCareerAchievements)
 		{
-			categories.Add(new AchievementCategory("career", "Career", [
-				new AllRounderAchievementListener(),
-				new VisitAllStationsAchievementListener(),
-				new CompleteTheMuseumAchievementListener(),
-				new DriveEveryVehicleAchievementListener(),
-				new FirstHazmatJobCompletionAchievementListener(),
-				new FirstMilitaryJobCompletionAchievementListener(),
-				new FirstFragileJobCompletionAchievementListener(),
-				new TheEndAchievementListener(),
-				new TheEngineerAchievementListener(),
-				new GraphicDesignIsMyPassionAchievementListener(),
-				// TODO: fix. new GarageSaleEnthusiastAchievementListener()
+			categories.Add(CreateCategory("career", "Career", [
+				typeof(AllRounderAchievementListener),
+				typeof(VisitAllStationsAchievementListener),
+				typeof(CompleteTheMuseumAchievementListener),
+				typeof(DriveEveryVehicleAchievementListener),
+				typeof(FirstHazmatJobCompletionAchievementListener),
+				typeof(FirstMilitaryJobCompletionAchievementListener),
+				typeof(FirstFragileJobCompletionAchievementListener),
+				typeof(TheEndAchievementListener),
+				typeof(TheEngineerAchievementListener),
+				typeof(GraphicDesignIsMyPassionAchievementListener),
+				// TODO: fix. typeof(GarageSaleEnthusiastAchievementListener)
 			]));
 		}
 
 		if (settings.EnableAdvancedAchievements)
 		{
-			categories.Add(new AchievementCategory("advanced", "Advanced", [
-				new SpeedDemonAchievementListener(),
-				new MaximumHonkAchievementListener()
+			categories.Add(CreateCategory("advanced", "Advanced", [
+				typeof(SpeedDemonAchievementListener),
+				typeof(MaximumHonkAchievementListener)
 			]));
 		}
 
 		if (settings.EnableMilestoneAchievements)
 		{
-			categories.Add(new AchievementCategory("milestones", "Milestones", [
-				new ScroogeMcDuckAchievementListener()
+			categories.Add(CreateCategory("milestones", "Milestones", [
+				typeof(ScroogeMcDuckAchievementListener)
 			]));
 		}
 
 		if (settings.EnableSecretAchievements)
 		{
-			categories.Add(new AchievementCategory("secret", "Secret", [
-				new HomeSweetHomeAchievementListener()
+			categories.Add(CreateCategory("secret", "Secret", [
+				typeof(HomeSweetHomeAchievementListener)
 			]));
 		}
 
 		// TODO: "Steam Engine Connoisseur" category (see ACHIEVEMENTS.md)
 		return categories;
+	}
+
+	private static AchievementCategory CreateCategory(string id, string title, IEnumerable<Type> achievementTypes)
+	{
+		List<AchievementListener> achievements = new List<AchievementListener>();
+
+		foreach (Type achievementType in achievementTypes)
+		{
+			try
+			{
+				if (Activator.CreateInstance(achievementType) is AchievementListener achievement)
+				{
+					achievements.Add(achievement);
+					continue;
+				}
+
+				Warning($"Failed to create achievement listener {achievementType.FullName}: created instance is not an AchievementListener.");
+			}
+			catch (Exception ex)
+			{
+				ModEntry.Logger.LogException($"Failed to create achievement listener {achievementType.FullName}:", ex);
+			}
+		}
+
+		return new AchievementCategory(id, title, achievements);
 	}
 }
