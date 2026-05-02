@@ -1,7 +1,6 @@
 ## TODO before initial release
 
 - Save game management
-- Rework notification (@Robert)
 - Implement all career achievements
 - Implement all milestones, advanced stats (think about missing ones: walk distance?, number of teleports)
 - Write the actual README.md
@@ -13,3 +12,4 @@
 - Garage achievement dynamic target count
 - Localization
 - Hot-Reloading of CareerManager
+- Give opinion and improvement suggestions on achievement unlocked notification (@Robert)
