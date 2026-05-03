@@ -18,24 +18,16 @@ namespace StatsAndAchievements.Achievements
 			Reach a speed of 100km/h with any locomotive
 			";
 
-		public override string Value() => $"{(int)this.maxSpeed} km/h";
+		public override string Value() => $"{(int)_maxSpeed.Value} km/h";
 		public override string ValueName() => "Highest Speed";
 		public override string Target() => "100 km/h";
-		public override string Progress() => $"{(int)this.maxSpeed}/100 kmh";
+		public override string Progress() => $"{(int)_maxSpeed.Value}/100 kmh";
 
-		private float maxSpeed;
+		private readonly SavedFloat _maxSpeed;
 
 		public SpeedDemonAchievementListener()
 		{
-			float? maxSpeed = Main.saaSaveData.GetFloat($"{Id}_max_speed");
-			if (maxSpeed.HasValue)
-			{
-				this.maxSpeed = maxSpeed.Value;
-			}
-			else
-			{
-				this.maxSpeed = 0.0f;
-			}
+			_maxSpeed = SavedFloat("max_speed");
 		}
 
 		protected override void SubscribeToEvents()
@@ -45,13 +37,12 @@ namespace StatsAndAchievements.Achievements
 
 		void OnSpeedIncreased(float speed)
 		{
-			if (speed <= maxSpeed)
+			if (speed <= _maxSpeed.Value)
 			{
 				return;
 			}
 
-			maxSpeed = speed;
-			Main.saaSaveData.SetFloat($"{Id}_max_speed", speed);
+			_maxSpeed.Value = speed;
 
 			if (speed > 100.0f)
 			{
@@ -139,34 +130,29 @@ namespace StatsAndAchievements.Achievements
 		public override string ValueName() => "Job Types Completed";
 		public override string Target() => $"{TargetCount}";
 
-		private bool hasAcquiredSteamLicense;
-		private bool hasAcquiredShovel;
-		private bool hasAcquiredLighter;
-		private bool hasAcquiredOil;
+		private readonly SavedBool _hasAcquiredSteamLicense;
+		private readonly SavedBool _hasAcquiredShovel;
+		private readonly SavedBool _hasAcquiredLighter;
+		private readonly SavedBool _hasAcquiredOil;
 
 		private int TargetCount => 4;
 		private int ProgressCount()
 		{
 			int progressCount = 0;
-			if (hasAcquiredSteamLicense) progressCount++;
-			if (hasAcquiredShovel) progressCount++;
-			if (hasAcquiredLighter) progressCount++;
-			if (hasAcquiredOil) progressCount++;
+			if (_hasAcquiredSteamLicense) progressCount++;
+			if (_hasAcquiredShovel) progressCount++;
+			if (_hasAcquiredLighter) progressCount++;
+			if (_hasAcquiredOil) progressCount++;
 
 			return progressCount;
 		}
 
 		public SteamEngineRequirementsAchievementListener()
 		{
-			bool? hasAcquiredSteamLicense = Main.saaSaveData.GetBool($"{Id}_has_acquired_steam_license");
-			bool? hasAcquiredShovel = Main.saaSaveData.GetBool($"{Id}_has_acquired_shovel");
-			bool? hasAcquiredLighter = Main.saaSaveData.GetBool($"{Id}_has_acquired_lighter");
-			bool? hasAcquiredOil = Main.saaSaveData.GetBool($"{Id}_has_acquired_oiler");
-
-			this.hasAcquiredSteamLicense = hasAcquiredSteamLicense ?? false;
-			this.hasAcquiredShovel = hasAcquiredShovel ?? false;
-			this.hasAcquiredLighter = hasAcquiredLighter ?? false;
-			this.hasAcquiredOil = hasAcquiredOil ?? false;
+			_hasAcquiredSteamLicense = SavedBool("has_acquired_steam_license");
+			_hasAcquiredShovel = SavedBool("has_acquired_shovel");
+			_hasAcquiredLighter = SavedBool("has_acquired_lighter");
+			_hasAcquiredOil = SavedBool("has_acquired_oiler");
 		}
 
 		protected override void SubscribeToEvents()
@@ -183,8 +169,7 @@ namespace StatsAndAchievements.Achievements
 			bool isSteamer = (license.v1 & steamer) != 0;
 			if (isSteamer)
 			{
-				hasAcquiredSteamLicense = true;
-				Main.saaSaveData.SetBool($"{Id}_has_acquired_steam_license", true);
+				_hasAcquiredSteamLicense.SetTrue();
 			}
 
 			if (ProgressCount() >= TargetCount) TriggerUnlock();
@@ -196,20 +181,17 @@ namespace StatsAndAchievements.Achievements
 
 			if (itemName.ToLower().Contains("shovel"))
 			{
-				hasAcquiredShovel = true;
-				Main.saaSaveData.SetBool($"{Id}_has_acquired_shovel", true);
+				_hasAcquiredShovel.SetTrue();
 			}
 
 			if (itemName.ToLower().Contains("lighter"))
 			{
-				hasAcquiredLighter = true;
-				Main.saaSaveData.SetBool($"{Id}_has_acquired_lighter", true);
+				_hasAcquiredLighter.SetTrue();
 			}
 
 			if (itemName.ToLower().Contains("oiler"))
 			{
-				hasAcquiredOil = true;
-				Main.saaSaveData.SetBool($"{Id}_has_acquired_oiler", true);
+				_hasAcquiredOil.SetTrue();
 			}
 
 			if (ProgressCount() >= TargetCount) TriggerUnlock();
@@ -224,23 +206,15 @@ namespace StatsAndAchievements.Achievements
 			Earn $1,000,000 throughout your career
 			";
 
-		public override string Value() => $"${(int)moneyEarned}"; // TODO: thousand separator (see Varsius' KittyCat PR)
+		public override string Value() => $"${(int)_moneyEarned.Value}"; // TODO: thousand separator (see Varsius' KittyCat PR)
 		public override string ValueName() => "Money Earned";
 		public override string Target() => "$1,000,000";
 
-		private float moneyEarned;
+		private readonly SavedFloat _moneyEarned;
 
 		public ScroogeMcDuckAchievementListener()
 		{
-			float? moneyEarned = Main.saaSaveData.GetFloat($"{Id}_money_earned");
-			if (moneyEarned.HasValue)
-			{
-				this.moneyEarned = moneyEarned.Value;
-			}
-			else
-			{
-				this.moneyEarned = 0.0f;
-			}
+			_moneyEarned = SavedFloat("money_earned");
 		}
 
 		protected override void SubscribeToEvents()
@@ -250,10 +224,9 @@ namespace StatsAndAchievements.Achievements
 
 		void OnJobCompletion(Job job)
 		{
-			moneyEarned += job.GetWageForTheJob();
-			Main.saaSaveData.SetFloat($"{Id}_money_earned", moneyEarned);
+			_moneyEarned.Value += job.GetWageForTheJob();
 
-			if (moneyEarned >= 1_000_000f)
+			if (_moneyEarned.Value >= 1_000_000f)
 			{
 				TriggerUnlock();
 			}
@@ -292,7 +265,7 @@ namespace StatsAndAchievements.Achievements
 				string stationName = stationController.stationInfo.YardID.Trim();
 				_stations[stationName] = stationController;
 
-				if (Main.saaSaveData.GetBool(GetVisitedKey(stationName)) == true)
+				if (VisitedStation(stationName).Value)
 				{
 					_visitedStations.Add(stationName);
 				}
@@ -324,7 +297,7 @@ namespace StatsAndAchievements.Achievements
 
 				if (station.Value.stationRange.IsPlayerInRangeForBookletGeneration(distanceSquared) && _visitedStations.Add(station.Key))
 				{
-					Main.saaSaveData.SetBool(GetVisitedKey(station.Key), true);
+					VisitedStation(station.Key).SetTrue();
 					break;
 				}
 			}
@@ -353,7 +326,7 @@ namespace StatsAndAchievements.Achievements
 			return _stations.Keys.Count(stationName => _visitedStations.Contains(stationName));
 		}
 
-		private string GetVisitedKey(string stationName) => $"{Id}_visited_{stationName}";
+		private SavedBool VisitedStation(string stationName) => SavedBool($"visited_{stationName}");
 	}
 
 	public sealed class CompleteTheMuseumAchievementListener : ConditionAchievementListener
@@ -448,7 +421,7 @@ namespace StatsAndAchievements.Achievements
 		{
 			foreach (TrainCarType trainCarType in TrackableVehicles.Keys)
 			{
-				if (Main.saaSaveData.GetBool(GetOperatedKey(trainCarType)) == true)
+				if (OperatedVehicle(trainCarType).Value)
 				{
 					_operatedVehicles.Add(trainCarType);
 				}
@@ -482,7 +455,7 @@ namespace StatsAndAchievements.Achievements
 
 			if (_operatedVehicles.Add(trainCarType))
 			{
-				Main.saaSaveData.SetBool(GetOperatedKey(trainCarType), true);
+				OperatedVehicle(trainCarType).SetTrue();
 			}
 
 			if (!IsUnlocked() && _operatedVehicles.Count >= TrackableVehicles.Count)
@@ -522,7 +495,7 @@ namespace StatsAndAchievements.Achievements
 			return licenseManager.IsGeneralLicenseAcquired(requiredLicense.Value.ToV2());
 		}
 
-		private string GetOperatedKey(TrainCarType trainCarType) => $"{Id}_operated_{trainCarType}";
+		private SavedBool OperatedVehicle(TrainCarType trainCarType) => SavedBool($"operated_{trainCarType}");
 	}
 
 	public sealed class TheEngineerAchievementListener : ConditionAchievementListener
@@ -702,54 +675,19 @@ namespace StatsAndAchievements.Achievements
 		public override string ValueName() => "Job Types Completed";
 		public override string Target() => $"{targetCount}";
 
-		private bool hasCompletedTransport;
-		private bool hasCompletedEmptyHaul;
-		private bool hasCompletedShuntingLoad;
-		private bool hasCompletedShuntingUnload;
+		private readonly SavedBool _hasCompletedTransport;
+		private readonly SavedBool _hasCompletedEmptyHaul;
+		private readonly SavedBool _hasCompletedShuntingLoad;
+		private readonly SavedBool _hasCompletedShuntingUnload;
 
 		private int targetCount => 4;
 
 		public AllRounderAchievementListener()
 		{
-			bool? hasCompletedTransport = Main.saaSaveData.GetBool($"{Id}_completed_transport");
-			if (hasCompletedTransport.HasValue)
-			{
-				this.hasCompletedTransport = hasCompletedTransport.Value;
-			}
-			else
-			{
-				this.hasCompletedTransport = false;
-			}
-
-			bool? hasCompletedEmptyHaul = Main.saaSaveData.GetBool($"{Id}_completed_empty_haul");
-			if (hasCompletedEmptyHaul.HasValue)
-			{
-				this.hasCompletedEmptyHaul = hasCompletedEmptyHaul.Value;
-			}
-			else
-			{
-				this.hasCompletedEmptyHaul = false;
-			}
-
-			bool? hasCompletedShuntingLoad = Main.saaSaveData.GetBool($"{Id}_completed_shunting_load");
-			if (hasCompletedShuntingLoad.HasValue)
-			{
-				this.hasCompletedShuntingLoad = hasCompletedShuntingLoad.Value;
-			}
-			else
-			{
-				this.hasCompletedShuntingLoad = false;
-			}
-
-			bool? hasCompletedShuntingUnload = Main.saaSaveData.GetBool($"{Id}_completed_shunting_unload");
-			if (hasCompletedShuntingUnload.HasValue)
-			{
-				this.hasCompletedShuntingUnload = hasCompletedShuntingUnload.Value;
-			}
-			else
-			{
-				this.hasCompletedShuntingUnload = false;
-			}
+			_hasCompletedTransport = SavedBool("completed_transport");
+			_hasCompletedEmptyHaul = SavedBool("completed_empty_haul");
+			_hasCompletedShuntingLoad = SavedBool("completed_shunting_load");
+			_hasCompletedShuntingUnload = SavedBool("completed_shunting_unload");
 		}
 
 		protected override void SubscribeToEvents()
@@ -764,20 +702,16 @@ namespace StatsAndAchievements.Achievements
 			switch (job.jobType)
 			{
 				case JobType.Transport:
-					hasCompletedTransport = true;
-					Main.saaSaveData.SetBool($"{Id}_completed_transport", hasCompletedTransport);
+					_hasCompletedTransport.SetTrue();
 					break;
 				case JobType.EmptyHaul:
-					hasCompletedEmptyHaul = true;
-					Main.saaSaveData.SetBool($"{Id}_completed_empty_haul", hasCompletedEmptyHaul);
+					_hasCompletedEmptyHaul.SetTrue();
 					break;
 				case JobType.ShuntingLoad:
-					hasCompletedShuntingLoad = true;
-					Main.saaSaveData.SetBool($"{Id}_completed_shunting_load", hasCompletedShuntingLoad);
+					_hasCompletedShuntingLoad.SetTrue();
 					break;
 				case JobType.ShuntingUnload:
-					hasCompletedShuntingUnload = true;
-					Main.saaSaveData.SetBool($"{Id}_completed_shunting_unload", hasCompletedShuntingUnload);
+					_hasCompletedShuntingUnload.SetTrue();
 					break;
 			}
 
@@ -791,13 +725,13 @@ namespace StatsAndAchievements.Achievements
 		{
 			int completedJobTypeCount = 0;
 
-			if (hasCompletedTransport)
+			if (_hasCompletedTransport)
 				completedJobTypeCount++;
-			if (hasCompletedEmptyHaul)
+			if (_hasCompletedEmptyHaul)
 				completedJobTypeCount++;
-			if (hasCompletedShuntingLoad)
+			if (_hasCompletedShuntingLoad)
 				completedJobTypeCount++;
-			if (hasCompletedShuntingUnload)
+			if (_hasCompletedShuntingUnload)
 				completedJobTypeCount++;
 
 			return completedJobTypeCount;

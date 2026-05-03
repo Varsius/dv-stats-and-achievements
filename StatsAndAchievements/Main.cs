@@ -103,6 +103,15 @@ public class Main
 		achievementManager = new AchievementManager(BuildAchievementCategories());
 	}
 
+	public static void ResetAchievementManager()
+	{
+		if (achievementManager != null)
+		{
+			achievementManager.Detach();
+			achievementManager = null!;
+		}
+	}
+
 	public static IReadOnlyList<AchievementCategory> BuildAchievementCategories()
 	{
 		List<AchievementCategory> categories = new List<AchievementCategory>();
