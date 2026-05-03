@@ -135,7 +135,7 @@ namespace StatsAndAchievements.Achievements
 			Acquire everything you need to drive a steamer, including the license, a shovel, a lighter and oil.
 		";
 
-		public override string Value() => $"{ProgressCount()}";
+		public override string Value() => $"{CountTrue(_hasAcquiredSteamLicense, _hasAcquiredShovel, _hasAcquiredLighter, _hasAcquiredOil)}";
 		public override string ValueName() => "Job Types Completed";
 		public override string Target() => $"{TargetCount}";
 
@@ -145,16 +145,6 @@ namespace StatsAndAchievements.Achievements
 		private readonly SavedBool _hasAcquiredOil;
 
 		private int TargetCount => 4;
-		private int ProgressCount()
-		{
-			int progressCount = 0;
-			if (_hasAcquiredSteamLicense) progressCount++;
-			if (_hasAcquiredShovel) progressCount++;
-			if (_hasAcquiredLighter) progressCount++;
-			if (_hasAcquiredOil) progressCount++;
-
-			return progressCount;
-		}
 
 		public SteamEngineRequirementsAchievementListener()
 		{
@@ -181,7 +171,7 @@ namespace StatsAndAchievements.Achievements
 				_hasAcquiredSteamLicense.SetTrue();
 			}
 
-			if (ProgressCount() >= TargetCount) TriggerUnlock();
+			if (CountTrue(_hasAcquiredSteamLicense, _hasAcquiredShovel, _hasAcquiredLighter, _hasAcquiredOil) >= TargetCount) TriggerUnlock();
 		}
 
 		private void OnItemAcquired(string itemName)
@@ -203,7 +193,7 @@ namespace StatsAndAchievements.Achievements
 				_hasAcquiredOil.SetTrue();
 			}
 
-			if (ProgressCount() >= TargetCount) TriggerUnlock();
+			if (CountTrue(_hasAcquiredSteamLicense, _hasAcquiredShovel, _hasAcquiredLighter, _hasAcquiredOil) >= TargetCount) TriggerUnlock();
 		}
 	}
 
@@ -685,7 +675,7 @@ namespace StatsAndAchievements.Achievements
 			Complete a job of each type
 			";
 
-		public override string Value() => $"{CompletedJobTypeCount()}";
+		public override string Value() => $"{CountTrue(_hasCompletedTransport, _hasCompletedEmptyHaul, _hasCompletedShuntingLoad, _hasCompletedShuntingUnload)}";
 		public override string ValueName() => "Job Types Completed";
 		public override string Target() => $"{targetCount}";
 
@@ -729,26 +719,10 @@ namespace StatsAndAchievements.Achievements
 					break;
 			}
 
-			if (CompletedJobTypeCount() >= targetCount)
+			if (CountTrue(_hasCompletedTransport, _hasCompletedEmptyHaul, _hasCompletedShuntingLoad, _hasCompletedShuntingUnload) >= targetCount)
 			{
 				TriggerUnlock();
 			}
-		}
-
-		private int CompletedJobTypeCount()
-		{
-			int completedJobTypeCount = 0;
-
-			if (_hasCompletedTransport)
-				completedJobTypeCount++;
-			if (_hasCompletedEmptyHaul)
-				completedJobTypeCount++;
-			if (_hasCompletedShuntingLoad)
-				completedJobTypeCount++;
-			if (_hasCompletedShuntingUnload)
-				completedJobTypeCount++;
-
-			return completedJobTypeCount;
 		}
 	}
 

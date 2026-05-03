@@ -67,6 +67,17 @@ namespace StatsAndAchievements.Achievements
 			return new SavedBool($"{Id}_{name}", defaultValue);
 		}
 
+		protected static int CountTrue(params SavedBool[] values)
+		{
+			int count = 0;
+			foreach (var value in values)
+			{
+				if (value) count++;
+			}
+
+			return count;
+		}
+
 		protected SavedFloat SavedFloat(string name, float defaultValue = 0.0f)
 		{
 			return new SavedFloat($"{Id}_{name}", defaultValue);
