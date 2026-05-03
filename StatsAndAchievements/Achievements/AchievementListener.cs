@@ -52,6 +52,11 @@ namespace StatsAndAchievements.Achievements
 
 			Unlocked.SetTrue();
 
+			NotifyUnlock();
+		}
+
+		protected void NotifyUnlock()
+		{
 			_manager!.NotifyUnlocked(Id);
 		}
 
@@ -245,6 +250,91 @@ namespace StatsAndAchievements.Achievements
 			return $"{Value()}/{Target()}";
 		}
 		public override AchievementType Type => AchievementType.Progress;
+	}
+
+	public abstract class MilestoneAchievementListener : ProgressAchievementListener
+	{
+		protected abstract string BaseTitle { get; }
+		protected abstract string MaxRankDescription { get; }
+		protected abstract float[] Milestones { get; }
+		protected abstract float CurrentValue { get; }
+
+		public override string Title => CurrentRank() > 0 ? $"{BaseTitle} {ToRoman(CurrentRank())}" : BaseTitle;
+		public override string Description => CurrentRank() >= Milestones.Length
+			? MaxRankDescription
+			: GetMilestoneDescription(CurrentTarget());
+		public override string Target() => FormatValue(CurrentTarget());
+		public override string Progress() => $"{FormatValue(GetProgressValue())}/{FormatValue(CurrentTarget())}";
+
+		protected abstract string GetMilestoneDescription(float target);
+		protected abstract string FormatValue(float value);
+
+		protected int CurrentRank()
+		{
+			return CalculateRank(CurrentValue);
+		}
+
+		protected int CalculateRank(float value)
+		{
+			int rank = 0;
+
+			foreach (float threshold in Milestones)
+			{
+				if (value >= threshold)
+				{
+					rank++;
+				}
+			}
+
+			return rank;
+		}
+
+		protected float CurrentTarget()
+		{
+			int rank = CurrentRank();
+			if (rank >= Milestones.Length)
+			{
+				return Milestones[Milestones.Length - 1];
+			}
+
+			return Milestones[rank];
+		}
+
+		protected float GetProgressValue()
+		{
+			return Mathf.Min(CurrentValue, CurrentTarget());
+		}
+
+		protected void NotifyMilestoneProgress(float previousValue, float currentValue)
+		{
+			int previousRank = CalculateRank(previousValue);
+			int newRank = CalculateRank(currentValue);
+			if (newRank <= previousRank)
+			{
+				return;
+			}
+
+			if (previousRank == 0)
+			{
+				TriggerUnlock();
+				return;
+			}
+
+			NotifyUnlock();
+		}
+
+		protected static string ToRoman(int number)
+		{
+			return number switch
+			{
+				1 => "I",
+				2 => "II",
+				3 => "III",
+				4 => "IV",
+				5 => "V",
+				_ => number.ToString()
+			};
+		}
 	}
 
 	public abstract class ConditionAchievementListener : AchievementListener

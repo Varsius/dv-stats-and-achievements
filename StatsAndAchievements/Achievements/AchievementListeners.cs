@@ -198,19 +198,17 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
-	public sealed class ScroogeMcDuckAchievementListener : ProgressAchievementListener
+	public sealed class ScroogeMcDuckAchievementListener : MilestoneAchievementListener
 	{
 		public override string Id => "scrooge_mc_duck";
-		public override string Title => "Scrooge McDuck";
-		public override string Description => @"
-			Earn $1,000,000 throughout your career
-			";
-
 		public override string Value() => $"${(int)_moneyEarned.Value}"; // TODO: thousand separator (see Varsius' KittyCat PR)
 		public override string ValueName() => "Money Earned";
-		public override string Target() => "$1,000,000";
 
 		private readonly SavedFloat _moneyEarned;
+		protected override string BaseTitle => "Scrooge McDuck";
+		protected override string MaxRankDescription => "Earn $10,000,000 throughout your career";
+		protected override float[] Milestones => [100_000f, 1_000_000f, 10_000_000f];
+		protected override float CurrentValue => _moneyEarned.Value;
 
 		public ScroogeMcDuckAchievementListener()
 		{
@@ -224,12 +222,19 @@ namespace StatsAndAchievements.Achievements
 
 		void OnJobCompletion(Job job)
 		{
+			float previousMoneyEarned = _moneyEarned.Value;
 			_moneyEarned.Value += job.GetWageForTheJob();
+			NotifyMilestoneProgress(previousMoneyEarned, _moneyEarned.Value);
+		}
 
-			if (_moneyEarned.Value >= 1_000_000f)
-			{
-				TriggerUnlock();
-			}
+		protected override string GetMilestoneDescription(float target)
+		{
+			return $"Earn ${(int)target} throughout your career";
+		}
+
+		protected override string FormatValue(float value)
+		{
+			return $"${(int)value}";
 		}
 	}
 
