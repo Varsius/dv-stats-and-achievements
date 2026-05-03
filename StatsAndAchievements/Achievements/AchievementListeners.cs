@@ -135,7 +135,7 @@ namespace StatsAndAchievements.Achievements
 			Acquire everything you need to drive a steamer, including the license, a shovel, a lighter and oil.
 		";
 
-		public override string Value() => $"{CountTrue(_hasAcquiredSteamLicense, _hasAcquiredShovel, _hasAcquiredLighter, _hasAcquiredOil)}";
+		public override string Value() => $"{ProgressCount()}";
 		public override string ValueName() => "Job Types Completed";
 		public override string Target() => $"{TargetCount}";
 
@@ -145,6 +145,10 @@ namespace StatsAndAchievements.Achievements
 		private readonly SavedBool _hasAcquiredOil;
 
 		private int TargetCount => 4;
+		private int ProgressCount()
+		{
+			return CountTrue(_hasAcquiredSteamLicense, _hasAcquiredShovel, _hasAcquiredLighter, _hasAcquiredOil);
+		}
 
 		public SteamEngineRequirementsAchievementListener()
 		{
@@ -171,7 +175,7 @@ namespace StatsAndAchievements.Achievements
 				_hasAcquiredSteamLicense.SetTrue();
 			}
 
-			if (CountTrue(_hasAcquiredSteamLicense, _hasAcquiredShovel, _hasAcquiredLighter, _hasAcquiredOil) >= TargetCount) TriggerUnlock();
+			if (ProgressCount() >= TargetCount) TriggerUnlock();
 		}
 
 		private void OnItemAcquired(string itemName)
@@ -193,7 +197,7 @@ namespace StatsAndAchievements.Achievements
 				_hasAcquiredOil.SetTrue();
 			}
 
-			if (CountTrue(_hasAcquiredSteamLicense, _hasAcquiredShovel, _hasAcquiredLighter, _hasAcquiredOil) >= TargetCount) TriggerUnlock();
+			if (ProgressCount() >= TargetCount) TriggerUnlock();
 		}
 	}
 
@@ -675,16 +679,20 @@ namespace StatsAndAchievements.Achievements
 			Complete a job of each type
 			";
 
-		public override string Value() => $"{CountTrue(_hasCompletedTransport, _hasCompletedEmptyHaul, _hasCompletedShuntingLoad, _hasCompletedShuntingUnload)}";
+		public override string Value() => $"{ProgressCount()}";
 		public override string ValueName() => "Job Types Completed";
-		public override string Target() => $"{targetCount}";
+		public override string Target() => $"{TargetCount}";
 
 		private readonly SavedBool _hasCompletedTransport;
 		private readonly SavedBool _hasCompletedEmptyHaul;
 		private readonly SavedBool _hasCompletedShuntingLoad;
 		private readonly SavedBool _hasCompletedShuntingUnload;
 
-		private int targetCount => 4;
+		private int TargetCount => 4;
+		private int ProgressCount()
+		{
+			return CountTrue(_hasCompletedTransport, _hasCompletedEmptyHaul, _hasCompletedShuntingLoad, _hasCompletedShuntingUnload);
+		}
 
 		public AllRounderAchievementListener()
 		{
@@ -719,10 +727,7 @@ namespace StatsAndAchievements.Achievements
 					break;
 			}
 
-			if (CountTrue(_hasCompletedTransport, _hasCompletedEmptyHaul, _hasCompletedShuntingLoad, _hasCompletedShuntingUnload) >= targetCount)
-			{
-				TriggerUnlock();
-			}
+			if (ProgressCount() >= TargetCount) TriggerUnlock();
 		}
 	}
 
