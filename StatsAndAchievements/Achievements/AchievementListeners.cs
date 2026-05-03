@@ -4,7 +4,6 @@ using DV.LocoRestoration;
 using DV.ThingTypes;
 using DV.ThingTypes.TransitionHelpers;
 using DV.Utils;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -44,14 +43,14 @@ namespace StatsAndAchievements.Achievements
 			SubscribeToSpeedIncreased(OnSpeedIncreased);
 		}
 
-		protected override void OnSpeedIncreased(float speed)
+		void OnSpeedIncreased(float speed)
 		{
-			if (speed <= this.maxSpeed)
+			if (speed <= maxSpeed)
 			{
 				return;
 			}
 
-			this.maxSpeed = speed;
+			maxSpeed = speed;
 			Main.saaSaveData.SetFloat($"{Id}_max_speed", speed);
 
 			if (speed > 100.0f)
@@ -78,14 +77,14 @@ namespace StatsAndAchievements.Achievements
 			SubscribeToHonkEnded(OnHonkEnded);
 		}
 
-		protected override void OnHonkStarted()
+		void OnHonkStarted()
 		{
 			if (IsUnlocked()) return;
 
 			_honkStartedAt = Time.time;
 		}
 
-		protected override void OnHonkEnded()
+		void OnHonkEnded()
 		{
 			if (IsUnlocked()) return;
 
@@ -108,11 +107,11 @@ namespace StatsAndAchievements.Achievements
 
 		protected override void SubscribeToEvents()
 		{
-			SubscribeToGeneralLicenseAcquired(license => OnLicenseAcquired(license.name));
-			SubscribeToJobLicenseAcquired(license => OnLicenseAcquired(license.name));
+			SubscribeToGeneralLicenseAcquired(_ => OnLicenseAcquired());
+			SubscribeToJobLicenseAcquired(_ => OnLicenseAcquired());
 		}
 
-		protected override void OnLicenseAcquired(String licenseName)
+		void OnLicenseAcquired()
 		{
 			if (IsUnlocked()) return;
 
@@ -222,10 +221,10 @@ namespace StatsAndAchievements.Achievements
 		public override string Id => "scrooge_mc_duck";
 		public override string Title => "Scrooge McDuck";
 		public override string Description => @"
-			Earn $1,000,000 throughout your carreer
+			Earn $1,000,000 throughout your career
 			";
 
-		public override string Value() => $"${(int)this.moneyEarned}"; // TODO: thousand seperator (see Varsius' KittyCat PR)
+		public override string Value() => $"${(int)moneyEarned}"; // TODO: thousand separator (see Varsius' KittyCat PR)
 		public override string ValueName() => "Money Earned";
 		public override string Target() => "$1,000,000";
 
@@ -249,7 +248,7 @@ namespace StatsAndAchievements.Achievements
 			SubscribeToJobCompletion(OnJobCompletion);
 		}
 
-		protected override void OnJobCompletion(Job job)
+		void OnJobCompletion(Job job)
 		{
 			moneyEarned += job.GetWageForTheJob();
 			Main.saaSaveData.SetFloat($"{Id}_money_earned", moneyEarned);
@@ -305,14 +304,13 @@ namespace StatsAndAchievements.Achievements
 			SubscribeToPlayerPositionChanged(OnPlayerPositionChanged);
 		}
 
-		protected override void OnPlayerPositionChanged(Vector3 playerPosition)
+		void OnPlayerPositionChanged(Vector3 playerPosition)
 		{
 			if (_stations.Count == 0)
 			{
 				return;
 			}
 
-			string? closestStationName = null;
 			float closestDistance = float.MaxValue;
 
 			foreach (KeyValuePair<string, StationController> station in _stations)
@@ -322,7 +320,6 @@ namespace StatsAndAchievements.Achievements
 				if (distance < closestDistance)
 				{
 					closestDistance = distance;
-					closestStationName = station.Key;
 				}
 
 				if (station.Value.stationRange.IsPlayerInRangeForBookletGeneration(distanceSquared) && _visitedStations.Add(station.Key))
@@ -541,7 +538,7 @@ namespace StatsAndAchievements.Achievements
 			SubscribeToPitStopCheckout(OnPitStopCheckout);
 		}
 
-		protected override void OnPitStopCheckout(float amount, bool hasPaid)
+		void OnPitStopCheckout(float amount, bool hasPaid)
 		{
 			TriggerUnlock();
 		}
@@ -560,7 +557,7 @@ namespace StatsAndAchievements.Achievements
 			SubscribeToPaintJobApplied(OnPaintJobApplied);
 		}
 
-		protected override void OnPaintJobApplied()
+		void OnPaintJobApplied()
 		{
 			if (IsUnlocked()) return;
 
@@ -680,7 +677,7 @@ namespace StatsAndAchievements.Achievements
 			SubscribeToPlayerPositionChanged(OnPlayerPositionChanged);
 		}
 
-		protected override void OnPlayerPositionChanged(Vector3 playerPosition)
+		void OnPlayerPositionChanged(Vector3 playerPosition)
 		{
 			if (IsUnlocked()) return;
 
@@ -703,12 +700,14 @@ namespace StatsAndAchievements.Achievements
 
 		public override string Value() => $"{CompletedJobTypeCount()}";
 		public override string ValueName() => "Job Types Completed";
-		public override string Target() => "4";
+		public override string Target() => $"{targetCount}";
 
 		private bool hasCompletedTransport;
-		private bool hasCompletedEmptytHaul;
+		private bool hasCompletedEmptyHaul;
 		private bool hasCompletedShuntingLoad;
 		private bool hasCompletedShuntingUnload;
+
+		private int targetCount => 4;
 
 		public AllRounderAchievementListener()
 		{
@@ -722,14 +721,14 @@ namespace StatsAndAchievements.Achievements
 				this.hasCompletedTransport = false;
 			}
 
-			bool? hasCompletedEmptytHaul = Main.saaSaveData.GetBool($"{Id}_completed_empty_haul");
-			if (hasCompletedEmptytHaul.HasValue)
+			bool? hasCompletedEmptyHaul = Main.saaSaveData.GetBool($"{Id}_completed_empty_haul");
+			if (hasCompletedEmptyHaul.HasValue)
 			{
-				this.hasCompletedEmptytHaul = hasCompletedEmptytHaul.Value;
+				this.hasCompletedEmptyHaul = hasCompletedEmptyHaul.Value;
 			}
 			else
 			{
-				this.hasCompletedEmptytHaul = false;
+				this.hasCompletedEmptyHaul = false;
 			}
 
 			bool? hasCompletedShuntingLoad = Main.saaSaveData.GetBool($"{Id}_completed_shunting_load");
@@ -758,31 +757,31 @@ namespace StatsAndAchievements.Achievements
 			SubscribeToJobCompletion(OnJobCompletion);
 		}
 
-		protected override void OnJobCompletion(Job job)
+		void OnJobCompletion(Job job)
 		{
 			if (IsUnlocked()) return;
 
 			switch (job.jobType)
 			{
-				case DV.ThingTypes.JobType.Transport:
+				case JobType.Transport:
 					hasCompletedTransport = true;
 					Main.saaSaveData.SetBool($"{Id}_completed_transport", hasCompletedTransport);
 					break;
-				case DV.ThingTypes.JobType.EmptyHaul:
-					hasCompletedEmptytHaul = true;
-					Main.saaSaveData.SetBool($"{Id}_completed_empty_haul", hasCompletedEmptytHaul);
+				case JobType.EmptyHaul:
+					hasCompletedEmptyHaul = true;
+					Main.saaSaveData.SetBool($"{Id}_completed_empty_haul", hasCompletedEmptyHaul);
 					break;
-				case DV.ThingTypes.JobType.ShuntingLoad:
+				case JobType.ShuntingLoad:
 					hasCompletedShuntingLoad = true;
 					Main.saaSaveData.SetBool($"{Id}_completed_shunting_load", hasCompletedShuntingLoad);
 					break;
-				case DV.ThingTypes.JobType.ShuntingUnload:
+				case JobType.ShuntingUnload:
 					hasCompletedShuntingUnload = true;
 					Main.saaSaveData.SetBool($"{Id}_completed_shunting_unload", hasCompletedShuntingUnload);
 					break;
 			}
 
-			if (hasCompletedTransport && hasCompletedEmptytHaul && hasCompletedShuntingLoad && hasCompletedShuntingUnload)
+			if (CompletedJobTypeCount() >= targetCount)
 			{
 				TriggerUnlock();
 			}
@@ -794,7 +793,7 @@ namespace StatsAndAchievements.Achievements
 
 			if (hasCompletedTransport)
 				completedJobTypeCount++;
-			if (hasCompletedEmptytHaul)
+			if (hasCompletedEmptyHaul)
 				completedJobTypeCount++;
 			if (hasCompletedShuntingLoad)
 				completedJobTypeCount++;
@@ -818,7 +817,7 @@ namespace StatsAndAchievements.Achievements
 			SubscribeToJobCompletion(OnJobCompletion);
 		}
 
-		protected override void OnJobCompletion(Job job)
+		void OnJobCompletion(Job job)
 		{
 			if (IsUnlocked()) return;
 
@@ -850,7 +849,7 @@ namespace StatsAndAchievements.Achievements
 			SubscribeToJobCompletion(OnJobCompletion);
 		}
 
-		protected override void OnJobCompletion(Job job)
+		void OnJobCompletion(Job job)
 		{
 			if (IsUnlocked()) return;
 
@@ -882,7 +881,7 @@ namespace StatsAndAchievements.Achievements
 			SubscribeToJobCompletion(OnJobCompletion);
 		}
 
-		protected override void OnJobCompletion(Job job)
+		void OnJobCompletion(Job job)
 		{
 			if (IsUnlocked()) return;
 
