@@ -183,7 +183,7 @@ namespace StatsAndAchievements.Achievements
 
 		private void EnsureLoaded()
 		{
-			if (_hasLoaded || !Main.hasLoadedSaaSaveData)
+			if (_hasLoaded)
 			{
 				return;
 			}
@@ -225,7 +225,7 @@ namespace StatsAndAchievements.Achievements
 
 		private void EnsureLoaded()
 		{
-			if (_hasLoaded || !Main.hasLoadedSaaSaveData)
+			if (_hasLoaded)
 			{
 				return;
 			}

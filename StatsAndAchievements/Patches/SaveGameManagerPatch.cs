@@ -21,6 +21,7 @@ internal class SaveGameManagerPatch
 	[HarmonyPostfix]
 	public static void FindStartGameDataPatch(SaveGameManager __instance)
 	{
+		Main.ResetAchievementManager();
 		Main.Log("Attempting load from save");
 		JObject saveData = __instance.data.GetJObject(SAA_SAVE_DATA_KEY);
 
@@ -34,8 +35,5 @@ internal class SaveGameManagerPatch
 			Main.Log("No save data found, creating new");
 			Main.saaSaveData = new JObject();
 		}
-
-		// TODO: this needs to be set to false when switching between save games
-		Main.hasLoadedSaaSaveData = true;
 	}
 }

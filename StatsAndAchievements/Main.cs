@@ -30,7 +30,6 @@ public class Main
 	public static AchievementManager achievementManager = null!;
 	public static Settings settings = null!;
 	public static JObject saaSaveData = new JObject();
-	public static bool hasLoadedSaaSaveData = false;
 	private static bool Load(UnityModManager.ModEntry modEntry)
 	{
 		ModEntry = modEntry;
@@ -102,6 +101,15 @@ public class Main
 		}
 
 		achievementManager = new AchievementManager(BuildAchievementCategories());
+	}
+
+	public static void ResetAchievementManager()
+	{
+		if (achievementManager != null)
+		{
+			achievementManager.Detach();
+			achievementManager = null!;
+		}
 	}
 
 	public static IReadOnlyList<AchievementCategory> BuildAchievementCategories()
