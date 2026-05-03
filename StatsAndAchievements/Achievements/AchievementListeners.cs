@@ -86,15 +86,16 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
-	// This achievement is implemented as a conditional achievement, since the total amount of licenses
-	// is already tracked in the vanilla stats menu
-	public sealed class TheEndAchievementListener : ConditionAchievementListener
+	public sealed class TheEndAchievementListener : ProgressAchievementListener
 	{
 		public override string Id => "the_end";
 		public override string Title => "The End?";
 		public override string Description => @"
 			Acquire all licenses
 			";
+		public override string Value() => $"{AcquiredLicensesCount()}";
+		public override string ValueName() => "Licenses Acquired";
+		public override string Target() => $"{AllLicensesCount()}";
 
 		protected override void SubscribeToEvents()
 		{
@@ -106,13 +107,21 @@ namespace StatsAndAchievements.Achievements
 		{
 			if (IsUnlocked()) return;
 
-			int acquiredLicensesCount = SingletonBehaviour<LicenseManager>.Instance.GetNumberOfAcquiredGeneralLicenses() + SingletonBehaviour<LicenseManager>.Instance.GetNumberOfAcquiredJobLicenses();
-			int allLicensesCount = SingletonBehaviour<LicenseManager>.Instance.AllLicensesCount;
-
-			if (acquiredLicensesCount >= allLicensesCount)
+			if (AcquiredLicensesCount() >= AllLicensesCount())
 			{
 				TriggerUnlock();
 			}
+		}
+
+		private static int AcquiredLicensesCount()
+		{
+			LicenseManager licenseManager = SingletonBehaviour<LicenseManager>.Instance;
+			return licenseManager.GetNumberOfAcquiredGeneralLicenses() + licenseManager.GetNumberOfAcquiredJobLicenses();
+		}
+
+		private static int AllLicensesCount()
+		{
+			return SingletonBehaviour<LicenseManager>.Instance.AllLicensesCount;
 		}
 	}
 
