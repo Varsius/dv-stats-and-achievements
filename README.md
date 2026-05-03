@@ -1,6 +1,5 @@
 ## TODO before initial release
 
-- Save game management
 - Implement all career achievements
 - Implement all milestones, advanced stats (think about missing ones: walk distance?, number of teleports)
 - Write the actual README.md
