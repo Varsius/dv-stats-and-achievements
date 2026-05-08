@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using DV.Logic.Job;
-using DV.LocoRestoration;
 using DV.ThingTypes;
 using DV.ThingTypes.TransitionHelpers;
 using DV.Utils;
@@ -13,13 +12,13 @@ public sealed class SpeedStatTracker : StatTracker
 {
 	private readonly SavedFloat _maxSpeed;
 
-	public override string Id => "speed_demon";
+	public override string Id => "highest_speed";
 	public override string Title => "Highest Speed";
 	public override int SortOrder => 60;
 
 	public SpeedStatTracker()
 	{
-		_maxSpeed = SavedFloat("max_speed");
+		_maxSpeed = SavedFloat("highest_speed");
 	}
 
 	public override string Value() => $"{(int)_maxSpeed.Value} km/h";
@@ -44,13 +43,12 @@ public sealed class SpeedStatTracker : StatTracker
 
 public sealed class LicenseProgressStatTracker : StatTracker
 {
-	public override string Id => "the_end";
+	public override string Id => "licenses_acquired";
 	public override string Title => "Licenses Acquired";
 	public override int SortOrder => 40;
 
 	public override string Value() => $"{AcquiredLicensesCount()}";
 	public int CurrentCount => AcquiredLicensesCount();
-	public int TotalCount => AllLicensesCount();
 
 	protected override void SubscribeToEvents()
 	{
@@ -63,11 +61,6 @@ public sealed class LicenseProgressStatTracker : StatTracker
 		LicenseManager licenseManager = SingletonBehaviour<LicenseManager>.Instance;
 		return licenseManager.GetNumberOfAcquiredGeneralLicenses() + licenseManager.GetNumberOfAcquiredJobLicenses();
 	}
-
-	private static int AllLicensesCount()
-	{
-		return SingletonBehaviour<LicenseManager>.Instance.AllLicensesCount;
-	}
 }
 
 public sealed class SteamEngineRequirementsStatTracker : StatTracker
@@ -77,21 +70,20 @@ public sealed class SteamEngineRequirementsStatTracker : StatTracker
 	private readonly SavedBool _hasAcquiredLighter;
 	private readonly SavedBool _hasAcquiredOil;
 
-	public override string Id => "steam_engine_requirements";
+	public override string Id => "steamer_items_collected";
 	public override string Title => "Steamer Items Collected";
 	public override int SortOrder => 50;
 
 	public SteamEngineRequirementsStatTracker()
 	{
-		_hasAcquiredSteamLicense = SavedBool("has_acquired_steam_license");
-		_hasAcquiredShovel = SavedBool("has_acquired_shovel");
-		_hasAcquiredLighter = SavedBool("has_acquired_lighter");
-		_hasAcquiredOil = SavedBool("has_acquired_oiler");
+		_hasAcquiredSteamLicense = SavedBool("steamer_license_acquired");
+		_hasAcquiredShovel = SavedBool("steamer_shovel_acquired");
+		_hasAcquiredLighter = SavedBool("steamer_lighter_acquired");
+		_hasAcquiredOil = SavedBool("steamer_oiler_acquired");
 	}
 
 	public override string Value() => $"{CurrentCount}";
 	public int CurrentCount => CountTrue(_hasAcquiredSteamLicense, _hasAcquiredShovel, _hasAcquiredLighter, _hasAcquiredOil);
-	public int TargetCount => 4;
 
 	protected override void SubscribeToEvents()
 	{
@@ -160,13 +152,13 @@ public sealed class MoneyEarnedStatTracker : StatTracker
 {
 	private readonly SavedFloat _moneyEarned;
 
-	public override string Id => "scrooge_mc_duck";
+	public override string Id => "money_earned";
 	public override string Title => "Money Earned";
 	public override int SortOrder => 80;
 
 	public MoneyEarnedStatTracker()
 	{
-		_moneyEarned = SavedFloat("money_earned");
+		_moneyEarned = SavedFloat("career_money_earned");
 	}
 
 	public override string Value() => $"${(int)_moneyEarned.Value}";
@@ -189,7 +181,7 @@ public sealed class VisitedStationsStatTracker : StatTracker
 	private readonly Dictionary<string, StationController> _stations = new();
 	private readonly HashSet<string> _visitedStations = new();
 
-	public override string Id => "visit_all_stations";
+	public override string Id => "visited_stations";
 	public override string Title => "Stations Visited";
 	public override int SortOrder => 20;
 
@@ -209,7 +201,6 @@ public sealed class VisitedStationsStatTracker : StatTracker
 
 	public override string Value() => $"{CurrentCount}";
 	public int CurrentCount => _stations.Keys.Count(stationName => _visitedStations.Contains(stationName));
-	public int TotalCount => _stations.Count;
 
 	protected override void SubscribeToEvents()
 	{
@@ -245,7 +236,7 @@ public sealed class VisitedStationsStatTracker : StatTracker
 			.ToList();
 	}
 
-	private SavedBool VisitedStation(string stationName) => SavedBool($"visited_{stationName}");
+	private SavedBool VisitedStation(string stationName) => SavedBool($"station_visited_{stationName}");
 }
 
 public sealed class OperatedVehiclesStatTracker : StatTracker
@@ -278,7 +269,7 @@ public sealed class OperatedVehiclesStatTracker : StatTracker
 
 	private readonly HashSet<TrainCarType> _operatedVehicles = new();
 
-	public override string Id => "drive_every_vehicle";
+	public override string Id => "operated_vehicles";
 	public override string Title => "Vehicles Operated";
 	public override int SortOrder => 30;
 
@@ -295,7 +286,6 @@ public sealed class OperatedVehiclesStatTracker : StatTracker
 
 	public override string Value() => $"{CurrentCount}";
 	public int CurrentCount => TrackableVehicles.Keys.Count(trainCarType => _operatedVehicles.Contains(trainCarType));
-	public int TotalCount => TrackableVehicles.Count;
 
 	protected override void SubscribeToEvents()
 	{
@@ -356,7 +346,7 @@ public sealed class OperatedVehiclesStatTracker : StatTracker
 		return licenseManager.IsGeneralLicenseAcquired(requiredLicense.Value.ToV2());
 	}
 
-	private SavedBool OperatedVehicle(TrainCarType trainCarType) => SavedBool($"operated_{trainCarType}");
+	private SavedBool OperatedVehicle(TrainCarType trainCarType) => SavedBool($"vehicle_operated_{trainCarType}");
 }
 
 public sealed class UnlockedGaragesStatTracker : StatTracker
@@ -371,13 +361,12 @@ public sealed class UnlockedGaragesStatTracker : StatTracker
 
 	private readonly HashSet<Garage> _unlockedGarages = new();
 
-	public override string Id => "garage_sale_enthusiast";
+	public override string Id => "unlocked_garages";
 	public override string Title => "Garages Unlocked";
 	public override int SortOrder => 70;
 
 	public override string Value() => $"{_unlockedGarages.Count}";
 	public int CurrentCount => _unlockedGarages.Count;
-	public int TotalCount => TrackableGarages.Count;
 
 	protected override void SubscribeToEvents()
 	{
@@ -443,21 +432,20 @@ public sealed class CompletedJobTypesStatTracker : StatTracker
 	private readonly SavedBool _hasCompletedShuntingLoad;
 	private readonly SavedBool _hasCompletedShuntingUnload;
 
-	public override string Id => "all_rounder";
+	public override string Id => "completed_job_types";
 	public override string Title => "Job Types Completed";
 	public override int SortOrder => 10;
 
 	public CompletedJobTypesStatTracker()
 	{
-		_hasCompletedTransport = SavedBool("completed_transport");
-		_hasCompletedEmptyHaul = SavedBool("completed_empty_haul");
-		_hasCompletedShuntingLoad = SavedBool("completed_shunting_load");
-		_hasCompletedShuntingUnload = SavedBool("completed_shunting_unload");
+		_hasCompletedTransport = SavedBool("job_type_transport_completed");
+		_hasCompletedEmptyHaul = SavedBool("job_type_empty_haul_completed");
+		_hasCompletedShuntingLoad = SavedBool("job_type_shunting_load_completed");
+		_hasCompletedShuntingUnload = SavedBool("job_type_shunting_unload_completed");
 	}
 
 	public override string Value() => $"{CurrentCount}";
 	public int CurrentCount => CountTrue(_hasCompletedTransport, _hasCompletedEmptyHaul, _hasCompletedShuntingLoad, _hasCompletedShuntingUnload);
-	public int TargetCount => 4;
 
 	protected override void SubscribeToEvents()
 	{

@@ -1,4 +1,3 @@
-using DV.JObjectExtstensions;
 using DV.Logic.Job;
 using DV.LocoRestoration;
 using DV.ThingTypes;
@@ -79,6 +78,8 @@ namespace StatsAndAchievements.Achievements
 
 	public sealed class TheEndAchievementListener : ProgressAchievementListener
 	{
+		private static int TargetLicenseCount => SingletonBehaviour<LicenseManager>.Instance.AllLicensesCount;
+
 		public override string Id => "the_end";
 		public override string Title => "The End?";
 		public override int SortOrder => 80;
@@ -87,7 +88,7 @@ namespace StatsAndAchievements.Achievements
 			";
 		public override string Value() => Tracker.Value();
 		public override string ValueName() => "Licenses Acquired";
-		public override string Target() => $"{Tracker.TotalCount}";
+		public override string Target() => $"{TargetLicenseCount}";
 
 		private LicenseProgressStatTracker Tracker => Main.statTrackerManager.Licenses;
 
@@ -99,7 +100,7 @@ namespace StatsAndAchievements.Achievements
 
 		private void OnTrackerChanged()
 		{
-			if (!IsUnlocked() && Tracker.CurrentCount >= Tracker.TotalCount)
+			if (!IsUnlocked() && Tracker.CurrentCount >= TargetLicenseCount)
 			{
 				TriggerUnlock();
 			}
@@ -110,6 +111,8 @@ namespace StatsAndAchievements.Achievements
 	// is already tracked in the vanilla stats menu
 	public sealed class SteamEngineRequirementsAchievementListener : ProgressAchievementListener
 	{
+		private const int RequiredItemCount = 4;
+
 		public override string Id => "steam_engine_requirements";
 		public override string Title => "Fully equipped";
 		public override int SortOrder => 70;
@@ -119,7 +122,7 @@ namespace StatsAndAchievements.Achievements
 
 		public override string Value() => Tracker.Value();
 		public override string ValueName() => "Steamer Items Collected";
-		public override string Target() => $"{Tracker.TargetCount}";
+		public override string Target() => $"{RequiredItemCount}";
 
 		private SteamEngineRequirementsStatTracker Tracker => Main.statTrackerManager.SteamEngineRequirements;
 
@@ -131,7 +134,7 @@ namespace StatsAndAchievements.Achievements
 
 		private void OnTrackerChanged()
 		{
-			if (!IsUnlocked() && Tracker.CurrentCount >= Tracker.TargetCount)
+			if (!IsUnlocked() && Tracker.CurrentCount >= RequiredItemCount)
 			{
 				TriggerUnlock();
 			}
@@ -199,7 +202,7 @@ namespace StatsAndAchievements.Achievements
 
 		public override string Value() => Tracker.Value();
 		public override string ValueName() => "Stations Visited";
-		public override string Target() => $"{Tracker.TotalCount}";
+		public override string Target() => $"{KnownStationCount()}";
 
 		private VisitedStationsStatTracker Tracker => Main.statTrackerManager.VisitedStations;
 
@@ -211,10 +214,15 @@ namespace StatsAndAchievements.Achievements
 
 		private void OnTrackerChanged()
 		{
-			if (!IsUnlocked() && Tracker.TotalCount > 0 && Tracker.CurrentCount >= Tracker.TotalCount)
+			if (!IsUnlocked() && KnownStationCount() > 0 && Tracker.CurrentCount >= KnownStationCount())
 			{
 				TriggerUnlock();
 			}
+		}
+
+		private int KnownStationCount()
+		{
+			return Tracker.CurrentCount + Tracker.GetRemainingStationNames().Count;
 		}
 	}
 
@@ -277,7 +285,7 @@ namespace StatsAndAchievements.Achievements
 
 		public override string Value() => Tracker.Value();
 		public override string ValueName() => "Vehicles Operated";
-		public override string Target() => $"{Tracker.TotalCount}";
+		public override string Target() => $"{TrackableVehicleCount()}";
 
 		private OperatedVehiclesStatTracker Tracker => Main.statTrackerManager.OperatedVehicles;
 
@@ -289,10 +297,15 @@ namespace StatsAndAchievements.Achievements
 
 		private void OnTrackerChanged()
 		{
-			if (!IsUnlocked() && Tracker.CurrentCount >= Tracker.TotalCount)
+			if (!IsUnlocked() && Tracker.CurrentCount >= TrackableVehicleCount())
 			{
 				TriggerUnlock();
 			}
+		}
+
+		private int TrackableVehicleCount()
+		{
+			return Tracker.CurrentCount + Tracker.GetRemainingVehicleNames().Count;
 		}
 	}
 
@@ -357,7 +370,7 @@ namespace StatsAndAchievements.Achievements
 
 		public override string Value() => Tracker.Value();
 		public override string ValueName() => "Garages Unlocked";
-		public override string Target() => $"{Tracker.TotalCount}";
+		public override string Target() => $"{TrackableGarageCount()}";
 
 		private UnlockedGaragesStatTracker Tracker => Main.statTrackerManager.UnlockedGarages;
 
@@ -369,10 +382,15 @@ namespace StatsAndAchievements.Achievements
 
 		private void OnTrackerChanged()
 		{
-			if (!IsUnlocked() && Tracker.CurrentCount >= Tracker.TotalCount)
+			if (!IsUnlocked() && Tracker.CurrentCount >= TrackableGarageCount())
 			{
 				TriggerUnlock();
 			}
+		}
+
+		private int TrackableGarageCount()
+		{
+			return Tracker.CurrentCount + Tracker.GetRemainingGarageNames().Count;
 		}
 	}
 
@@ -407,6 +425,8 @@ namespace StatsAndAchievements.Achievements
 	// TODO: When we are able to detect if passenger jobs is installed alongside this mod, then conditionally include regional/express job
 	public sealed class AllRounderAchievementListener : ProgressAchievementListener
 	{
+		private const int RequiredJobTypeCount = 4;
+
 		public override string Id => "all_rounder";
 		public override string Title => "All-Rounder";
 		public override int SortOrder => 10;
@@ -416,7 +436,7 @@ namespace StatsAndAchievements.Achievements
 
 		public override string Value() => Tracker.Value();
 		public override string ValueName() => "Job Types Completed";
-		public override string Target() => $"{Tracker.TargetCount}";
+		public override string Target() => $"{RequiredJobTypeCount}";
 
 		private CompletedJobTypesStatTracker Tracker => Main.statTrackerManager.CompletedJobTypes;
 
@@ -428,7 +448,7 @@ namespace StatsAndAchievements.Achievements
 
 		private void OnTrackerChanged()
 		{
-			if (!IsUnlocked() && Tracker.CurrentCount >= Tracker.TargetCount)
+			if (!IsUnlocked() && Tracker.CurrentCount >= RequiredJobTypeCount)
 			{
 				TriggerUnlock();
 			}
