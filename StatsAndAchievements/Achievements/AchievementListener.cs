@@ -1,7 +1,7 @@
-using DV.JObjectExtstensions;
 using System;
 using System.Collections.Generic;
 using DV.Logic.Job;
+using StatsAndAchievements.Trackers;
 using UnityEngine;
 using DV.ThingTypes;
 
@@ -21,6 +21,7 @@ namespace StatsAndAchievements.Achievements
 		public abstract string Title { get; }
 		public abstract string Description { get; }
 		public abstract AchievementType Type { get; }
+		public virtual int SortOrder => 0;
 
 		public virtual string GetDisplayTitle() => Title;
 		public virtual string GetDisplayDescription() => Description;
@@ -88,6 +89,12 @@ namespace StatsAndAchievements.Achievements
 			subscribe();
 			unsubscribeActions.Add(unsubscribe);
 		}
+
+		protected void SubscribeToTrackerChanged(StatTracker tracker, Action listener) =>
+			Subscribe(
+				() => tracker.Changed += listener,
+				() => tracker.Changed -= listener
+			);
 
 		protected void SubscribeToSpeedIncreased(Action<float> listener) =>
 			Subscribe(
@@ -160,95 +167,6 @@ namespace StatsAndAchievements.Achievements
 				() => Events.Actions.ItemAcquired += listener,
 				() => Events.Actions.ItemAcquired -= listener
 			);
-	}
-
-	public sealed class SavedBool
-	{
-		private readonly string _key;
-		private readonly bool _defaultValue;
-		private bool _hasLoaded;
-		private bool _value;
-
-		public SavedBool(string key, bool defaultValue = false)
-		{
-			_key = key;
-			_defaultValue = defaultValue;
-		}
-
-		public bool Value
-		{
-			get
-			{
-				EnsureLoaded();
-				return _hasLoaded ? _value : _defaultValue;
-			}
-			set
-			{
-				_value = value;
-				_hasLoaded = true;
-				Main.saaSaveData.SetBool(_key, value);
-			}
-		}
-
-		public void SetTrue()
-		{
-			Value = true;
-		}
-
-		public static implicit operator bool(SavedBool savedBool) => savedBool.Value;
-
-		private void EnsureLoaded()
-		{
-			if (_hasLoaded)
-			{
-				return;
-			}
-
-			_value = Main.saaSaveData.GetBool(_key) ?? _defaultValue;
-			_hasLoaded = true;
-		}
-	}
-
-	public sealed class SavedFloat
-	{
-		private readonly string _key;
-		private readonly float _defaultValue;
-		private bool _hasLoaded;
-		private float _value;
-
-		public SavedFloat(string key, float defaultValue = 0.0f)
-		{
-			_key = key;
-			_defaultValue = defaultValue;
-		}
-
-		public float Value
-		{
-			get
-			{
-				EnsureLoaded();
-				return _hasLoaded ? _value : _defaultValue;
-			}
-			set
-			{
-				_value = value;
-				_hasLoaded = true;
-				Main.saaSaveData.SetFloat(_key, value);
-			}
-		}
-
-		public static implicit operator float(SavedFloat savedFloat) => savedFloat.Value;
-
-		private void EnsureLoaded()
-		{
-			if (_hasLoaded)
-			{
-				return;
-			}
-
-			_value = Main.saaSaveData.GetFloat(_key) ?? _defaultValue;
-			_hasLoaded = true;
-		}
 	}
 
 	public abstract class ProgressAchievementListener : AchievementListener

@@ -1,0 +1,517 @@
+using System.Collections.Generic;
+using System.Linq;
+using DV.Logic.Job;
+using DV.LocoRestoration;
+using DV.ThingTypes;
+using DV.ThingTypes.TransitionHelpers;
+using DV.Utils;
+using UnityEngine;
+
+namespace StatsAndAchievements.Trackers;
+
+public sealed class SpeedStatTracker : StatTracker
+{
+	private readonly SavedFloat _maxSpeed;
+
+	public override string Id => "speed_demon";
+	public override string Title => "Highest Speed";
+	public override int SortOrder => 60;
+
+	public SpeedStatTracker()
+	{
+		_maxSpeed = SavedFloat("max_speed");
+	}
+
+	public override string Value() => $"{(int)_maxSpeed.Value} km/h";
+	public float CurrentSpeed => _maxSpeed.Value;
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToSpeedIncreased(OnSpeedIncreased);
+	}
+
+	private void OnSpeedIncreased(float speed)
+	{
+		if (speed <= _maxSpeed.Value)
+		{
+			return;
+		}
+
+		_maxSpeed.Value = speed;
+		NotifyChanged();
+	}
+}
+
+public sealed class LicenseProgressStatTracker : StatTracker
+{
+	public override string Id => "the_end";
+	public override string Title => "Licenses Acquired";
+	public override int SortOrder => 40;
+
+	public override string Value() => $"{AcquiredLicensesCount()}";
+	public int CurrentCount => AcquiredLicensesCount();
+	public int TotalCount => AllLicensesCount();
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToGeneralLicenseAcquired(_ => NotifyChanged());
+		SubscribeToJobLicenseAcquired(_ => NotifyChanged());
+	}
+
+	private static int AcquiredLicensesCount()
+	{
+		LicenseManager licenseManager = SingletonBehaviour<LicenseManager>.Instance;
+		return licenseManager.GetNumberOfAcquiredGeneralLicenses() + licenseManager.GetNumberOfAcquiredJobLicenses();
+	}
+
+	private static int AllLicensesCount()
+	{
+		return SingletonBehaviour<LicenseManager>.Instance.AllLicensesCount;
+	}
+}
+
+public sealed class SteamEngineRequirementsStatTracker : StatTracker
+{
+	private readonly SavedBool _hasAcquiredSteamLicense;
+	private readonly SavedBool _hasAcquiredShovel;
+	private readonly SavedBool _hasAcquiredLighter;
+	private readonly SavedBool _hasAcquiredOil;
+
+	public override string Id => "steam_engine_requirements";
+	public override string Title => "Steamer Items Collected";
+	public override int SortOrder => 50;
+
+	public SteamEngineRequirementsStatTracker()
+	{
+		_hasAcquiredSteamLicense = SavedBool("has_acquired_steam_license");
+		_hasAcquiredShovel = SavedBool("has_acquired_shovel");
+		_hasAcquiredLighter = SavedBool("has_acquired_lighter");
+		_hasAcquiredOil = SavedBool("has_acquired_oiler");
+	}
+
+	public override string Value() => $"{CurrentCount}";
+	public int CurrentCount => CountTrue(_hasAcquiredSteamLicense, _hasAcquiredShovel, _hasAcquiredLighter, _hasAcquiredOil);
+	public int TargetCount => 4;
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToGeneralLicenseAcquired(OnGeneralLicenseAcquired);
+		SubscribeToItemAcquired(OnItemAcquired);
+	}
+
+	private void OnGeneralLicenseAcquired(GeneralLicenseType_v2 license)
+	{
+		var steamer = GeneralLicenseType.S060 | GeneralLicenseType.SH282;
+		bool isSteamer = (license.v1 & steamer) != 0;
+		if (!isSteamer || _hasAcquiredSteamLicense.Value)
+		{
+			return;
+		}
+
+		_hasAcquiredSteamLicense.SetTrue();
+		NotifyChanged();
+	}
+
+	private void OnItemAcquired(string itemName)
+	{
+		bool changed = false;
+		string normalizedName = itemName.ToLower();
+
+		if (normalizedName.Contains("shovel") && !_hasAcquiredShovel.Value)
+		{
+			_hasAcquiredShovel.SetTrue();
+			changed = true;
+		}
+
+		if (normalizedName.Contains("lighter") && !_hasAcquiredLighter.Value)
+		{
+			_hasAcquiredLighter.SetTrue();
+			changed = true;
+		}
+
+		if (normalizedName.Contains("oiler") && !_hasAcquiredOil.Value)
+		{
+			_hasAcquiredOil.SetTrue();
+			changed = true;
+		}
+
+		if (changed)
+		{
+			NotifyChanged();
+		}
+	}
+
+	private static int CountTrue(params SavedBool[] values)
+	{
+		int count = 0;
+		foreach (SavedBool value in values)
+		{
+			if (value)
+			{
+				count++;
+			}
+		}
+
+		return count;
+	}
+}
+
+public sealed class MoneyEarnedStatTracker : StatTracker
+{
+	private readonly SavedFloat _moneyEarned;
+
+	public override string Id => "scrooge_mc_duck";
+	public override string Title => "Money Earned";
+	public override int SortOrder => 80;
+
+	public MoneyEarnedStatTracker()
+	{
+		_moneyEarned = SavedFloat("money_earned");
+	}
+
+	public override string Value() => $"${(int)_moneyEarned.Value}";
+	public float CurrentValue => _moneyEarned.Value;
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToJobCompletion(OnJobCompletion);
+	}
+
+	private void OnJobCompletion(Job job)
+	{
+		_moneyEarned.Value += job.GetWageForTheJob();
+		NotifyChanged();
+	}
+}
+
+public sealed class VisitedStationsStatTracker : StatTracker
+{
+	private readonly Dictionary<string, StationController> _stations = new();
+	private readonly HashSet<string> _visitedStations = new();
+
+	public override string Id => "visit_all_stations";
+	public override string Title => "Stations Visited";
+	public override int SortOrder => 20;
+
+	public VisitedStationsStatTracker()
+	{
+		foreach (StationController stationController in StationController.allStations.Where(station => station != null).ToList())
+		{
+			string stationName = stationController.stationInfo.YardID.Trim();
+			_stations[stationName] = stationController;
+
+			if (VisitedStation(stationName).Value)
+			{
+				_visitedStations.Add(stationName);
+			}
+		}
+	}
+
+	public override string Value() => $"{CurrentCount}";
+	public int CurrentCount => _stations.Keys.Count(stationName => _visitedStations.Contains(stationName));
+	public int TotalCount => _stations.Count;
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToPlayerPositionChanged(OnPlayerPositionChanged);
+	}
+
+	private void OnPlayerPositionChanged(Vector3 playerPosition)
+	{
+		if (_stations.Count == 0)
+		{
+			return;
+		}
+
+		foreach (KeyValuePair<string, StationController> station in _stations)
+		{
+			float distanceSquared = station.Value.stationRange.PlayerSqrDistanceFromStationOffice;
+			if (!station.Value.stationRange.IsPlayerInRangeForBookletGeneration(distanceSquared) || !_visitedStations.Add(station.Key))
+			{
+				continue;
+			}
+
+			VisitedStation(station.Key).SetTrue();
+			NotifyChanged();
+			break;
+		}
+	}
+
+	public List<string> GetRemainingStationNames()
+	{
+		return _stations.Keys
+			.Where(stationName => !_visitedStations.Contains(stationName))
+			.OrderBy(stationName => stationName)
+			.ToList();
+	}
+
+	private SavedBool VisitedStation(string stationName) => SavedBool($"visited_{stationName}");
+}
+
+public sealed class OperatedVehiclesStatTracker : StatTracker
+{
+	private static readonly Dictionary<TrainCarType, string> TrackableVehicles = new()
+	{
+		{ TrainCarType.LocoShunter, "DE2 Shunter" },
+		{ TrainCarType.LocoSteamHeavy, "282 Steam Locomotive" },
+		{ TrainCarType.LocoS060, "S060 Steam Locomotive" },
+		{ TrainCarType.LocoRailbus, "Railbus" },
+		{ TrainCarType.LocoDM1U, "DM1U" },
+		{ TrainCarType.LocoDiesel, "DE6" },
+		{ TrainCarType.LocoDH4, "DH4" },
+		{ TrainCarType.LocoDM3, "DM3" },
+		{ TrainCarType.LocoMicroshunter, "Microshunter" }
+	};
+
+	private static readonly Dictionary<TrainCarType, GeneralLicenseType?> RequiredLicenses = new()
+	{
+		{ TrainCarType.LocoShunter, GeneralLicenseType.DE2 },
+		{ TrainCarType.LocoSteamHeavy, GeneralLicenseType.SH282 },
+		{ TrainCarType.LocoS060, GeneralLicenseType.S060 },
+		{ TrainCarType.LocoRailbus, null },
+		{ TrainCarType.LocoDM1U, null },
+		{ TrainCarType.LocoDiesel, GeneralLicenseType.DE6 },
+		{ TrainCarType.LocoDH4, GeneralLicenseType.DH4 },
+		{ TrainCarType.LocoDM3, GeneralLicenseType.DM3 },
+		{ TrainCarType.LocoMicroshunter, null }
+	};
+
+	private readonly HashSet<TrainCarType> _operatedVehicles = new();
+
+	public override string Id => "drive_every_vehicle";
+	public override string Title => "Vehicles Operated";
+	public override int SortOrder => 30;
+
+	public OperatedVehiclesStatTracker()
+	{
+		foreach (TrainCarType trainCarType in TrackableVehicles.Keys)
+		{
+			if (OperatedVehicle(trainCarType).Value)
+			{
+				_operatedVehicles.Add(trainCarType);
+			}
+		}
+	}
+
+	public override string Value() => $"{CurrentCount}";
+	public int CurrentCount => TrackableVehicles.Keys.Count(trainCarType => _operatedVehicles.Contains(trainCarType));
+	public int TotalCount => TrackableVehicles.Count;
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToCarChanged(OnCarChanged);
+
+		if (PlayerManager.Car != null)
+		{
+			OnCarChanged(PlayerManager.Car);
+		}
+	}
+
+	private void OnCarChanged(TrainCar trainCar)
+	{
+		TrainCarType trainCarType = trainCar.carType;
+		if (!TrackableVehicles.ContainsKey(trainCarType))
+		{
+			return;
+		}
+
+		if (!HasRequiredLicense(trainCarType))
+		{
+			Main.Debug($"Drive every vehicle: {TrackableVehicles[trainCarType]} did not count because the required license is missing");
+			return;
+		}
+
+		if (!_operatedVehicles.Add(trainCarType))
+		{
+			return;
+		}
+
+		OperatedVehicle(trainCarType).SetTrue();
+		NotifyChanged();
+	}
+
+	public List<string> GetRemainingVehicleNames()
+	{
+		return TrackableVehicles
+			.Where(vehicle => !_operatedVehicles.Contains(vehicle.Key))
+			.Select(vehicle => vehicle.Value)
+			.OrderBy(vehicleName => vehicleName)
+			.ToList();
+	}
+
+	private static bool HasRequiredLicense(TrainCarType trainCarType)
+	{
+		LicenseManager? licenseManager = SingletonBehaviour<LicenseManager>.Instance;
+		if (licenseManager == null)
+		{
+			return false;
+		}
+
+		GeneralLicenseType? requiredLicense = RequiredLicenses[trainCarType];
+		if (!requiredLicense.HasValue)
+		{
+			return true;
+		}
+
+		return licenseManager.IsGeneralLicenseAcquired(requiredLicense.Value.ToV2());
+	}
+
+	private SavedBool OperatedVehicle(TrainCarType trainCarType) => SavedBool($"operated_{trainCarType}");
+}
+
+public sealed class UnlockedGaragesStatTracker : StatTracker
+{
+	private static readonly Dictionary<Garage, string> TrackableGarages = new()
+	{
+		{ Garage.Bob, "BE2 Microshunter" },
+		{ Garage.Caboose, "Caboose" },
+		{ Garage.DM1U, "DM1U" },
+		{ Garage.DE6_Slug, "DE6 Slug" }
+	};
+
+	private readonly HashSet<Garage> _unlockedGarages = new();
+
+	public override string Id => "garage_sale_enthusiast";
+	public override string Title => "Garages Unlocked";
+	public override int SortOrder => 70;
+
+	public override string Value() => $"{_unlockedGarages.Count}";
+	public int CurrentCount => _unlockedGarages.Count;
+	public int TotalCount => TrackableGarages.Count;
+
+	protected override void SubscribeToEvents()
+	{
+		LicenseManager? licenseManager = SingletonBehaviour<LicenseManager>.Instance;
+		if (licenseManager == null)
+		{
+			Main.Warning("Garage Sale Enthusiast: LicenseManager instance was not available.");
+			return;
+		}
+
+		Subscribe(
+			() => licenseManager.GarageUnlocked += OnGarageUnlocked,
+			() => licenseManager.GarageUnlocked -= OnGarageUnlocked
+		);
+
+		RefreshUnlockedGarages(licenseManager);
+	}
+
+	private void OnGarageUnlocked(GarageType_v2 unlockedGarage)
+	{
+		LicenseManager? licenseManager = SingletonBehaviour<LicenseManager>.Instance;
+		if (licenseManager == null || !TrackableGarages.Keys.Any(garage => garage.ToV2() == unlockedGarage))
+		{
+			return;
+		}
+
+		RefreshUnlockedGarages(licenseManager);
+	}
+
+	private void RefreshUnlockedGarages(LicenseManager licenseManager)
+	{
+		int previousCount = _unlockedGarages.Count;
+		_unlockedGarages.Clear();
+
+		foreach (Garage garage in TrackableGarages.Keys)
+		{
+			if (licenseManager.GetUnlockedGarages().Contains(garage.ToV2()))
+			{
+				_unlockedGarages.Add(garage);
+			}
+		}
+
+		if (_unlockedGarages.Count != previousCount)
+		{
+			NotifyChanged();
+		}
+	}
+
+	public List<string> GetRemainingGarageNames()
+	{
+		return TrackableGarages
+			.Where(garage => !_unlockedGarages.Contains(garage.Key))
+			.Select(garage => garage.Value)
+			.OrderBy(garageName => garageName)
+			.ToList();
+	}
+}
+
+public sealed class CompletedJobTypesStatTracker : StatTracker
+{
+	private readonly SavedBool _hasCompletedTransport;
+	private readonly SavedBool _hasCompletedEmptyHaul;
+	private readonly SavedBool _hasCompletedShuntingLoad;
+	private readonly SavedBool _hasCompletedShuntingUnload;
+
+	public override string Id => "all_rounder";
+	public override string Title => "Job Types Completed";
+	public override int SortOrder => 10;
+
+	public CompletedJobTypesStatTracker()
+	{
+		_hasCompletedTransport = SavedBool("completed_transport");
+		_hasCompletedEmptyHaul = SavedBool("completed_empty_haul");
+		_hasCompletedShuntingLoad = SavedBool("completed_shunting_load");
+		_hasCompletedShuntingUnload = SavedBool("completed_shunting_unload");
+	}
+
+	public override string Value() => $"{CurrentCount}";
+	public int CurrentCount => CountTrue(_hasCompletedTransport, _hasCompletedEmptyHaul, _hasCompletedShuntingLoad, _hasCompletedShuntingUnload);
+	public int TargetCount => 4;
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToJobCompletion(OnJobCompletion);
+	}
+
+	private void OnJobCompletion(Job job)
+	{
+		bool changed = false;
+
+		switch (job.jobType)
+		{
+			case JobType.Transport:
+				changed = SetIfNeeded(_hasCompletedTransport);
+				break;
+			case JobType.EmptyHaul:
+				changed = SetIfNeeded(_hasCompletedEmptyHaul);
+				break;
+			case JobType.ShuntingLoad:
+				changed = SetIfNeeded(_hasCompletedShuntingLoad);
+				break;
+			case JobType.ShuntingUnload:
+				changed = SetIfNeeded(_hasCompletedShuntingUnload);
+				break;
+		}
+
+		if (changed)
+		{
+			NotifyChanged();
+		}
+	}
+
+	private static int CountTrue(params SavedBool[] values)
+	{
+		int count = 0;
+		foreach (SavedBool value in values)
+		{
+			if (value)
+			{
+				count++;
+			}
+		}
+
+		return count;
+	}
+
+	private static bool SetIfNeeded(SavedBool value)
+	{
+		if (value.Value)
+		{
+			return false;
+		}
+
+		value.SetTrue();
+		return true;
+	}
+}

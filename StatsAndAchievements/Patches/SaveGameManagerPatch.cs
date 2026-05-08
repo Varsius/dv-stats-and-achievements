@@ -21,6 +21,7 @@ internal class SaveGameManagerPatch
 	[HarmonyPostfix]
 	public static void FindStartGameDataPatch(SaveGameManager __instance)
 	{
+		Main.ResetStatTrackerManager();
 		Main.ResetAchievementManager();
 		Main.Log("Attempting load from save");
 		JObject saveData = __instance.data.GetJObject(SAA_SAVE_DATA_KEY);

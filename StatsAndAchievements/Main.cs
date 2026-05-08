@@ -9,6 +9,7 @@ using static UnityModManagerNet.UnityModManager;
 using StatsAndAchievements.Achievements;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using StatsAndAchievements.Trackers;
 
 namespace StatsAndAchievements;
 
@@ -28,6 +29,7 @@ public class Main
 	private static Harmony? _harmony;
 	private static GameObject? watchGO;
 	public static AchievementManager achievementManager = null!;
+	public static StatTrackerManager statTrackerManager = null!;
 	public static Settings settings = null!;
 	public static JObject saaSaveData = new JObject();
 	private static bool Load(UnityModManager.ModEntry modEntry)
@@ -58,8 +60,6 @@ public class Main
 			modEntry.OnSaveGUI = SaveGUI;
 			modEntry.OnUnload = Unload;
 
-			Main.RebuildAchievementManager();
-
 			return true;
 		}
 		catch (Exception ex)
@@ -74,6 +74,8 @@ public class Main
 	{
 		if (achievementManager != null)
 			achievementManager.Detach();
+		if (statTrackerManager != null)
+			statTrackerManager.Detach();
 
 		_harmony?.UnpatchAll(modEntry.Info.Id);
 		if (watchGO != null)
@@ -91,6 +93,11 @@ public class Main
 	private static void SaveGUI(UnityModManager.ModEntry modEntry)
 	{
 		settings.Save(modEntry);
+
+		if (statTrackerManager != null)
+		{
+			RebuildAchievementManager();
+		}
 	}
 
 	public static void RebuildAchievementManager()
@@ -103,6 +110,16 @@ public class Main
 		achievementManager = new AchievementManager(BuildAchievementCategories());
 	}
 
+	public static void RebuildStatTrackerManager()
+	{
+		if (statTrackerManager != null)
+		{
+			statTrackerManager.Detach();
+		}
+
+		statTrackerManager = new StatTrackerManager();
+	}
+
 	public static void ResetAchievementManager()
 	{
 		if (achievementManager != null)
@@ -112,13 +129,22 @@ public class Main
 		}
 	}
 
+	public static void ResetStatTrackerManager()
+	{
+		if (statTrackerManager != null)
+		{
+			statTrackerManager.Detach();
+			statTrackerManager = null!;
+		}
+	}
+
 	public static IReadOnlyList<AchievementCategory> BuildAchievementCategories()
 	{
 		List<AchievementCategory> categories = new List<AchievementCategory>();
 
 		if (settings.EnableCareerAchievements)
 		{
-			categories.Add(CreateCategory("career", "Career", [
+			categories.Add(CreateCategory("career", "Career", 10, [
 				typeof(AllRounderAchievementListener),
 				typeof(VisitAllStationsAchievementListener),
 				typeof(CompleteTheMuseumAchievementListener),
@@ -136,7 +162,7 @@ public class Main
 
 		if (settings.EnableAdvancedAchievements)
 		{
-			categories.Add(CreateCategory("advanced", "Advanced", [
+			categories.Add(CreateCategory("advanced", "Advanced", 20, [
 				typeof(SpeedDemonAchievementListener),
 				typeof(MaximumHonkAchievementListener)
 			]));
@@ -144,14 +170,14 @@ public class Main
 
 		if (settings.EnableMilestoneAchievements)
 		{
-			categories.Add(CreateCategory("milestones", "Milestones", [
+			categories.Add(CreateCategory("milestones", "Milestones", 30, [
 				typeof(ScroogeMcDuckAchievementListener)
 			]));
 		}
 
 		if (settings.EnableSecretAchievements)
 		{
-			categories.Add(CreateCategory("secret", "Secret", [
+			categories.Add(CreateCategory("secret", "Secret", 40, [
 				typeof(HomeSweetHomeAchievementListener)
 			]));
 		}
@@ -160,7 +186,7 @@ public class Main
 		return categories;
 	}
 
-	private static AchievementCategory CreateCategory(string id, string title, IEnumerable<Type> achievementTypes)
+	private static AchievementCategory CreateCategory(string id, string title, int sortOrder, IEnumerable<Type> achievementTypes)
 	{
 		List<AchievementListener> achievements = new List<AchievementListener>();
 
@@ -182,6 +208,6 @@ public class Main
 			}
 		}
 
-		return new AchievementCategory(id, title, achievements);
+		return new AchievementCategory(id, title, sortOrder, achievements);
 	}
 }

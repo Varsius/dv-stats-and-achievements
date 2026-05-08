@@ -18,7 +18,9 @@ namespace StatsAndAchievements.Achievements
 
 		public AchievementManager(IEnumerable<AchievementCategory> categories)
 		{
-			Categories = categories.ToList();
+			Categories = categories
+				.OrderBy(category => category.SortOrder)
+				.ToList();
 
 			foreach (var category in Categories)
 			{
