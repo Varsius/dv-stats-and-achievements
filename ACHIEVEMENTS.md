@@ -4,6 +4,7 @@
 3. [Milestones](#milestones)
 4. [Secret](#secret)
 5. [Steam Engine Connoisseur](#steam-engine-connoisseur)
+6. [Stats Without Achievement](#stats-without-achievement)
 
 # Career
 
@@ -98,3 +99,20 @@ Breaks overheated
 # Steam Engine Connoisseur
 
 TODO: include Roberts achievements here
+
+# Stats Without Achievement
+
+- Number of teleports
+- Number of fast travels (with/out loco)
+- Distance driven using each loco (forwards/backwards)
+- Distance walked
+- Distance teleported
+- Money spent (on licenses, in the shop)
+- Total Cargo Damage
+- Amount of service resources (fuel, sand, oil, ...)
+- Number of derailments / rerails
+- Number of spawns / removals with radio
+- Total time honked / bell ringed
+- Number of motors started
+- Number of switches changed
+- Number of jobs cancelled
