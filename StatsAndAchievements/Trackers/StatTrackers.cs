@@ -217,6 +217,51 @@ public sealed class TeleportsStatTracker : StatTracker
 	}
 }
 
+public sealed class FastTravelsStatTracker : StatTracker
+{
+	private readonly SavedInt _fastTravelsWithoutLoco;
+	private readonly SavedInt _fastTravelsWithLoco;
+
+	public override string Id => "fast_travels";
+	public override string Title => "Fast Travels";
+
+	public FastTravelsStatTracker()
+	{
+		_fastTravelsWithoutLoco = SavedInt("fast_travels_without_loco");
+		_fastTravelsWithLoco = SavedInt("fast_travels_with_loco");
+	}
+
+	public override string Value() => $"{CurrentCount}";
+	public int CurrentCount => WithoutLocoCount + WithLocoCount;
+	public int WithoutLocoCount => _fastTravelsWithoutLoco.Value;
+	public int WithLocoCount => _fastTravelsWithLoco.Value;
+	public override IReadOnlyList<DetailEntry> Details() =>
+	[
+		new DetailEntry("Total", $"{CurrentCount}"),
+		new DetailEntry("Without Loco", $"{WithoutLocoCount}"),
+		new DetailEntry("With Loco", $"{WithLocoCount}")
+	];
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToFastTravelCompleted(OnFastTravelCompleted);
+	}
+
+	private void OnFastTravelCompleted(bool withLoco)
+	{
+		if (withLoco)
+		{
+			_fastTravelsWithLoco.Value++;
+		}
+		else
+		{
+			_fastTravelsWithoutLoco.Value++;
+		}
+
+		NotifyChanged();
+	}
+}
+
 public sealed class DistanceTravelledStatTracker : StatTracker
 {
 	private const float MaxWalkingDistancePerSample = 20f;

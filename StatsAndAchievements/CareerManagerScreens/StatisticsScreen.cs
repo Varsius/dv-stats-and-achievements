@@ -78,6 +78,7 @@ public class StatisticsScreen : ModularScreenHost
 				StatTracker tracker = _trackers[Scroller.SelectedIndex];
 				if (tracker.Details().Count > 0)
 				{
+					// TODO: add some kind of indicator, such that the users knows there is a submenu
 					SwitchToScreen(new TrackerDetailsScreen(this, this, tracker));
 				}
 				break;

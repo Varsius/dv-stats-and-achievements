@@ -157,4 +157,10 @@ public abstract class StatTracker
 			() => PlayerManager.PlayerTeleportFinished += listener,
 			() => PlayerManager.PlayerTeleportFinished -= listener
 		);
+
+	protected void SubscribeToFastTravelCompleted(Action<bool> listener) =>
+		Subscribe(
+			() => Events.Actions.FastTravelCompleted += listener,
+			() => Events.Actions.FastTravelCompleted -= listener
+		);
 }

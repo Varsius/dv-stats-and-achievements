@@ -7,6 +7,7 @@ public sealed class StatTrackerManager
 	public LicenseProgressStatTracker Licenses { get; }
 	public SteamEngineRequirementsStatTracker SteamEngineRequirements { get; }
 	public TeleportsStatTracker Teleports { get; }
+	public FastTravelsStatTracker FastTravels { get; }
 	public DistanceTravelledStatTracker DistanceTravelled { get; }
 	public MoneyEarnedStatTracker MoneyEarned { get; }
 	public MoneySpentStatTracker MoneySpent { get; }
@@ -24,6 +25,7 @@ public sealed class StatTrackerManager
 		Licenses = new LicenseProgressStatTracker();
 		SteamEngineRequirements = new SteamEngineRequirementsStatTracker();
 		Teleports = new TeleportsStatTracker();
+		FastTravels = new FastTravelsStatTracker();
 		DistanceTravelled = new DistanceTravelledStatTracker();
 		MoneyEarned = new MoneyEarnedStatTracker();
 		MoneySpent = new MoneySpentStatTracker();
@@ -42,6 +44,7 @@ public sealed class StatTrackerManager
 			Licenses,
 			SteamEngineRequirements,
 			Teleports,
+			FastTravels,
 			DistanceTravelled,
 			Speed,
 			UnlockedGarages,
