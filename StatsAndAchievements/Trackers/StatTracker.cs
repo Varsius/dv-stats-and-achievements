@@ -43,12 +43,12 @@ public abstract class StatTracker
 
 	protected SavedBool SavedBool(string name, bool defaultValue = false)
 	{
-		return new SavedBool($"SAA_{name}", defaultValue);
+		return new SavedBool(name, defaultValue);
 	}
 
 	protected SavedFloat SavedFloat(string name, float defaultValue = 0.0f)
 	{
-		return new SavedFloat($"SAA_{name}", defaultValue);
+		return new SavedFloat(name, defaultValue);
 	}
 
 	protected void Subscribe(Action subscribe, Action unsubscribe)
