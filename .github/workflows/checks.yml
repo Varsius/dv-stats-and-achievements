@@ -8,14 +8,26 @@ on:
 
 jobs:
   check-crlf:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Set HOME for Git 
-        run: echo "HOME=$PWD" >> $GITHUB_ENV
-      - name: Check CRLF
-        uses: DecimalTurn/Enforce-CRLF@v1.2.1
+      - uses: actions/checkout@v4
         with:
-          extensions: .cs
-          do-checkout: true
-          fail-on-lf: true
+          # Important: do not let Git normalize line endings silently
+          fetch-depth: 0
+
+      - name: Install unix2dos
+        run: sudo apt-get update && sudo apt-get install -y dos2unix
+
+      - name: Convert .cs files to CRLF
+        run: |
+          find . -type f -name "*.cs" -not -path "./.git/*" -exec unix2dos {} +
+
+      - name: Fail if files changed
+        run: |
+          if ! git diff --exit-code; then
+            echo "Some .cs files are not using CRLF line endings."
+            echo "Run this locally:"
+            echo 'find . -type f -name "*.cs" -exec unix2dos {} +'
+            exit 1
+          fi
