@@ -16,6 +16,7 @@ namespace StatsAndAchievements;
 [EnableReloading]
 public class Main
 {
+	public const int CurrentSaveVersion = 1;
 	public static UnityModManager.ModEntry ModEntry { get; private set; } = null!;
 
 
@@ -32,6 +33,7 @@ public class Main
 	public static StatTrackerManager statTrackerManager = null!;
 	public static Settings settings = null!;
 	public static JObject saaSaveData = new JObject();
+
 	private static bool Load(UnityModManager.ModEntry modEntry)
 	{
 		ModEntry = modEntry;
