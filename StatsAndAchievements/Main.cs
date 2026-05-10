@@ -49,6 +49,7 @@ public class Main
 
 			CareerManagerAPI.CareerManagerAPI.CareerManagerAwake += (tracker, locationName, station, trainCar) =>
 			{
+				// TODO: If all achievement categories are disabled, then skip this screen
 				tracker.TryAddToMainScreen<CareerManagerScreens.AchievementCategoryScreen>("Achievements", null,
 					after: CareerManagerLocalization.STATS);
 				// TODO: ideally this should extend/replace the original "Stats" screen
