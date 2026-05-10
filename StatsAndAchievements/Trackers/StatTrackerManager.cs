@@ -10,7 +10,7 @@ public sealed class StatTrackerManager
 	public VisitedStationsStatTracker VisitedStations { get; }
 	public OperatedVehiclesStatTracker OperatedVehicles { get; }
 	public UnlockedGaragesStatTracker UnlockedGarages { get; }
-	public CompletedJobTypesStatTracker CompletedJobTypes { get; }
+	public CompletedJobsStatTracker CompletedJobs { get; }
 
 	public IReadOnlyList<StatTracker> Trackers { get; }
 
@@ -23,11 +23,11 @@ public sealed class StatTrackerManager
 		VisitedStations = new VisitedStationsStatTracker();
 		OperatedVehicles = new OperatedVehiclesStatTracker();
 		UnlockedGarages = new UnlockedGaragesStatTracker();
-		CompletedJobTypes = new CompletedJobTypesStatTracker();
+		CompletedJobs = new CompletedJobsStatTracker();
 
 		Trackers = new StatTracker[]
 		{
-			CompletedJobTypes,
+			CompletedJobs,
 			VisitedStations,
 			OperatedVehicles,
 			Licenses,

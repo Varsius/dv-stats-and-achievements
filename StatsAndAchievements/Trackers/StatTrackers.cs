@@ -423,26 +423,30 @@ public sealed class UnlockedGaragesStatTracker : StatTracker
 	}
 }
 
-public sealed class CompletedJobTypesStatTracker : StatTracker
+public sealed class CompletedJobsStatTracker : StatTracker
 {
-	private readonly SavedBool _hasCompletedTransport;
-	private readonly SavedBool _hasCompletedEmptyHaul;
-	private readonly SavedBool _hasCompletedShuntingLoad;
-	private readonly SavedBool _hasCompletedShuntingUnload;
+	private readonly SavedInt _transportCount;
+	private readonly SavedInt _emptyHaulCount;
+	private readonly SavedInt _shuntingLoadCount;
+	private readonly SavedInt _shuntingUnloadCount;
 
 	public override string Id => "completed_job_types";
 	public override string Title => "Job Types Completed";
 
-	public CompletedJobTypesStatTracker()
+	public CompletedJobsStatTracker()
 	{
-		_hasCompletedTransport = SavedBool("job_type_transport_completed");
-		_hasCompletedEmptyHaul = SavedBool("job_type_empty_haul_completed");
-		_hasCompletedShuntingLoad = SavedBool("job_type_shunting_load_completed");
-		_hasCompletedShuntingUnload = SavedBool("job_type_shunting_unload_completed");
+		_transportCount = SavedInt("job_type_transport_completed_count");
+		_emptyHaulCount = SavedInt("job_type_empty_haul_completed_count");
+		_shuntingLoadCount = SavedInt("job_type_shunting_load_completed_count");
+		_shuntingUnloadCount = SavedInt("job_type_shunting_unload_completed_count");
 	}
 
-	public override string Value() => $"{CurrentCount}";
-	public int CurrentCount => CountTrue(_hasCompletedTransport, _hasCompletedEmptyHaul, _hasCompletedShuntingLoad, _hasCompletedShuntingUnload);
+	public override string Value() => $"{TotalCompletedJobs}";
+	public int TotalCompletedJobs => TransportCount + EmptyHaulCount + ShuntingLoadCount + ShuntingUnloadCount;
+	public int TransportCount => _transportCount.Value;
+	public int EmptyHaulCount => _emptyHaulCount.Value;
+	public int ShuntingLoadCount => _shuntingLoadCount.Value;
+	public int ShuntingUnloadCount => _shuntingUnloadCount.Value;
 
 	protected override void SubscribeToEvents()
 	{
@@ -451,52 +455,24 @@ public sealed class CompletedJobTypesStatTracker : StatTracker
 
 	private void OnJobCompletion(Job job)
 	{
-		bool changed = false;
-
 		switch (job.jobType)
 		{
 			case JobType.Transport:
-				changed = SetIfNeeded(_hasCompletedTransport);
+				_transportCount.Value++;
 				break;
 			case JobType.EmptyHaul:
-				changed = SetIfNeeded(_hasCompletedEmptyHaul);
+				_emptyHaulCount.Value++;
 				break;
 			case JobType.ShuntingLoad:
-				changed = SetIfNeeded(_hasCompletedShuntingLoad);
+				_shuntingLoadCount.Value++;
 				break;
 			case JobType.ShuntingUnload:
-				changed = SetIfNeeded(_hasCompletedShuntingUnload);
+				_shuntingUnloadCount.Value++;
 				break;
+			default:
+				return;
 		}
 
-		if (changed)
-		{
-			NotifyChanged();
-		}
-	}
-
-	private static int CountTrue(params SavedBool[] values)
-	{
-		int count = 0;
-		foreach (SavedBool value in values)
-		{
-			if (value)
-			{
-				count++;
-			}
-		}
-
-		return count;
-	}
-
-	private static bool SetIfNeeded(SavedBool value)
-	{
-		if (value.Value)
-		{
-			return false;
-		}
-
-		value.SetTrue();
-		return true;
+		NotifyChanged();
 	}
 }

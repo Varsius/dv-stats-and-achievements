@@ -90,3 +90,45 @@ public sealed class SavedFloat
 		_hasLoaded = true;
 	}
 }
+
+public sealed class SavedInt
+{
+	private readonly string _key;
+	private readonly int _defaultValue;
+	private bool _hasLoaded;
+	private int _value;
+
+	public SavedInt(string key, int defaultValue = 0)
+	{
+		_key = key;
+		_defaultValue = defaultValue;
+	}
+
+	public int Value
+	{
+		get
+		{
+			EnsureLoaded();
+			return _hasLoaded ? _value : _defaultValue;
+		}
+		set
+		{
+			_value = value;
+			_hasLoaded = true;
+			Main.saaSaveData[_key] = value;
+		}
+	}
+
+	public static implicit operator int(SavedInt savedInt) => savedInt.Value;
+
+	private void EnsureLoaded()
+	{
+		if (_hasLoaded)
+		{
+			return;
+		}
+
+		_value = Main.saaSaveData.Value<int?>(_key) ?? _defaultValue;
+		_hasLoaded = true;
+	}
+}

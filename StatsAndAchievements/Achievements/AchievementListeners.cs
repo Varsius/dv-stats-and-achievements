@@ -422,15 +422,15 @@ namespace StatsAndAchievements.Achievements
 
 			public override string Id => "all_rounder";
 			public override string Title => "All-Rounder";
-			public override string Description => @"
+		public override string Description => @"
 				Complete a job of each type
 				";
 
-		public override string Value() => Tracker.Value();
+		public override string Value() => $"{CountCompletedTypes()}";
 		public override string ValueName() => "Job Types Completed";
 		public override string Target() => $"{RequiredJobTypeCount}";
 
-		private CompletedJobTypesStatTracker Tracker => Main.statTrackerManager.CompletedJobTypes;
+		private CompletedJobsStatTracker Tracker => Main.statTrackerManager.CompletedJobs;
 
 		protected override void SubscribeToEvents()
 		{
@@ -440,10 +440,20 @@ namespace StatsAndAchievements.Achievements
 
 		private void OnTrackerChanged()
 		{
-			if (!IsUnlocked() && Tracker.CurrentCount >= RequiredJobTypeCount)
+			if (!IsUnlocked() && CountCompletedTypes() >= RequiredJobTypeCount)
 			{
 				TriggerUnlock();
 			}
+		}
+
+		private int CountCompletedTypes()
+		{
+			int count = 0;
+			if (Tracker.TransportCount > 0) count++;
+			if (Tracker.EmptyHaulCount > 0) count++;
+			if (Tracker.ShuntingLoadCount > 0) count++;
+			if (Tracker.ShuntingUnloadCount > 0) count++;
+			return count;
 		}
 	}
 

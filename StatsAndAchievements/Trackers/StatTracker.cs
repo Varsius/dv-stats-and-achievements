@@ -50,6 +50,11 @@ public abstract class StatTracker
 		return new SavedFloat(name, defaultValue);
 	}
 
+	protected SavedInt SavedInt(string name, int defaultValue = 0)
+	{
+		return new SavedInt(name, defaultValue);
+	}
+
 	protected void Subscribe(Action subscribe, Action unsubscribe)
 	{
 		subscribe();
