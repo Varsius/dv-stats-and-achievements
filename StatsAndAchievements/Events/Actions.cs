@@ -10,7 +10,8 @@ namespace StatsAndAchievements.Events
 		ItemShop,
 		ManualService,
 		CareerManagerFees,
-		CareerManagerLicense
+		CareerManagerLicense,
+		FastTravel
 	}
 
 	public static class Actions

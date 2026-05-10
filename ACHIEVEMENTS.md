@@ -105,9 +105,8 @@ TODO: include Roberts achievements here
 
 # Stats Without Achievement
 
-- Number of fast travels (with/out loco)
 - Distance driven using each loco (forwards/backwards)
-- Money spent on fast travel and comms radio
+- Money spent on comms radio
 - Total Cargo Damage
 - Amount of service resources (fuel, sand, oil, ...)
 - Number of derailments / rerails

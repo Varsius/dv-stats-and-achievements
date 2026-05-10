@@ -417,6 +417,7 @@ public sealed class MoneySpentStatTracker : StatTracker
 	private readonly SavedFloat _manualServiceMoneySpent;
 	private readonly SavedFloat _careerManagerFeesMoneySpent;
 	private readonly SavedFloat _careerManagerLicensesMoneySpent;
+	private readonly SavedFloat _fastTravelMoneySpent;
 
 	public override string Id => "money_spent";
 	public override string Title => "Money Spent";
@@ -427,16 +428,17 @@ public sealed class MoneySpentStatTracker : StatTracker
 		_manualServiceMoneySpent = SavedFloat("money_spent_manual_service");
 		_careerManagerFeesMoneySpent = SavedFloat("money_spent_career_manager_fees");
 		_careerManagerLicensesMoneySpent = SavedFloat("money_spent_career_manager_licenses");
+		_fastTravelMoneySpent = SavedFloat("money_spent_fast_travel");
 	}
 
 	public override string Value() => $"${(int)TotalValue}";
-	public float TotalValue => ItemShopValue + ManualServiceValue + CareerManagerFeesValue + CareerManagerLicensesValue;
+	public float TotalValue => ItemShopValue + ManualServiceValue + CareerManagerFeesValue + CareerManagerLicensesValue + FastTravelValue;
 	public float ItemShopValue => _itemShopMoneySpent.Value;
 	public float ManualServiceValue => _manualServiceMoneySpent.Value;
 	public float CareerManagerFeesValue => _careerManagerFeesMoneySpent.Value;
 	public float CareerManagerLicensesValue => _careerManagerLicensesMoneySpent.Value;
+	public float FastTravelValue => _fastTravelMoneySpent.Value;
 	// TODO: Track comms radio payments.
-	// TODO: Track fast travel payments.
 
 	public override IReadOnlyList<DetailEntry> Details() =>
 	[
@@ -444,7 +446,8 @@ public sealed class MoneySpentStatTracker : StatTracker
 		new DetailEntry("Item Shop", FormatMoney(ItemShopValue)),
 		new DetailEntry("Manual Service", FormatMoney(ManualServiceValue)),
 		new DetailEntry("Career Manager Fees", FormatMoney(CareerManagerFeesValue)),
-		new DetailEntry("Career Manager Licenses", FormatMoney(CareerManagerLicensesValue))
+		new DetailEntry("Career Manager Licenses", FormatMoney(CareerManagerLicensesValue)),
+		new DetailEntry("Fast Travel", FormatMoney(FastTravelValue))
 	];
 
 	protected override void SubscribeToEvents()
@@ -470,6 +473,9 @@ public sealed class MoneySpentStatTracker : StatTracker
 				break;
 			case Events.MoneySpentSource.CareerManagerLicense:
 				_careerManagerLicensesMoneySpent.Value += amount;
+				break;
+			case Events.MoneySpentSource.FastTravel:
+				_fastTravelMoneySpent.Value += amount;
 				break;
 			default:
 				return;
@@ -749,6 +755,7 @@ public sealed class UnlockedGaragesStatTracker : StatTracker
 {
 	private static readonly Dictionary<Garage, string> TrackableGarages = new()
 	{
+		// TODO: rethink the display names, maybe use Bob, Dave, etc.
 		{ Garage.Bob, "BE2 Microshunter" },
 		{ Garage.Caboose, "Caboose" },
 		{ Garage.DM1U, "DM1U" },
