@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DV.Logic.Job;
@@ -346,6 +347,67 @@ public sealed class OperatedVehiclesStatTracker : StatTracker
 	}
 
 	private SavedBool OperatedVehicle(TrainCarType trainCarType) => SavedBool($"vehicle_operated_{trainCarType}");
+}
+
+public sealed class JunctionsSwitchedStatTracker : StatTracker
+{
+	private readonly SavedInt _junctionsSwitched;
+	private Junction[] _junctions = Array.Empty<Junction>();
+
+	public override string Id => "junctions_switched";
+	public override string Title => "Junctions Switched";
+
+	public JunctionsSwitchedStatTracker()
+	{
+		_junctionsSwitched = SavedInt("junctions_switched");
+	}
+
+	public override string Value() => $"{CurrentCount}";
+	public int CurrentCount => _junctionsSwitched.Value;
+
+	protected override void SubscribeToEvents()
+	{
+		RailTrackRegistryBase? registry = SingletonBehaviour<RailTrackRegistryBase>.Instance;
+		if (registry == null)
+		{
+			Main.Warning("Junctions Switched: RailTrackRegistryBase instance was not available.");
+			return;
+		}
+
+		_junctions = registry.OrderedJunctions ?? Array.Empty<Junction>();
+		Subscribe(
+			SubscribeToJunctions,
+			UnsubscribeFromJunctions
+		);
+	}
+
+	private void SubscribeToJunctions()
+	{
+		foreach (Junction junction in _junctions)
+		{
+			if (junction != null)
+			{
+				junction.Switched += OnJunctionSwitched;
+			}
+		}
+	}
+
+	private void UnsubscribeFromJunctions()
+	{
+		foreach (Junction junction in _junctions)
+		{
+			if (junction != null)
+			{
+				junction.Switched -= OnJunctionSwitched;
+			}
+		}
+	}
+
+	private void OnJunctionSwitched(Junction.SwitchMode mode, int selectedBranch)
+	{
+		_junctionsSwitched.Value++;
+		NotifyChanged();
+	}
 }
 
 public sealed class UnlockedGaragesStatTracker : StatTracker

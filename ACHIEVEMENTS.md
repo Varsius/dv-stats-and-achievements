@@ -114,5 +114,4 @@ TODO: include Roberts achievements here
 - Number of spawns / removals with radio
 - Total time honked / bell ringed
 - Number of motors started
-- Number of switches changed
 - Number of jobs cancelled
