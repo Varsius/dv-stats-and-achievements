@@ -171,7 +171,6 @@ namespace StatsAndAchievements.Achievements
 	public abstract class ProgressAchievementListener : AchievementListener
 	{
 		public abstract string Value();
-		public abstract string ValueName();
 		public abstract string Target();
 		public virtual string Progress()
 		{

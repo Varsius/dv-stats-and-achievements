@@ -6,6 +6,8 @@ namespace StatsAndAchievements.CareerManagerScreens;
 
 public class StatisticsScreen : ModularScreenHost
 {
+	private IReadOnlyList<StatTracker> _trackers = [];
+
 	public StatisticsScreen()
 	{
 		Show = OnShow;
@@ -33,11 +35,14 @@ public class StatisticsScreen : ModularScreenHost
 
 		if (Main.statTrackerManager == null)
 		{
+			_trackers = [];
 			Scroller?.SetOptions(options);
 			return;
 		}
 
-		foreach (StatTracker tracker in Main.statTrackerManager.Trackers)
+		_trackers = Main.statTrackerManager.Trackers;
+
+		foreach (StatTracker tracker in _trackers)
 		{
 			options.Add((
 				tmPro =>
@@ -63,6 +68,18 @@ public class StatisticsScreen : ModularScreenHost
 				break;
 			case InputAction.Down:
 				Scroller?.Down();
+				break;
+			case InputAction.Confirm:
+				if (Scroller == null || Scroller.SelectedIndex < 0 || Scroller.SelectedIndex >= _trackers.Count)
+				{
+					return;
+				}
+
+				StatTracker tracker = _trackers[Scroller.SelectedIndex];
+				if (tracker.Details().Count > 0)
+				{
+					SwitchToScreen(new TrackerDetailsScreen(this, this, tracker));
+				}
 				break;
 			case InputAction.PrintInfo:
 				break;
