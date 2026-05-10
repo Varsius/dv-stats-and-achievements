@@ -39,6 +39,45 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
+	public sealed class MarathonAchievementListener : ProgressAchievementListener
+	{
+		private const float MarathonDistanceMeters = 42195f;
+
+		public override string Id => "marathon";
+		public override string Title => "Marathon";
+		public override string Description => @"
+			Walk a marathon distance
+			";
+
+		public override string Value() => FormatDistance(Tracker.WalkingDistanceTravelled);
+		public override string Target() => "42.2 km";
+		public override string Progress() => $"{FormatDistance(Tracker.WalkingDistanceTravelled)}/42.2 km";
+
+		private DistanceTravelledStatTracker Tracker => Main.statTrackerManager.DistanceTravelled;
+
+		protected override void SubscribeToEvents()
+		{
+			SubscribeToTrackerChanged(Tracker, OnTrackerChanged);
+			OnTrackerChanged();
+		}
+
+		private void OnTrackerChanged()
+		{
+			if (!IsUnlocked() && Tracker.WalkingDistanceTravelled >= MarathonDistanceMeters)
+			{
+				TriggerUnlock();
+			}
+		}
+
+		// TODO: distance formatting is implement in several places.
+		// This should also include meters and abstractions for very large numbers
+		// The same is true for money values
+		private static string FormatDistance(float distanceInMeters)
+		{
+			return $"{distanceInMeters / 1000f:0.0} km";
+		}
+	}
+
 	// TODO: trigger while honking and not only when the honking ends
 	public sealed class MaximumHonkAchievementListener : ConditionAchievementListener
 	{

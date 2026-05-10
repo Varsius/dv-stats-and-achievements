@@ -52,6 +52,9 @@ Cause environmental damage of at leat $XXX
 ### Speed Demon ✅
 Reach a speed of XXX
 
+### Marathon ✅ (untested)
+Walk 42.2 km
+
 ### Delivery Chain
 Complete the consecutive shunting load, transport and shunting unload job of
 the same cargo

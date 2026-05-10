@@ -167,6 +167,7 @@ public class Main
 		{
 			categories.Add(CreateCategory("advanced", "Advanced", [
 				typeof(SpeedDemonAchievementListener),
+				typeof(MarathonAchievementListener),
 				typeof(MaximumHonkAchievementListener)
 			]));
 		}
