@@ -1,0 +1,19 @@
+name: Checks
+
+on:
+  pull_request:
+    branches:
+      - '*'
+  workflow_dispatch: {}
+
+jobs:
+  check-crlf:
+    runs-on: self-hosted
+
+    steps:
+      - name: Check CRLF
+        uses: DecimalTurn/Enforce-CRLF@v1.2.1
+        with:
+          extensions: .cs
+          do-checkout: true
+          fail-on-lf: true
