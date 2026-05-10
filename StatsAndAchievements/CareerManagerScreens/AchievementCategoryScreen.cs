@@ -26,7 +26,7 @@ public class AchievementCategoryScreen : ModularScreenHost
 		}
 
 		Title.text = "Achievements"; // TODO: include overall percentage of unlocked achievements in all categories
-		_categories = Main.achievementManager.Categories;
+		_categories = Main.achievementManager?.Categories ?? [];
 
 		var options = new List<(
 			LinesScrollerScreen.OptionParser?,

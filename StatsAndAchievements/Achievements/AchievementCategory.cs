@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
-
 namespace StatsAndAchievements.Achievements
 {
 	public sealed class AchievementCategory
@@ -13,7 +11,7 @@ namespace StatsAndAchievements.Achievements
 		{
 			Id = id;
 			Title = title;
-			Achievements = achievements.ToList();
+			Achievements = new List<AchievementListener>(achievements);
 		}
 	}
 }

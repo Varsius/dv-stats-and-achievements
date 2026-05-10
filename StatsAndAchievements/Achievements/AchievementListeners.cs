@@ -1,9 +1,9 @@
-using DV.JObjectExtstensions;
 using DV.Logic.Job;
 using DV.LocoRestoration;
 using DV.ThingTypes;
 using DV.ThingTypes.TransitionHelpers;
 using DV.Utils;
+using StatsAndAchievements.Trackers;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -18,33 +18,22 @@ namespace StatsAndAchievements.Achievements
 			Reach a speed of 100km/h with any locomotive
 			";
 
-		public override string Value() => $"{(int)_maxSpeed.Value} km/h";
+		public override string Value() => Tracker.Value();
 		public override string ValueName() => "Highest Speed";
 		public override string Target() => "100 km/h";
-		public override string Progress() => $"{(int)_maxSpeed.Value}/100 kmh";
+		public override string Progress() => $"{(int)Tracker.CurrentSpeed}/100 km/h";
 
-		private readonly SavedFloat _maxSpeed;
-
-		public SpeedDemonAchievementListener()
-		{
-			_maxSpeed = SavedFloat("max_speed");
-		}
+		private SpeedStatTracker Tracker => Main.statTrackerManager.Speed;
 
 		protected override void SubscribeToEvents()
 		{
-			SubscribeToSpeedIncreased(OnSpeedIncreased);
+			SubscribeToTrackerChanged(Tracker, OnTrackerChanged);
+			OnTrackerChanged();
 		}
 
-		void OnSpeedIncreased(float speed)
+		private void OnTrackerChanged()
 		{
-			if (speed <= _maxSpeed.Value)
-			{
-				return;
-			}
-
-			_maxSpeed.Value = speed;
-
-			if (speed > 100.0f)
+			if (!IsUnlocked() && Tracker.CurrentSpeed >= 100.0f)
 			{
 				TriggerUnlock();
 			}
@@ -88,40 +77,31 @@ namespace StatsAndAchievements.Achievements
 
 	public sealed class TheEndAchievementListener : ProgressAchievementListener
 	{
+		private static int TargetLicenseCount => SingletonBehaviour<LicenseManager>.Instance.AllLicensesCount;
+
 		public override string Id => "the_end";
 		public override string Title => "The End?";
 		public override string Description => @"
 			Acquire all licenses
 			";
-		public override string Value() => $"{AcquiredLicensesCount()}";
+		public override string Value() => Tracker.Value();
 		public override string ValueName() => "Licenses Acquired";
-		public override string Target() => $"{AllLicensesCount()}";
+		public override string Target() => $"{TargetLicenseCount}";
+
+		private LicenseProgressStatTracker Tracker => Main.statTrackerManager.Licenses;
 
 		protected override void SubscribeToEvents()
 		{
-			SubscribeToGeneralLicenseAcquired(_ => OnLicenseAcquired());
-			SubscribeToJobLicenseAcquired(_ => OnLicenseAcquired());
+			SubscribeToTrackerChanged(Tracker, OnTrackerChanged);
+			OnTrackerChanged();
 		}
 
-		void OnLicenseAcquired()
+		private void OnTrackerChanged()
 		{
-			if (IsUnlocked()) return;
-
-			if (AcquiredLicensesCount() >= AllLicensesCount())
+			if (!IsUnlocked() && Tracker.CurrentCount >= TargetLicenseCount)
 			{
 				TriggerUnlock();
 			}
-		}
-
-		private static int AcquiredLicensesCount()
-		{
-			LicenseManager licenseManager = SingletonBehaviour<LicenseManager>.Instance;
-			return licenseManager.GetNumberOfAcquiredGeneralLicenses() + licenseManager.GetNumberOfAcquiredJobLicenses();
-		}
-
-		private static int AllLicensesCount()
-		{
-			return SingletonBehaviour<LicenseManager>.Instance.AllLicensesCount;
 		}
 	}
 
@@ -129,105 +109,54 @@ namespace StatsAndAchievements.Achievements
 	// is already tracked in the vanilla stats menu
 	public sealed class SteamEngineRequirementsAchievementListener : ProgressAchievementListener
 	{
+		private const int RequiredItemCount = 4;
+
 		public override string Id => "steam_engine_requirements";
 		public override string Title => "Fully equipped";
 		public override string Description => @"
 			Acquire everything you need to drive a steamer, including the license, a shovel, a lighter and oil.
 		";
 
-		public override string Value() => $"{ProgressCount()}";
-		public override string ValueName() => "Job Types Completed";
-		public override string Target() => $"{TargetCount}";
+		public override string Value() => Tracker.Value();
+		public override string ValueName() => "Steamer Items Collected";
+		public override string Target() => $"{RequiredItemCount}";
 
-		private readonly SavedBool _hasAcquiredSteamLicense;
-		private readonly SavedBool _hasAcquiredShovel;
-		private readonly SavedBool _hasAcquiredLighter;
-		private readonly SavedBool _hasAcquiredOil;
-
-		private int TargetCount => 4;
-		private int ProgressCount()
-		{
-			return CountTrue(_hasAcquiredSteamLicense, _hasAcquiredShovel, _hasAcquiredLighter, _hasAcquiredOil);
-		}
-
-		public SteamEngineRequirementsAchievementListener()
-		{
-			_hasAcquiredSteamLicense = SavedBool("has_acquired_steam_license");
-			_hasAcquiredShovel = SavedBool("has_acquired_shovel");
-			_hasAcquiredLighter = SavedBool("has_acquired_lighter");
-			_hasAcquiredOil = SavedBool("has_acquired_oiler");
-		}
+		private SteamEngineRequirementsStatTracker Tracker => Main.statTrackerManager.SteamEngineRequirements;
 
 		protected override void SubscribeToEvents()
 		{
-			SubscribeToGeneralLicenseAcquired(OnGeneralLicenseAcquired);
-			SubscribeToItemAcquired(OnItemAcquired);
+			SubscribeToTrackerChanged(Tracker, OnTrackerChanged);
+			OnTrackerChanged();
 		}
 
-		void OnGeneralLicenseAcquired(GeneralLicenseType_v2 license)
+		private void OnTrackerChanged()
 		{
-			if (IsUnlocked()) return;
-
-			var steamer = GeneralLicenseType.S060 | GeneralLicenseType.SH282;
-			bool isSteamer = (license.v1 & steamer) != 0;
-			if (isSteamer)
+			if (!IsUnlocked() && Tracker.CurrentCount >= RequiredItemCount)
 			{
-				_hasAcquiredSteamLicense.SetTrue();
+				TriggerUnlock();
 			}
-
-			if (ProgressCount() >= TargetCount) TriggerUnlock();
-		}
-
-		private void OnItemAcquired(string itemName)
-		{
-			if (IsUnlocked()) return;
-
-			if (itemName.ToLower().Contains("shovel"))
-			{
-				_hasAcquiredShovel.SetTrue();
-			}
-
-			if (itemName.ToLower().Contains("lighter"))
-			{
-				_hasAcquiredLighter.SetTrue();
-			}
-
-			if (itemName.ToLower().Contains("oiler"))
-			{
-				_hasAcquiredOil.SetTrue();
-			}
-
-			if (ProgressCount() >= TargetCount) TriggerUnlock();
 		}
 	}
 
 	public sealed class ScroogeMcDuckAchievementListener : MilestoneAchievementListener
 	{
-		public override string Id => "scrooge_mc_duck";
-		public override string Value() => $"${(int)_moneyEarned.Value}"; // TODO: thousand separator (see Varsius' KittyCat PR)
-		public override string ValueName() => "Money Earned";
+		private float _previousValue;
 
-		private readonly SavedFloat _moneyEarned;
+		public override string Id => "scrooge_mc_duck";
+		public override string Value() => Tracker.Value(); // TODO: thousand separator (see Varsius' KittyCat PR)
+		public override string ValueName() => "Money Earned";
 		protected override string BaseTitle => "Scrooge McDuck";
 		protected override string MaxRankDescription => "Earn $10,000,000 throughout your career";
 		protected override float[] Milestones => [100_000f, 1_000_000f, 10_000_000f];
-		protected override float CurrentValue => _moneyEarned.Value;
+		protected override float CurrentValue => Tracker.CurrentValue;
 
-		public ScroogeMcDuckAchievementListener()
-		{
-			_moneyEarned = SavedFloat("money_earned");
-		}
+		private MoneyEarnedStatTracker Tracker => Main.statTrackerManager.MoneyEarned;
 
 		protected override void SubscribeToEvents()
 		{
-			SubscribeToJobCompletion(OnJobCompletion);
-		}
-
-		void OnJobCompletion(Job job)
-		{
-			float previousMoneyEarned = _moneyEarned.Value;
-			_moneyEarned.Value += job.GetWageForTheJob();
-			NotifyMilestoneProgress(previousMoneyEarned, _moneyEarned.Value);
+			_previousValue = CurrentValue;
+			SubscribeToTrackerChanged(Tracker, OnTrackerChanged);
+			OnTrackerChanged();
 		}
 
 		protected override string GetMilestoneDescription(float target)
@@ -239,6 +168,13 @@ namespace StatsAndAchievements.Achievements
 		{
 			return $"${(int)value}";
 		}
+
+		private void OnTrackerChanged()
+		{
+			float currentValue = CurrentValue;
+			NotifyMilestoneProgress(_previousValue, currentValue);
+			_previousValue = currentValue;
+		}
 	}
 
 	public sealed class VisitAllStationsAchievementListener : ProgressAchievementListener
@@ -249,7 +185,7 @@ namespace StatsAndAchievements.Achievements
 		{
 			get
 			{
-				var remainingStations = GetRemainingStationNames();
+				List<string> remainingStations = Tracker.GetRemainingStationNames();
 				if (remainingStations.Count == 0)
 				{
 					return "Visit all stations";
@@ -259,82 +195,30 @@ namespace StatsAndAchievements.Achievements
 			}
 		}
 
-		public override string Value() => $"{VisitedStationCount()}";
+		public override string Value() => Tracker.Value();
 		public override string ValueName() => "Stations Visited";
 		public override string Target() => $"{KnownStationCount()}";
 
-		private readonly Dictionary<string, StationController> _stations = new Dictionary<string, StationController>();
-		private readonly HashSet<string> _visitedStations = new HashSet<string>();
-
-		public VisitAllStationsAchievementListener()
-		{
-			foreach (StationController stationController in StationController.allStations.Where((x) => { return x != null; }).ToList())
-			{
-				string stationName = stationController.stationInfo.YardID.Trim();
-				_stations[stationName] = stationController;
-
-				if (VisitedStation(stationName).Value)
-				{
-					_visitedStations.Add(stationName);
-				}
-			}
-		}
+		private VisitedStationsStatTracker Tracker => Main.statTrackerManager.VisitedStations;
 
 		protected override void SubscribeToEvents()
 		{
-			SubscribeToPlayerPositionChanged(OnPlayerPositionChanged);
+			SubscribeToTrackerChanged(Tracker, OnTrackerChanged);
+			OnTrackerChanged();
 		}
 
-		void OnPlayerPositionChanged(Vector3 playerPosition)
+		private void OnTrackerChanged()
 		{
-			if (_stations.Count == 0)
-			{
-				return;
-			}
-
-			float closestDistance = float.MaxValue;
-
-			foreach (KeyValuePair<string, StationController> station in _stations)
-			{
-				float distanceSquared = station.Value.stationRange.PlayerSqrDistanceFromStationOffice;
-				float distance = Mathf.Sqrt(distanceSquared);
-				if (distance < closestDistance)
-				{
-					closestDistance = distance;
-				}
-
-				if (station.Value.stationRange.IsPlayerInRangeForBookletGeneration(distanceSquared) && _visitedStations.Add(station.Key))
-				{
-					VisitedStation(station.Key).SetTrue();
-					break;
-				}
-			}
-
-			if (!IsUnlocked() && _stations.Count > 0 && _visitedStations.Count >= _stations.Count)
+			if (!IsUnlocked() && KnownStationCount() > 0 && Tracker.CurrentCount >= KnownStationCount())
 			{
 				TriggerUnlock();
 			}
 		}
 
-		private List<string> GetRemainingStationNames()
-		{
-			return _stations.Keys
-				.Where(stationName => !_visitedStations.Contains(stationName))
-				.OrderBy(stationName => stationName)
-				.ToList();
-		}
-
 		private int KnownStationCount()
 		{
-			return _stations.Count;
+			return Tracker.CurrentCount + Tracker.GetRemainingStationNames().Count;
 		}
-
-		private int VisitedStationCount()
-		{
-			return _stations.Keys.Count(stationName => _visitedStations.Contains(stationName));
-		}
-
-		private SavedBool VisitedStation(string stationName) => SavedBool($"visited_{stationName}");
 	}
 
 	public sealed class CompleteTheMuseumAchievementListener : ConditionAchievementListener
@@ -375,15 +259,15 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
-	public sealed class DriveEveryVehicleAchievementListener : ProgressAchievementListener
-	{
-		public override string Id => "drive_every_vehicle";
-		public override string Title => "Jack of All Trades";
-		public override string Description
+		public sealed class DriveEveryVehicleAchievementListener : ProgressAchievementListener
+		{
+			public override string Id => "drive_every_vehicle";
+			public override string Title => "Jack of All Trades";
+			public override string Description
 		{
 			get
 			{
-				var remainingVehicles = GetRemainingVehicleNames();
+				List<string> remainingVehicles = Tracker.GetRemainingVehicleNames();
 				if (remainingVehicles.Count == 0)
 				{
 					return "Operate every drivable vehicle";
@@ -393,117 +277,30 @@ namespace StatsAndAchievements.Achievements
 			}
 		}
 
-		public override string Value() => $"{OperatedVehicleCount()}";
+		public override string Value() => Tracker.Value();
 		public override string ValueName() => "Vehicles Operated";
-		public override string Target() => $"{TrackableVehicles.Count}";
+		public override string Target() => $"{TrackableVehicleCount()}";
 
-		private static readonly Dictionary<TrainCarType, string> TrackableVehicles = new Dictionary<TrainCarType, string>
-		{
-			{ TrainCarType.LocoShunter, "DE2 Shunter" },
-			{ TrainCarType.LocoSteamHeavy, "282 Steam Locomotive" },
-			{ TrainCarType.LocoS060, "S060 Steam Locomotive" },
-			{ TrainCarType.LocoRailbus, "Railbus" },
-			{ TrainCarType.LocoDM1U, "DM1U" },
-			{ TrainCarType.LocoDiesel, "DE6" },
-			{ TrainCarType.LocoDH4, "DH4" },
-			{ TrainCarType.LocoDM3, "DM3" },
-			{ TrainCarType.LocoMicroshunter, "Microshunter" }
-		};
-
-		private static readonly Dictionary<TrainCarType, GeneralLicenseType?> RequiredLicenses = new Dictionary<TrainCarType, GeneralLicenseType?>
-		{
-			{ TrainCarType.LocoShunter, GeneralLicenseType.DE2 },
-			{ TrainCarType.LocoSteamHeavy, GeneralLicenseType.SH282 },
-			{ TrainCarType.LocoS060, GeneralLicenseType.S060 },
-			{ TrainCarType.LocoRailbus, null },
-			{ TrainCarType.LocoDM1U, null },
-			{ TrainCarType.LocoDiesel, GeneralLicenseType.DE6 },
-			{ TrainCarType.LocoDH4, GeneralLicenseType.DH4 },
-			{ TrainCarType.LocoDM3, GeneralLicenseType.DM3 },
-			{ TrainCarType.LocoMicroshunter, null }
-		};
-
-		private readonly HashSet<TrainCarType> _operatedVehicles = new HashSet<TrainCarType>();
-
-		public DriveEveryVehicleAchievementListener()
-		{
-			foreach (TrainCarType trainCarType in TrackableVehicles.Keys)
-			{
-				if (OperatedVehicle(trainCarType).Value)
-				{
-					_operatedVehicles.Add(trainCarType);
-				}
-			}
-		}
+		private OperatedVehiclesStatTracker Tracker => Main.statTrackerManager.OperatedVehicles;
 
 		protected override void SubscribeToEvents()
 		{
-			SubscribeToCarChanged(OnCarChanged);
-
-			if (PlayerManager.Car != null)
-			{
-				OnCarChanged(PlayerManager.Car);
-			}
+			SubscribeToTrackerChanged(Tracker, OnTrackerChanged);
+			OnTrackerChanged();
 		}
 
-		private void OnCarChanged(TrainCar trainCar)
+		private void OnTrackerChanged()
 		{
-			TrainCarType trainCarType = trainCar.carType;
-
-			if (!TrackableVehicles.ContainsKey(trainCarType))
-			{
-				return;
-			}
-
-			if (!HasRequiredLicense(trainCarType))
-			{
-				Main.Debug($"Drive every vehicle: {TrackableVehicles[trainCarType]} did not count because the required license is missing");
-				return;
-			}
-
-			if (_operatedVehicles.Add(trainCarType))
-			{
-				OperatedVehicle(trainCarType).SetTrue();
-			}
-
-			if (!IsUnlocked() && _operatedVehicles.Count >= TrackableVehicles.Count)
+			if (!IsUnlocked() && Tracker.CurrentCount >= TrackableVehicleCount())
 			{
 				TriggerUnlock();
 			}
 		}
 
-		private List<string> GetRemainingVehicleNames()
+		private int TrackableVehicleCount()
 		{
-			return TrackableVehicles
-				.Where(vehicle => !_operatedVehicles.Contains(vehicle.Key))
-				.Select(vehicle => vehicle.Value)
-				.OrderBy(vehicleName => vehicleName)
-				.ToList();
+			return Tracker.CurrentCount + Tracker.GetRemainingVehicleNames().Count;
 		}
-
-		private int OperatedVehicleCount()
-		{
-			return TrackableVehicles.Keys.Count(trainCarType => _operatedVehicles.Contains(trainCarType));
-		}
-
-		private static bool HasRequiredLicense(TrainCarType trainCarType)
-		{
-			LicenseManager? licenseManager = SingletonBehaviour<LicenseManager>.Instance;
-			if (licenseManager == null)
-			{
-				return false;
-			}
-
-			GeneralLicenseType? requiredLicense = RequiredLicenses[trainCarType];
-			if (!requiredLicense.HasValue)
-			{
-				return true;
-			}
-
-			return licenseManager.IsGeneralLicenseAcquired(requiredLicense.Value.ToV2());
-		}
-
-		private SavedBool OperatedVehicle(TrainCarType trainCarType) => SavedBool($"operated_{trainCarType}");
 	}
 
 	public sealed class TheEngineerAchievementListener : ConditionAchievementListener
@@ -546,15 +343,15 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
-	public sealed class GarageSaleEnthusiastAchievementListener : ProgressAchievementListener
-	{
-		public override string Id => "garage_sale_enthusiast";
-		public override string Title => "Garage Sale Enthusiast";
-		public override string Description
+		public sealed class GarageSaleEnthusiastAchievementListener : ProgressAchievementListener
+		{
+			public override string Id => "garage_sale_enthusiast";
+			public override string Title => "Garage Sale Enthusiast";
+			public override string Description
 		{
 			get
 			{
-				List<string> remainingGarages = GetRemainingGarageNames();
+				List<string> remainingGarages = Tracker.GetRemainingGarageNames();
 				if (remainingGarages.Count == 0)
 				{
 					return "Buy everything in the garages";
@@ -564,81 +361,29 @@ namespace StatsAndAchievements.Achievements
 			}
 		}
 
-		public override string Value() => $"{_unlockedGarages.Count}";
+		public override string Value() => Tracker.Value();
 		public override string ValueName() => "Garages Unlocked";
-		public override string Target() => "4";
+		public override string Target() => $"{TrackableGarageCount()}";
 
-		// As of may 2026, the `Garage` enum contains entries that are not related to an actual garage.
-		// Hard-coding the required garages should only fail, if new garages are introduces or if there is a custom map with different garages.
-		// If this should be the case, the `PadlockKeyType` enum might come in handy.
-		private static readonly Dictionary<Garage, string> TrackableGarages = new Dictionary<Garage, string>
-		{
-			{ Garage.Bob, "BE2 Microshunter" },
-			{ Garage.Caboose, "Caboose" },
-			{ Garage.DM1U, "DM1U" },
-			{ Garage.DE6_Slug, "DE6 Slug" }
-		};
-
-		private readonly HashSet<Garage> _unlockedGarages = new HashSet<Garage>();
+		private UnlockedGaragesStatTracker Tracker => Main.statTrackerManager.UnlockedGarages;
 
 		protected override void SubscribeToEvents()
 		{
-			LicenseManager? licenseManager = SingletonBehaviour<LicenseManager>.Instance;
-			if (licenseManager == null)
-			{
-				Main.Warning("Garage Sale Enthusiast: LicenseManager instance was not available.");
-				return;
-			}
-
-			Subscribe(
-				() => licenseManager.GarageUnlocked += OnGarageUnlocked,
-				() => licenseManager.GarageUnlocked -= OnGarageUnlocked
-			);
-
-			RefreshUnlockedGarages(licenseManager);
+			SubscribeToTrackerChanged(Tracker, OnTrackerChanged);
+			OnTrackerChanged();
 		}
 
-		private void OnGarageUnlocked(GarageType_v2 unlockedGarage)
+		private void OnTrackerChanged()
 		{
-			LicenseManager? licenseManager = SingletonBehaviour<LicenseManager>.Instance;
-			if (licenseManager == null)
-			{
-				return;
-			}
-
-			if (!TrackableGarages.Keys.Any(garage => garage.ToV2() == unlockedGarage))
-			{
-				return;
-			}
-
-			RefreshUnlockedGarages(licenseManager);
-		}
-
-		private void RefreshUnlockedGarages(LicenseManager licenseManager)
-		{
-			_unlockedGarages.Clear();
-
-			foreach (Garage garage in TrackableGarages.Keys)
-			{
-				if (licenseManager.GetUnlockedGarages().Contains(garage.ToV2()))
-				{
-					_unlockedGarages.Add(garage);
-				}
-			}
-
-			if (!IsUnlocked() && _unlockedGarages.Count >= TrackableGarages.Count)
+			if (!IsUnlocked() && Tracker.CurrentCount >= TrackableGarageCount())
 			{
 				TriggerUnlock();
 			}
 		}
 
-		private List<string> GetRemainingGarageNames()
+		private int TrackableGarageCount()
 		{
-			return TrackableGarages
-				.Where(garage => !_unlockedGarages.Contains(garage.Key))
-				.Select(garage => garage.Value)
-				.OrderBy(garageName => garageName)
-				.ToList();
+			return Tracker.CurrentCount + Tracker.GetRemainingGarageNames().Count;
 		}
 	}
 
@@ -671,63 +416,44 @@ namespace StatsAndAchievements.Achievements
 	}
 
 	// TODO: When we are able to detect if passenger jobs is installed alongside this mod, then conditionally include regional/express job
-	public sealed class AllRounderAchievementListener : ProgressAchievementListener
-	{
-		public override string Id => "all_rounder";
-		public override string Title => "All-Rounder";
+		public sealed class AllRounderAchievementListener : ProgressAchievementListener
+		{
+			private const int RequiredJobTypeCount = 4;
+
+			public override string Id => "all_rounder";
+			public override string Title => "All-Rounder";
 		public override string Description => @"
-			Complete a job of each type
-			";
+				Complete a job of each type
+				";
 
-		public override string Value() => $"{ProgressCount()}";
+		public override string Value() => $"{CountCompletedTypes()}";
 		public override string ValueName() => "Job Types Completed";
-		public override string Target() => $"{TargetCount}";
+		public override string Target() => $"{RequiredJobTypeCount}";
 
-		private readonly SavedBool _hasCompletedTransport;
-		private readonly SavedBool _hasCompletedEmptyHaul;
-		private readonly SavedBool _hasCompletedShuntingLoad;
-		private readonly SavedBool _hasCompletedShuntingUnload;
-
-		private int TargetCount => 4;
-		private int ProgressCount()
-		{
-			return CountTrue(_hasCompletedTransport, _hasCompletedEmptyHaul, _hasCompletedShuntingLoad, _hasCompletedShuntingUnload);
-		}
-
-		public AllRounderAchievementListener()
-		{
-			_hasCompletedTransport = SavedBool("completed_transport");
-			_hasCompletedEmptyHaul = SavedBool("completed_empty_haul");
-			_hasCompletedShuntingLoad = SavedBool("completed_shunting_load");
-			_hasCompletedShuntingUnload = SavedBool("completed_shunting_unload");
-		}
+		private CompletedJobsStatTracker Tracker => Main.statTrackerManager.CompletedJobs;
 
 		protected override void SubscribeToEvents()
 		{
-			SubscribeToJobCompletion(OnJobCompletion);
+			SubscribeToTrackerChanged(Tracker, OnTrackerChanged);
+			OnTrackerChanged();
 		}
 
-		void OnJobCompletion(Job job)
+		private void OnTrackerChanged()
 		{
-			if (IsUnlocked()) return;
-
-			switch (job.jobType)
+			if (!IsUnlocked() && CountCompletedTypes() >= RequiredJobTypeCount)
 			{
-				case JobType.Transport:
-					_hasCompletedTransport.SetTrue();
-					break;
-				case JobType.EmptyHaul:
-					_hasCompletedEmptyHaul.SetTrue();
-					break;
-				case JobType.ShuntingLoad:
-					_hasCompletedShuntingLoad.SetTrue();
-					break;
-				case JobType.ShuntingUnload:
-					_hasCompletedShuntingUnload.SetTrue();
-					break;
+				TriggerUnlock();
 			}
+		}
 
-			if (ProgressCount() >= TargetCount) TriggerUnlock();
+		private int CountCompletedTypes()
+		{
+			int count = 0;
+			if (Tracker.TransportCount > 0) count++;
+			if (Tracker.EmptyHaulCount > 0) count++;
+			if (Tracker.ShuntingLoadCount > 0) count++;
+			if (Tracker.ShuntingUnloadCount > 0) count++;
+			return count;
 		}
 	}
 

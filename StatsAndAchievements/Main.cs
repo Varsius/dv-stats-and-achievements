@@ -9,12 +9,14 @@ using static UnityModManagerNet.UnityModManager;
 using StatsAndAchievements.Achievements;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using StatsAndAchievements.Trackers;
 
 namespace StatsAndAchievements;
 
 [EnableReloading]
 public class Main
 {
+	public const int CurrentSaveVersion = 1;
 	public static UnityModManager.ModEntry ModEntry { get; private set; } = null!;
 
 
@@ -28,8 +30,10 @@ public class Main
 	private static Harmony? _harmony;
 	private static GameObject? watchGO;
 	public static AchievementManager achievementManager = null!;
+	public static StatTrackerManager statTrackerManager = null!;
 	public static Settings settings = null!;
 	public static JObject saaSaveData = new JObject();
+
 	private static bool Load(UnityModManager.ModEntry modEntry)
 	{
 		ModEntry = modEntry;
@@ -47,6 +51,7 @@ public class Main
 
 			CareerManagerAPI.CareerManagerAPI.CareerManagerAwake += (tracker, locationName, station, trainCar) =>
 			{
+				// TODO: If all achievement categories are disabled, then skip this screen
 				tracker.TryAddToMainScreen<CareerManagerScreens.AchievementCategoryScreen>("Achievements", null,
 					after: CareerManagerLocalization.STATS);
 				// TODO: ideally this should extend/replace the original "Stats" screen
@@ -57,8 +62,6 @@ public class Main
 			modEntry.OnGUI = DrawGUI;
 			modEntry.OnSaveGUI = SaveGUI;
 			modEntry.OnUnload = Unload;
-
-			Main.RebuildAchievementManager();
 
 			return true;
 		}
@@ -74,6 +77,8 @@ public class Main
 	{
 		if (achievementManager != null)
 			achievementManager.Detach();
+		if (statTrackerManager != null)
+			statTrackerManager.Detach();
 
 		_harmony?.UnpatchAll(modEntry.Info.Id);
 		if (watchGO != null)
@@ -91,6 +96,11 @@ public class Main
 	private static void SaveGUI(UnityModManager.ModEntry modEntry)
 	{
 		settings.Save(modEntry);
+
+		if (statTrackerManager != null)
+		{
+			RebuildAchievementManager();
+		}
 	}
 
 	public static void RebuildAchievementManager()
@@ -103,12 +113,31 @@ public class Main
 		achievementManager = new AchievementManager(BuildAchievementCategories());
 	}
 
+	public static void RebuildStatTrackerManager()
+	{
+		if (statTrackerManager != null)
+		{
+			statTrackerManager.Detach();
+		}
+
+		statTrackerManager = new StatTrackerManager();
+	}
+
 	public static void ResetAchievementManager()
 	{
 		if (achievementManager != null)
 		{
 			achievementManager.Detach();
 			achievementManager = null!;
+		}
+	}
+
+	public static void ResetStatTrackerManager()
+	{
+		if (statTrackerManager != null)
+		{
+			statTrackerManager.Detach();
+			statTrackerManager = null!;
 		}
 	}
 

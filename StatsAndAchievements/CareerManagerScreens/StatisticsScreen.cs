@@ -1,6 +1,6 @@
 using DV.ServicePenalty.UI;
-using StatsAndAchievements.Achievements;
 using System.Collections.Generic;
+using StatsAndAchievements.Trackers;
 
 namespace StatsAndAchievements.CareerManagerScreens;
 
@@ -31,22 +31,22 @@ public class StatisticsScreen : ModularScreenHost
 			LinesScrollerScreen.CanEnter?
 		)>();
 
-		foreach (KeyValuePair<string, AchievementListener> entry in Main.achievementManager._listeners)
+		if (Main.statTrackerManager == null)
 		{
-			AchievementListener listener = entry.Value;
-			if (listener.Type == Achievements.AchievementType.Condition)
-			{
-				continue;
-			}
-			ProgressAchievementListener progressListener = (ProgressAchievementListener)listener;
+			Scroller?.SetOptions(options);
+			return;
+		}
+
+		foreach (StatTracker tracker in Main.statTrackerManager.Trackers)
+		{
 			options.Add((
 				tmPro =>
 				{
-					tmPro.text = progressListener.ValueName();
+					tmPro.text = tracker.Title;
 				},
 				tmPro =>
 				{
-					tmPro.text = progressListener.Value();
+					tmPro.text = tracker.Value();
 				},
 				null
 			));

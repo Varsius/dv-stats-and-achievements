@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using DV.UI;
 using DV.Utils;
 
@@ -18,7 +17,7 @@ namespace StatsAndAchievements.Achievements
 
 		public AchievementManager(IEnumerable<AchievementCategory> categories)
 		{
-			Categories = categories.ToList();
+			Categories = new List<AchievementCategory>(categories);
 
 			foreach (var category in Categories)
 			{
