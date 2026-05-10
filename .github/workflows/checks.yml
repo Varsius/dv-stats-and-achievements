@@ -11,6 +11,8 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Set HOME for Git 
+        run: echo "HOME=$PWD" >> $GITHUB_ENV
       - name: Check CRLF
         uses: DecimalTurn/Enforce-CRLF@v1.2.1
         with:
