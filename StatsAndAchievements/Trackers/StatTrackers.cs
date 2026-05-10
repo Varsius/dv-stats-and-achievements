@@ -177,6 +177,8 @@ public sealed class MoneySpentStatTracker : StatTracker
 {
 	private readonly SavedFloat _itemShopMoneySpent;
 	private readonly SavedFloat _manualServiceMoneySpent;
+	private readonly SavedFloat _careerManagerFeesMoneySpent;
+	private readonly SavedFloat _careerManagerLicensesMoneySpent;
 
 	public override string Id => "money_spent";
 	public override string Title => "Money Spent";
@@ -185,12 +187,18 @@ public sealed class MoneySpentStatTracker : StatTracker
 	{
 		_itemShopMoneySpent = SavedFloat("money_spent_item_shop");
 		_manualServiceMoneySpent = SavedFloat("money_spent_manual_service");
+		_careerManagerFeesMoneySpent = SavedFloat("money_spent_career_manager_fees");
+		_careerManagerLicensesMoneySpent = SavedFloat("money_spent_career_manager_licenses");
 	}
 
 	public override string Value() => $"${(int)TotalValue}";
-	public float TotalValue => ItemShopValue + ManualServiceValue;
+	public float TotalValue => ItemShopValue + ManualServiceValue + CareerManagerFeesValue + CareerManagerLicensesValue;
 	public float ItemShopValue => _itemShopMoneySpent.Value;
 	public float ManualServiceValue => _manualServiceMoneySpent.Value;
+	public float CareerManagerFeesValue => _careerManagerFeesMoneySpent.Value;
+	public float CareerManagerLicensesValue => _careerManagerLicensesMoneySpent.Value;
+	// TODO: Track comms radio payments.
+	// TODO: Track fast travel payments.
 
 	protected override void SubscribeToEvents()
 	{
@@ -198,14 +206,28 @@ public sealed class MoneySpentStatTracker : StatTracker
 		SubscribeToPitStopCheckout(OnManualServiceCheckout);
 	}
 
-	private void OnMoneySpent(float amount)
+	private void OnMoneySpent(float amount, Events.MoneySpentSource source)
 	{
 		if (amount <= 0f)
 		{
 			return;
 		}
 
-		_itemShopMoneySpent.Value += amount;
+		switch (source)
+		{
+			case Events.MoneySpentSource.ItemShop:
+				_itemShopMoneySpent.Value += amount;
+				break;
+			case Events.MoneySpentSource.CareerManagerFees:
+				_careerManagerFeesMoneySpent.Value += amount;
+				break;
+			case Events.MoneySpentSource.CareerManagerLicense:
+				_careerManagerLicensesMoneySpent.Value += amount;
+				break;
+			default:
+				return;
+		}
+
 		NotifyChanged();
 	}
 

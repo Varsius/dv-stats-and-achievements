@@ -5,6 +5,14 @@ using UnityEngine;
 
 namespace StatsAndAchievements.Events
 {
+	public enum MoneySpentSource
+	{
+		ItemShop,
+		ManualService,
+		CareerManagerFees,
+		CareerManagerLicense
+	}
+
 	public static class Actions
 	{
 		public static event Action<JobLicenseType_v2>? JobLicenseAcquired;
@@ -13,7 +21,7 @@ namespace StatsAndAchievements.Events
 		public static event Action? PaintJobApplied;
 		public static event Action<Vector3>? PlayerPositionChanged;
 		public static event Action<string>? ItemAcquired;
-		public static event Action<float>? MoneySpent;
+		public static event Action<float, MoneySpentSource>? MoneySpent;
 
 		public static void InvokeJobLicenseAcquired(JobLicenseType_v2 license)
 		{
@@ -45,9 +53,9 @@ namespace StatsAndAchievements.Events
 			ItemAcquired?.Invoke(itemName);
 		}
 
-		public static void InvokeMoneySpent(float amount)
+		public static void InvokeMoneySpent(float amount, MoneySpentSource source)
 		{
-			MoneySpent?.Invoke(amount);
+			MoneySpent?.Invoke(amount, source);
 		}
 	}
 }

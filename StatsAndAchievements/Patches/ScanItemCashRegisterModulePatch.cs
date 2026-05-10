@@ -13,13 +13,13 @@ internal static class ScanItemCashRegisterModulePatch
 		__state = __instance.Data.unitsToBuy > 0f ? __instance.Data.TotalPrice : 0f;
 	}
 
-	[HarmonyPatch(nameof(ScanItemCashRegisterModule.GetBoughtResource))]
-	[HarmonyPostfix]
-	private static void GetBoughtResourcePostfix(float __state)
-	{
-		if (__state > 0f)
+		[HarmonyPatch(nameof(ScanItemCashRegisterModule.GetBoughtResource))]
+		[HarmonyPostfix]
+		private static void GetBoughtResourcePostfix(float __state)
 		{
-			Events.Actions.InvokeMoneySpent(__state);
+			if (__state > 0f)
+			{
+				Events.Actions.InvokeMoneySpent(__state, Events.MoneySpentSource.ItemShop);
+			}
 		}
-	}
 }
