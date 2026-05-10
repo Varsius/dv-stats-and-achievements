@@ -14,7 +14,6 @@ namespace StatsAndAchievements.Achievements
 	{
 		public override string Id => "speed_demon";
 		public override string Title => "Speed Demon";
-		public override int SortOrder => 60;
 		public override string Description => @"
 			Reach a speed of 100km/h with any locomotive
 			";
@@ -82,7 +81,6 @@ namespace StatsAndAchievements.Achievements
 
 		public override string Id => "the_end";
 		public override string Title => "The End?";
-		public override int SortOrder => 80;
 		public override string Description => @"
 			Acquire all licenses
 			";
@@ -115,7 +113,6 @@ namespace StatsAndAchievements.Achievements
 
 		public override string Id => "steam_engine_requirements";
 		public override string Title => "Fully equipped";
-		public override int SortOrder => 70;
 		public override string Description => @"
 			Acquire everything you need to drive a steamer, including the license, a shovel, a lighter and oil.
 		";
@@ -146,7 +143,6 @@ namespace StatsAndAchievements.Achievements
 		private float _previousValue;
 
 		public override string Id => "scrooge_mc_duck";
-		public override int SortOrder => 10;
 		public override string Value() => Tracker.Value(); // TODO: thousand separator (see Varsius' KittyCat PR)
 		public override string ValueName() => "Money Earned";
 		protected override string BaseTitle => "Scrooge McDuck";
@@ -185,7 +181,6 @@ namespace StatsAndAchievements.Achievements
 	{
 		public override string Id => "visit_all_stations";
 		public override string Title => "Traveling Salesman";
-		public override int SortOrder => 20;
 		public override string Description
 		{
 			get
@@ -264,12 +259,11 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
-	public sealed class DriveEveryVehicleAchievementListener : ProgressAchievementListener
-	{
-		public override string Id => "drive_every_vehicle";
-		public override string Title => "Jack of All Trades";
-		public override int SortOrder => 30;
-		public override string Description
+		public sealed class DriveEveryVehicleAchievementListener : ProgressAchievementListener
+		{
+			public override string Id => "drive_every_vehicle";
+			public override string Title => "Jack of All Trades";
+			public override string Description
 		{
 			get
 			{
@@ -349,12 +343,11 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
-	public sealed class GarageSaleEnthusiastAchievementListener : ProgressAchievementListener
-	{
-		public override string Id => "garage_sale_enthusiast";
-		public override string Title => "Garage Sale Enthusiast";
-		public override int SortOrder => 40;
-		public override string Description
+		public sealed class GarageSaleEnthusiastAchievementListener : ProgressAchievementListener
+		{
+			public override string Id => "garage_sale_enthusiast";
+			public override string Title => "Garage Sale Enthusiast";
+			public override string Description
 		{
 			get
 			{
@@ -423,16 +416,15 @@ namespace StatsAndAchievements.Achievements
 	}
 
 	// TODO: When we are able to detect if passenger jobs is installed alongside this mod, then conditionally include regional/express job
-	public sealed class AllRounderAchievementListener : ProgressAchievementListener
-	{
-		private const int RequiredJobTypeCount = 4;
+		public sealed class AllRounderAchievementListener : ProgressAchievementListener
+		{
+			private const int RequiredJobTypeCount = 4;
 
-		public override string Id => "all_rounder";
-		public override string Title => "All-Rounder";
-		public override int SortOrder => 10;
-		public override string Description => @"
-			Complete a job of each type
-			";
+			public override string Id => "all_rounder";
+			public override string Title => "All-Rounder";
+			public override string Description => @"
+				Complete a job of each type
+				";
 
 		public override string Value() => Tracker.Value();
 		public override string ValueName() => "Job Types Completed";

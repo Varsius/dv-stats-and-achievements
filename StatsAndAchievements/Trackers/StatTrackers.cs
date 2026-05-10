@@ -14,7 +14,6 @@ public sealed class SpeedStatTracker : StatTracker
 
 	public override string Id => "highest_speed";
 	public override string Title => "Highest Speed";
-	public override int SortOrder => 60;
 
 	public SpeedStatTracker()
 	{
@@ -45,7 +44,6 @@ public sealed class LicenseProgressStatTracker : StatTracker
 {
 	public override string Id => "licenses_acquired";
 	public override string Title => "Licenses Acquired";
-	public override int SortOrder => 40;
 
 	public override string Value() => $"{AcquiredLicensesCount()}";
 	public int CurrentCount => AcquiredLicensesCount();
@@ -72,7 +70,6 @@ public sealed class SteamEngineRequirementsStatTracker : StatTracker
 
 	public override string Id => "steamer_items_collected";
 	public override string Title => "Steamer Items Collected";
-	public override int SortOrder => 50;
 
 	public SteamEngineRequirementsStatTracker()
 	{
@@ -154,7 +151,6 @@ public sealed class MoneyEarnedStatTracker : StatTracker
 
 	public override string Id => "money_earned";
 	public override string Title => "Money Earned";
-	public override int SortOrder => 80;
 
 	public MoneyEarnedStatTracker()
 	{
@@ -183,7 +179,6 @@ public sealed class VisitedStationsStatTracker : StatTracker
 
 	public override string Id => "visited_stations";
 	public override string Title => "Stations Visited";
-	public override int SortOrder => 20;
 
 	public VisitedStationsStatTracker()
 	{
@@ -271,7 +266,6 @@ public sealed class OperatedVehiclesStatTracker : StatTracker
 
 	public override string Id => "operated_vehicles";
 	public override string Title => "Vehicles Operated";
-	public override int SortOrder => 30;
 
 	public OperatedVehiclesStatTracker()
 	{
@@ -363,7 +357,6 @@ public sealed class UnlockedGaragesStatTracker : StatTracker
 
 	public override string Id => "unlocked_garages";
 	public override string Title => "Garages Unlocked";
-	public override int SortOrder => 70;
 
 	public override string Value() => $"{_unlockedGarages.Count}";
 	public int CurrentCount => _unlockedGarages.Count;
@@ -434,7 +427,6 @@ public sealed class CompletedJobTypesStatTracker : StatTracker
 
 	public override string Id => "completed_job_types";
 	public override string Title => "Job Types Completed";
-	public override int SortOrder => 10;
 
 	public CompletedJobTypesStatTracker()
 	{

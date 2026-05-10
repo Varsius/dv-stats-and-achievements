@@ -15,7 +15,6 @@ public abstract class StatTracker
 	public abstract string Id { get; }
 	public abstract string Title { get; }
 	public abstract string Value();
-	public virtual int SortOrder => 0;
 
 	internal void Attach()
 	{

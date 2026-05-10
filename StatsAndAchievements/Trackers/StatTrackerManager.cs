@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
-
 namespace StatsAndAchievements.Trackers;
 
 public sealed class StatTrackerManager
@@ -37,9 +35,7 @@ public sealed class StatTrackerManager
 			Speed,
 			UnlockedGarages,
 			MoneyEarned
-		}
-			.OrderBy(tracker => tracker.SortOrder)
-			.ToList();
+		};
 
 		foreach (StatTracker tracker in Trackers)
 		{

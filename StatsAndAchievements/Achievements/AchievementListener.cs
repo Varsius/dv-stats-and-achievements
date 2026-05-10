@@ -21,7 +21,6 @@ namespace StatsAndAchievements.Achievements
 		public abstract string Title { get; }
 		public abstract string Description { get; }
 		public abstract AchievementType Type { get; }
-		public virtual int SortOrder => 0;
 
 		public virtual string GetDisplayTitle() => Title;
 		public virtual string GetDisplayDescription() => Description;

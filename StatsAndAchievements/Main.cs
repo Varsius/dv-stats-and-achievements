@@ -147,7 +147,7 @@ public class Main
 
 		if (settings.EnableCareerAchievements)
 		{
-			categories.Add(CreateCategory("career", "Career", 10, [
+			categories.Add(CreateCategory("career", "Career", [
 				typeof(AllRounderAchievementListener),
 				typeof(VisitAllStationsAchievementListener),
 				typeof(CompleteTheMuseumAchievementListener),
@@ -165,7 +165,7 @@ public class Main
 
 		if (settings.EnableAdvancedAchievements)
 		{
-			categories.Add(CreateCategory("advanced", "Advanced", 20, [
+			categories.Add(CreateCategory("advanced", "Advanced", [
 				typeof(SpeedDemonAchievementListener),
 				typeof(MaximumHonkAchievementListener)
 			]));
@@ -173,14 +173,14 @@ public class Main
 
 		if (settings.EnableMilestoneAchievements)
 		{
-			categories.Add(CreateCategory("milestones", "Milestones", 30, [
+			categories.Add(CreateCategory("milestones", "Milestones", [
 				typeof(ScroogeMcDuckAchievementListener)
 			]));
 		}
 
 		if (settings.EnableSecretAchievements)
 		{
-			categories.Add(CreateCategory("secret", "Secret", 40, [
+			categories.Add(CreateCategory("secret", "Secret", [
 				typeof(HomeSweetHomeAchievementListener)
 			]));
 		}
@@ -189,7 +189,7 @@ public class Main
 		return categories;
 	}
 
-	private static AchievementCategory CreateCategory(string id, string title, int sortOrder, IEnumerable<Type> achievementTypes)
+	private static AchievementCategory CreateCategory(string id, string title, IEnumerable<Type> achievementTypes)
 	{
 		List<AchievementListener> achievements = new List<AchievementListener>();
 
@@ -211,6 +211,6 @@ public class Main
 			}
 		}
 
-		return new AchievementCategory(id, title, sortOrder, achievements);
+		return new AchievementCategory(id, title, achievements);
 	}
 }
