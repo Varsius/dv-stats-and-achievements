@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install unix2dos
-        run: sudo apt-get update && sudo apt-get install -y dos2unix
+        run: apt-get update && apt-get install -y dos2unix
 
       - name: Convert .cs files to CRLF
         run: |
