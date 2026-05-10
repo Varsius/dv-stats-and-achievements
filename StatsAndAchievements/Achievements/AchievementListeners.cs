@@ -19,7 +19,6 @@ namespace StatsAndAchievements.Achievements
 			";
 
 		public override string Value() => Tracker.Value();
-		public override string ValueName() => "Highest Speed";
 		public override string Target() => "100 km/h";
 		public override string Progress() => $"{(int)Tracker.CurrentSpeed}/100 km/h";
 
@@ -85,7 +84,6 @@ namespace StatsAndAchievements.Achievements
 			Acquire all licenses
 			";
 		public override string Value() => Tracker.Value();
-		public override string ValueName() => "Licenses Acquired";
 		public override string Target() => $"{TargetLicenseCount}";
 
 		private LicenseProgressStatTracker Tracker => Main.statTrackerManager.Licenses;
@@ -118,7 +116,6 @@ namespace StatsAndAchievements.Achievements
 		";
 
 		public override string Value() => Tracker.Value();
-		public override string ValueName() => "Steamer Items Collected";
 		public override string Target() => $"{RequiredItemCount}";
 
 		private SteamEngineRequirementsStatTracker Tracker => Main.statTrackerManager.SteamEngineRequirements;
@@ -144,7 +141,6 @@ namespace StatsAndAchievements.Achievements
 
 		public override string Id => "scrooge_mc_duck";
 		public override string Value() => Tracker.Value(); // TODO: thousand separator (see Varsius' KittyCat PR)
-		public override string ValueName() => "Money Earned";
 		protected override string BaseTitle => "Scrooge McDuck";
 		protected override string MaxRankDescription => "Earn $10,000,000 throughout your career";
 		protected override float[] Milestones => [100_000f, 1_000_000f, 10_000_000f];
@@ -196,7 +192,6 @@ namespace StatsAndAchievements.Achievements
 		}
 
 		public override string Value() => Tracker.Value();
-		public override string ValueName() => "Stations Visited";
 		public override string Target() => $"{KnownStationCount()}";
 
 		private VisitedStationsStatTracker Tracker => Main.statTrackerManager.VisitedStations;
@@ -259,11 +254,11 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
-		public sealed class DriveEveryVehicleAchievementListener : ProgressAchievementListener
-		{
-			public override string Id => "drive_every_vehicle";
-			public override string Title => "Jack of All Trades";
-			public override string Description
+	public sealed class DriveEveryVehicleAchievementListener : ProgressAchievementListener
+	{
+		public override string Id => "drive_every_vehicle";
+		public override string Title => "Jack of All Trades";
+		public override string Description
 		{
 			get
 			{
@@ -278,7 +273,6 @@ namespace StatsAndAchievements.Achievements
 		}
 
 		public override string Value() => Tracker.Value();
-		public override string ValueName() => "Vehicles Operated";
 		public override string Target() => $"{TrackableVehicleCount()}";
 
 		private OperatedVehiclesStatTracker Tracker => Main.statTrackerManager.OperatedVehicles;
@@ -343,11 +337,11 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
-		public sealed class GarageSaleEnthusiastAchievementListener : ProgressAchievementListener
-		{
-			public override string Id => "garage_sale_enthusiast";
-			public override string Title => "Garage Sale Enthusiast";
-			public override string Description
+	public sealed class GarageSaleEnthusiastAchievementListener : ProgressAchievementListener
+	{
+		public override string Id => "garage_sale_enthusiast";
+		public override string Title => "Garage Sale Enthusiast";
+		public override string Description
 		{
 			get
 			{
@@ -362,7 +356,6 @@ namespace StatsAndAchievements.Achievements
 		}
 
 		public override string Value() => Tracker.Value();
-		public override string ValueName() => "Garages Unlocked";
 		public override string Target() => $"{TrackableGarageCount()}";
 
 		private UnlockedGaragesStatTracker Tracker => Main.statTrackerManager.UnlockedGarages;
@@ -416,18 +409,17 @@ namespace StatsAndAchievements.Achievements
 	}
 
 	// TODO: When we are able to detect if passenger jobs is installed alongside this mod, then conditionally include regional/express job
-		public sealed class AllRounderAchievementListener : ProgressAchievementListener
-		{
-			private const int RequiredJobTypeCount = 4;
+	public sealed class AllRounderAchievementListener : ProgressAchievementListener
+	{
+		private const int RequiredJobTypeCount = 4;
 
-			public override string Id => "all_rounder";
-			public override string Title => "All-Rounder";
+		public override string Id => "all_rounder";
+		public override string Title => "All-Rounder";
 		public override string Description => @"
 				Complete a job of each type
 				";
 
 		public override string Value() => $"{CountCompletedTypes()}";
-		public override string ValueName() => "Job Types Completed";
 		public override string Target() => $"{RequiredJobTypeCount}";
 
 		private CompletedJobsStatTracker Tracker => Main.statTrackerManager.CompletedJobs;

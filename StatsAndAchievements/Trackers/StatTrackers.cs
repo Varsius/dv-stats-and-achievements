@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DV.Logic.Job;
@@ -81,6 +82,13 @@ public sealed class SteamEngineRequirementsStatTracker : StatTracker
 
 	public override string Value() => $"{CurrentCount}";
 	public int CurrentCount => CountTrue(_hasAcquiredSteamLicense, _hasAcquiredShovel, _hasAcquiredLighter, _hasAcquiredOil);
+	public override IReadOnlyList<DetailEntry> Details() =>
+	[
+		new DetailEntry("Steam License", BoolState(_hasAcquiredSteamLicense.Value)),
+		new DetailEntry("Shovel", BoolState(_hasAcquiredShovel.Value)),
+		new DetailEntry("Lighter", BoolState(_hasAcquiredLighter.Value)),
+		new DetailEntry("Oiler", BoolState(_hasAcquiredOil.Value))
+	];
 
 	protected override void SubscribeToEvents()
 	{
@@ -143,6 +151,11 @@ public sealed class SteamEngineRequirementsStatTracker : StatTracker
 
 		return count;
 	}
+
+	private static string BoolState(bool value)
+	{
+		return value ? "Acquired" : "Missing";
+	}
 }
 
 public sealed class MoneyEarnedStatTracker : StatTracker
@@ -172,6 +185,90 @@ public sealed class MoneyEarnedStatTracker : StatTracker
 	}
 }
 
+public sealed class MoneySpentStatTracker : StatTracker
+{
+	private readonly SavedFloat _itemShopMoneySpent;
+	private readonly SavedFloat _manualServiceMoneySpent;
+	private readonly SavedFloat _careerManagerFeesMoneySpent;
+	private readonly SavedFloat _careerManagerLicensesMoneySpent;
+
+	public override string Id => "money_spent";
+	public override string Title => "Money Spent";
+
+	public MoneySpentStatTracker()
+	{
+		_itemShopMoneySpent = SavedFloat("money_spent_item_shop");
+		_manualServiceMoneySpent = SavedFloat("money_spent_manual_service");
+		_careerManagerFeesMoneySpent = SavedFloat("money_spent_career_manager_fees");
+		_careerManagerLicensesMoneySpent = SavedFloat("money_spent_career_manager_licenses");
+	}
+
+	public override string Value() => $"${(int)TotalValue}";
+	public float TotalValue => ItemShopValue + ManualServiceValue + CareerManagerFeesValue + CareerManagerLicensesValue;
+	public float ItemShopValue => _itemShopMoneySpent.Value;
+	public float ManualServiceValue => _manualServiceMoneySpent.Value;
+	public float CareerManagerFeesValue => _careerManagerFeesMoneySpent.Value;
+	public float CareerManagerLicensesValue => _careerManagerLicensesMoneySpent.Value;
+	// TODO: Track comms radio payments.
+	// TODO: Track fast travel payments.
+
+	public override IReadOnlyList<DetailEntry> Details() =>
+	[
+		new DetailEntry("Total", FormatMoney(TotalValue)),
+		new DetailEntry("Item Shop", FormatMoney(ItemShopValue)),
+		new DetailEntry("Manual Service", FormatMoney(ManualServiceValue)),
+		new DetailEntry("Career Manager Fees", FormatMoney(CareerManagerFeesValue)),
+		new DetailEntry("Career Manager Licenses", FormatMoney(CareerManagerLicensesValue))
+	];
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToMoneySpent(OnMoneySpent);
+		SubscribeToPitStopCheckout(OnManualServiceCheckout);
+	}
+
+	private void OnMoneySpent(float amount, Events.MoneySpentSource source)
+	{
+		if (amount <= 0f)
+		{
+			return;
+		}
+
+		switch (source)
+		{
+			case Events.MoneySpentSource.ItemShop:
+				_itemShopMoneySpent.Value += amount;
+				break;
+			case Events.MoneySpentSource.CareerManagerFees:
+				_careerManagerFeesMoneySpent.Value += amount;
+				break;
+			case Events.MoneySpentSource.CareerManagerLicense:
+				_careerManagerLicensesMoneySpent.Value += amount;
+				break;
+			default:
+				return;
+		}
+
+		NotifyChanged();
+	}
+
+	private void OnManualServiceCheckout(float amount, bool hasPaid)
+	{
+		if (!hasPaid || amount <= 0f)
+		{
+			return;
+		}
+
+		_manualServiceMoneySpent.Value += amount;
+		NotifyChanged();
+	}
+
+	private static string FormatMoney(float amount)
+	{
+		return $"${(int)amount}";
+	}
+}
+
 public sealed class VisitedStationsStatTracker : StatTracker
 {
 	private readonly Dictionary<string, StationController> _stations = new();
@@ -196,6 +293,11 @@ public sealed class VisitedStationsStatTracker : StatTracker
 
 	public override string Value() => $"{CurrentCount}";
 	public int CurrentCount => _stations.Keys.Count(stationName => _visitedStations.Contains(stationName));
+	public override IReadOnlyList<DetailEntry> Details() =>
+		_stations.Keys
+			.OrderBy(stationName => stationName)
+			.Select(stationName => new DetailEntry(stationName, _visitedStations.Contains(stationName) ? "Visited" : "Not Visited"))
+			.ToList();
 
 	protected override void SubscribeToEvents()
 	{
@@ -234,6 +336,9 @@ public sealed class VisitedStationsStatTracker : StatTracker
 	private SavedBool VisitedStation(string stationName) => SavedBool($"station_visited_{stationName}");
 }
 
+// TODO: this should track the distances traveled with each loco instead.
+// Then, the achievement can check that each distance > 0.
+// Suggestions: convert this to a DistanceWithLocoStatTracker and make each individual loco a detail
 public sealed class OperatedVehiclesStatTracker : StatTracker
 {
 	private static readonly Dictionary<TrainCarType, string> TrackableVehicles = new()
@@ -280,6 +385,11 @@ public sealed class OperatedVehiclesStatTracker : StatTracker
 
 	public override string Value() => $"{CurrentCount}";
 	public int CurrentCount => TrackableVehicles.Keys.Count(trainCarType => _operatedVehicles.Contains(trainCarType));
+	public override IReadOnlyList<DetailEntry> Details() =>
+		TrackableVehicles
+			.OrderBy(vehicle => vehicle.Value)
+			.Select(vehicle => new DetailEntry(vehicle.Value, _operatedVehicles.Contains(vehicle.Key) ? "Operated" : "Not Operated"))
+			.ToList();
 
 	protected override void SubscribeToEvents()
 	{
@@ -348,6 +458,67 @@ public sealed class OperatedVehiclesStatTracker : StatTracker
 	private SavedBool OperatedVehicle(TrainCarType trainCarType) => SavedBool($"vehicle_operated_{trainCarType}");
 }
 
+public sealed class JunctionsSwitchedStatTracker : StatTracker
+{
+	private readonly SavedInt _junctionsSwitched;
+	private Junction[] _junctions = Array.Empty<Junction>();
+
+	public override string Id => "junctions_switched";
+	public override string Title => "Junctions Switched";
+
+	public JunctionsSwitchedStatTracker()
+	{
+		_junctionsSwitched = SavedInt("junctions_switched");
+	}
+
+	public override string Value() => $"{CurrentCount}";
+	public int CurrentCount => _junctionsSwitched.Value;
+
+	protected override void SubscribeToEvents()
+	{
+		RailTrackRegistryBase? registry = SingletonBehaviour<RailTrackRegistryBase>.Instance;
+		if (registry == null)
+		{
+			Main.Warning("Junctions Switched: RailTrackRegistryBase instance was not available.");
+			return;
+		}
+
+		_junctions = registry.OrderedJunctions ?? Array.Empty<Junction>();
+		Subscribe(
+			SubscribeToJunctions,
+			UnsubscribeFromJunctions
+		);
+	}
+
+	private void SubscribeToJunctions()
+	{
+		foreach (Junction junction in _junctions)
+		{
+			if (junction != null)
+			{
+				junction.Switched += OnJunctionSwitched;
+			}
+		}
+	}
+
+	private void UnsubscribeFromJunctions()
+	{
+		foreach (Junction junction in _junctions)
+		{
+			if (junction != null)
+			{
+				junction.Switched -= OnJunctionSwitched;
+			}
+		}
+	}
+
+	private void OnJunctionSwitched(Junction.SwitchMode mode, int selectedBranch)
+	{
+		_junctionsSwitched.Value++;
+		NotifyChanged();
+	}
+}
+
 public sealed class UnlockedGaragesStatTracker : StatTracker
 {
 	private static readonly Dictionary<Garage, string> TrackableGarages = new()
@@ -365,6 +536,11 @@ public sealed class UnlockedGaragesStatTracker : StatTracker
 
 	public override string Value() => $"{_unlockedGarages.Count}";
 	public int CurrentCount => _unlockedGarages.Count;
+	public override IReadOnlyList<DetailEntry> Details() =>
+		TrackableGarages
+			.OrderBy(garage => garage.Value)
+			.Select(garage => new DetailEntry(garage.Value, _unlockedGarages.Contains(garage.Key) ? "Unlocked" : "Locked"))
+			.ToList();
 
 	protected override void SubscribeToEvents()
 	{
@@ -430,8 +606,8 @@ public sealed class CompletedJobsStatTracker : StatTracker
 	private readonly SavedInt _shuntingLoadCount;
 	private readonly SavedInt _shuntingUnloadCount;
 
-	public override string Id => "completed_job_types";
-	public override string Title => "Job Types Completed";
+	public override string Id => "completed_jobs";
+	public override string Title => "Jobs Completed";
 
 	public CompletedJobsStatTracker()
 	{
@@ -447,6 +623,13 @@ public sealed class CompletedJobsStatTracker : StatTracker
 	public int EmptyHaulCount => _emptyHaulCount.Value;
 	public int ShuntingLoadCount => _shuntingLoadCount.Value;
 	public int ShuntingUnloadCount => _shuntingUnloadCount.Value;
+	public override IReadOnlyList<DetailEntry> Details() =>
+	[
+		new DetailEntry("Transport", $"{TransportCount}"),
+		new DetailEntry("Empty Haul", $"{EmptyHaulCount}"),
+		new DetailEntry("Shunting Load", $"{ShuntingLoadCount}"),
+		new DetailEntry("Shunting Unload", $"{ShuntingUnloadCount}")
+	];
 
 	protected override void SubscribeToEvents()
 	{

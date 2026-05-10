@@ -8,6 +8,12 @@ namespace StatsAndAchievements.Trackers;
 
 public abstract class StatTracker
 {
+	public readonly struct DetailEntry(string title, string value)
+	{
+		public string Title { get; } = title;
+		public string Value { get; } = value;
+	}
+
 	private readonly List<Action> _unsubscribeActions = new();
 
 	public event Action? Changed;
@@ -15,6 +21,7 @@ public abstract class StatTracker
 	public abstract string Id { get; }
 	public abstract string Title { get; }
 	public abstract string Value();
+	public virtual IReadOnlyList<DetailEntry> Details() => [];
 
 	internal void Attach()
 	{
@@ -131,5 +138,11 @@ public abstract class StatTracker
 		Subscribe(
 			() => Events.Actions.ItemAcquired += listener,
 			() => Events.Actions.ItemAcquired -= listener
+		);
+
+	protected void SubscribeToMoneySpent(Action<float, Events.MoneySpentSource> listener) =>
+		Subscribe(
+			() => Events.Actions.MoneySpent += listener,
+			() => Events.Actions.MoneySpent -= listener
 		);
 }

@@ -13,6 +13,7 @@
 		<Reference Include="CareerManagerAPI"/>
 		<Reference Include="DV.Inventory"/>
 		<Reference Include="DV.Localization"/>
+		<Reference Include="DV.RailTrack"/>
 		<Reference Include="DV.Simulation"/>
 		<Reference Include="DV.ThingTypes"/>
 		<Reference Include="DV.UI"/>

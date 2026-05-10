@@ -61,6 +61,8 @@ public class LinesScrollerScreen((TextMeshPro lhs, TextMeshPro rhs)[] range, Col
 		set
 		{
 			options = value;
+			ScrollOffset = 0;
+			RangeSelectedIndex = -1;
 			SyncOptionsToTMPros();
 			SelectedIndex = value.Length > 0 ? 0 : -1;
 		}
@@ -87,7 +89,8 @@ public class LinesScrollerScreen((TextMeshPro lhs, TextMeshPro rhs)[] range, Col
 	private void SyncOptionsToTMPros()
 	{
 		ArrowLeader.text = Options.Length > Range.Length - 1 && ScrollOffset != Options.Length - (Range.Length - 1) ? Leader : string.Empty; // 10 - 11 - 2
-		for (var idx = 0; idx < Math.Min(Range.Length - 1, Options.Length); idx++)
+		var visibleOptionCount = Math.Min(Range.Length - 1, Options.Length);
+		for (var idx = 0; idx < visibleOptionCount; idx++)
 		{
 			var curCanEnter = Options[idx + ScrollOffset].canEnter?.Invoke() ?? true;
 			var color = idx == RangeSelectedIndex ? TextColors.select : TextColors.deselect;
@@ -96,6 +99,14 @@ public class LinesScrollerScreen((TextMeshPro lhs, TextMeshPro rhs)[] range, Col
 				Range[idx].rhs.color = curCanEnter ? color : color * 0.5f;
 			Options[idx + ScrollOffset].lhs?.Invoke(Range[idx].lhs);
 			Options[idx + ScrollOffset].rhs?.Invoke(Range[idx].rhs);
+		}
+
+		for (var idx = visibleOptionCount; idx < Range.Length - 1; idx++)
+		{
+			Range[idx].lhs.text = string.Empty;
+			Range[idx].rhs.text = string.Empty;
+			Range[idx].lhs.color = TextColors.deselect;
+			Range[idx].rhs.color = TextColors.deselect;
 		}
 	}
 }
