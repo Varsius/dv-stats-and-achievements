@@ -6,6 +6,8 @@ public sealed class StatTrackerManager
 	public SpeedStatTracker Speed { get; }
 	public LicenseProgressStatTracker Licenses { get; }
 	public SteamEngineRequirementsStatTracker SteamEngineRequirements { get; }
+	public TeleportsStatTracker Teleports { get; }
+	public DistanceTravelledStatTracker DistanceTravelled { get; }
 	public MoneyEarnedStatTracker MoneyEarned { get; }
 	public MoneySpentStatTracker MoneySpent { get; }
 	public VisitedStationsStatTracker VisitedStations { get; }
@@ -21,6 +23,8 @@ public sealed class StatTrackerManager
 		Speed = new SpeedStatTracker();
 		Licenses = new LicenseProgressStatTracker();
 		SteamEngineRequirements = new SteamEngineRequirementsStatTracker();
+		Teleports = new TeleportsStatTracker();
+		DistanceTravelled = new DistanceTravelledStatTracker();
 		MoneyEarned = new MoneyEarnedStatTracker();
 		MoneySpent = new MoneySpentStatTracker();
 		VisitedStations = new VisitedStationsStatTracker();
@@ -37,6 +41,8 @@ public sealed class StatTrackerManager
 			JunctionsSwitched,
 			Licenses,
 			SteamEngineRequirements,
+			Teleports,
+			DistanceTravelled,
 			Speed,
 			UnlockedGarages,
 			MoneyEarned,

@@ -185,6 +185,187 @@ public sealed class MoneyEarnedStatTracker : StatTracker
 	}
 }
 
+public sealed class TeleportsStatTracker : StatTracker
+{
+	private readonly SavedInt _teleports;
+
+	public override string Id => "teleports";
+	public override string Title => "Teleports";
+
+	public TeleportsStatTracker()
+	{
+		_teleports = SavedInt("teleports");
+	}
+
+	public override string Value() => $"{CurrentCount}";
+	public int CurrentCount => _teleports.Value;
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToPlayerTeleportFinished(OnPlayerTeleportFinished);
+	}
+
+	private void OnPlayerTeleportFinished()
+	{
+		if (FastTravelController.IsFastTravelling)
+		{
+			return;
+		}
+
+		_teleports.Value++;
+		NotifyChanged();
+	}
+}
+
+public sealed class DistanceTravelledStatTracker : StatTracker
+{
+	private const float MaxWalkingDistancePerSample = 20f;
+
+	private readonly SavedFloat _walkingDistanceTravelled;
+	private readonly SavedFloat _teleportDistanceTravelled;
+	private Transform? _walkingReferenceParent;
+	private Vector3 _lastWalkingPosition;
+	private bool _hasLastWalkingPosition;
+	private Vector3 _teleportStartPosition;
+	private bool _hasTeleportStartPosition;
+
+	public override string Id => "distance_travelled";
+	public override string Title => "Distance Travelled";
+
+	public DistanceTravelledStatTracker()
+	{
+		_walkingDistanceTravelled = SavedFloat("distance_travelled_walking");
+		_teleportDistanceTravelled = SavedFloat("distance_travelled_teleport");
+	}
+
+	public override string Value() => FormatDistance(TotalDistanceTravelled);
+	public float TotalDistanceTravelled => WalkingDistanceTravelled + TeleportDistanceTravelled;
+	public float WalkingDistanceTravelled => _walkingDistanceTravelled.Value;
+	public float TeleportDistanceTravelled => _teleportDistanceTravelled.Value;
+	public override IReadOnlyList<DetailEntry> Details() =>
+	[
+		new DetailEntry("Total", FormatDistance(TotalDistanceTravelled)),
+		new DetailEntry("Walking", FormatDistance(WalkingDistanceTravelled)),
+		new DetailEntry("Teleport", FormatDistance(TeleportDistanceTravelled))
+	];
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToPlayerPositionChanged(OnPlayerPositionChanged);
+		SubscribeToPlayerTeleportStarted(OnPlayerTeleportStarted);
+		SubscribeToPlayerTeleportFinished(OnPlayerTeleportFinished);
+	}
+
+	private void OnPlayerPositionChanged(Vector3 _)
+	{
+		if (FastTravelController.IsFastTravelling || _hasTeleportStartPosition)
+		{
+			_hasLastWalkingPosition = false;
+			_walkingReferenceParent = null;
+			return;
+		}
+
+		Transform? playerTransform = PlayerManager.PlayerTransform;
+		if (playerTransform == null)
+		{
+			_hasLastWalkingPosition = false;
+			_walkingReferenceParent = null;
+			return;
+		}
+
+		Transform? currentParent = playerTransform.parent;
+		Vector3 currentPosition = currentParent != null ? playerTransform.localPosition : playerTransform.position;
+		if (_walkingReferenceParent != currentParent)
+		{
+			_walkingReferenceParent = currentParent;
+			_lastWalkingPosition = currentPosition;
+			_hasLastWalkingPosition = true;
+			return;
+		}
+
+		if (!_hasLastWalkingPosition)
+		{
+			_lastWalkingPosition = currentPosition;
+			_hasLastWalkingPosition = true;
+			return;
+		}
+
+		float walkingDistance = Vector3.Distance(_lastWalkingPosition, currentPosition);
+		_lastWalkingPosition = currentPosition;
+		if (walkingDistance <= 0f || walkingDistance > MaxWalkingDistancePerSample)
+		{
+			return;
+		}
+
+		_walkingDistanceTravelled.Value += walkingDistance;
+		NotifyChanged();
+	}
+
+	private void OnPlayerTeleportStarted()
+	{
+		_hasLastWalkingPosition = false;
+		_walkingReferenceParent = null;
+		if (FastTravelController.IsFastTravelling)
+		{
+			_hasTeleportStartPosition = false;
+			return;
+		}
+
+		Transform? playerTransform = PlayerManager.PlayerTransform;
+		if (playerTransform == null)
+		{
+			_hasTeleportStartPosition = false;
+			return;
+		}
+
+		_teleportStartPosition = playerTransform.position;
+		_hasTeleportStartPosition = true;
+	}
+
+	private void OnPlayerTeleportFinished()
+	{
+		_hasLastWalkingPosition = false;
+		_walkingReferenceParent = null;
+		if (FastTravelController.IsFastTravelling)
+		{
+			_hasTeleportStartPosition = false;
+			return;
+		}
+
+		if (!_hasTeleportStartPosition)
+		{
+			return;
+		}
+
+		Transform? playerTransform = PlayerManager.PlayerTransform;
+		if (playerTransform == null)
+		{
+			_hasTeleportStartPosition = false;
+			return;
+		}
+
+		float teleportDistance = Vector3.Distance(_teleportStartPosition, playerTransform.position);
+		_hasTeleportStartPosition = false;
+		if (teleportDistance <= 0f)
+		{
+			return;
+		}
+
+		_teleportDistanceTravelled.Value += teleportDistance;
+		NotifyChanged();
+	}
+
+	private static string FormatDistance(float distanceInMeters)
+	{
+		if (distanceInMeters < 1000f)
+		{
+			return $"{(int)distanceInMeters} m";
+		}
+
+		return $"{distanceInMeters / 1000f:0.0} km";
+	}
+}
+
 public sealed class MoneySpentStatTracker : StatTracker
 {
 	private readonly SavedFloat _itemShopMoneySpent;

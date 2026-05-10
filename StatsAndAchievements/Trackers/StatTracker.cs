@@ -145,4 +145,16 @@ public abstract class StatTracker
 			() => Events.Actions.MoneySpent += listener,
 			() => Events.Actions.MoneySpent -= listener
 		);
+
+	protected void SubscribeToPlayerTeleportStarted(Action listener) =>
+		Subscribe(
+			() => PlayerManager.PlayerTeleportStarted += listener,
+			() => PlayerManager.PlayerTeleportStarted -= listener
+		);
+
+	protected void SubscribeToPlayerTeleportFinished(Action listener) =>
+		Subscribe(
+			() => PlayerManager.PlayerTeleportFinished += listener,
+			() => PlayerManager.PlayerTeleportFinished -= listener
+		);
 }
