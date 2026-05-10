@@ -131,7 +131,7 @@ namespace StatsAndAchievements.Achievements
 				() => Events.Actions.JobLicenseAcquired -= listener
 			);
 
-		protected void SubscribeToCarChanged(Action<TrainCar> listener) =>
+		protected void SubscribeToCarChanged(Action<TrainCar?> listener) =>
 			Subscribe(
 				() => PlayerManager.CarChanged += listener,
 				() => PlayerManager.CarChanged -= listener

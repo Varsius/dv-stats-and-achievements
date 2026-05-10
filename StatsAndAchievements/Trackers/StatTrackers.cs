@@ -291,8 +291,13 @@ public sealed class OperatedVehiclesStatTracker : StatTracker
 		}
 	}
 
-	private void OnCarChanged(TrainCar trainCar)
+	private void OnCarChanged(TrainCar? trainCar)
 	{
+		if (trainCar == null)
+		{
+			return;
+		}
+
 		TrainCarType trainCarType = trainCar.carType;
 		if (!TrackableVehicles.ContainsKey(trainCarType))
 		{
