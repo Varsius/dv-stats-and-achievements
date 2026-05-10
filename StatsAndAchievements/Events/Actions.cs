@@ -13,6 +13,7 @@ namespace StatsAndAchievements.Events
 		public static event Action? PaintJobApplied;
 		public static event Action<Vector3>? PlayerPositionChanged;
 		public static event Action<string>? ItemAcquired;
+		public static event Action<float>? MoneySpent;
 
 		public static void InvokeJobLicenseAcquired(JobLicenseType_v2 license)
 		{
@@ -42,6 +43,11 @@ namespace StatsAndAchievements.Events
 		public static void InvokeItemAcquired(string itemName)
 		{
 			ItemAcquired?.Invoke(itemName);
+		}
+
+		public static void InvokeMoneySpent(float amount)
+		{
+			MoneySpent?.Invoke(amount);
 		}
 	}
 }

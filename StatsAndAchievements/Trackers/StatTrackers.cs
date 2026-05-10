@@ -173,6 +173,54 @@ public sealed class MoneyEarnedStatTracker : StatTracker
 	}
 }
 
+public sealed class MoneySpentStatTracker : StatTracker
+{
+	private readonly SavedFloat _itemShopMoneySpent;
+	private readonly SavedFloat _manualServiceMoneySpent;
+
+	public override string Id => "money_spent";
+	public override string Title => "Money Spent";
+
+	public MoneySpentStatTracker()
+	{
+		_itemShopMoneySpent = SavedFloat("money_spent_item_shop");
+		_manualServiceMoneySpent = SavedFloat("money_spent_manual_service");
+	}
+
+	public override string Value() => $"${(int)TotalValue}";
+	public float TotalValue => ItemShopValue + ManualServiceValue;
+	public float ItemShopValue => _itemShopMoneySpent.Value;
+	public float ManualServiceValue => _manualServiceMoneySpent.Value;
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToMoneySpent(OnMoneySpent);
+		SubscribeToPitStopCheckout(OnManualServiceCheckout);
+	}
+
+	private void OnMoneySpent(float amount)
+	{
+		if (amount <= 0f)
+		{
+			return;
+		}
+
+		_itemShopMoneySpent.Value += amount;
+		NotifyChanged();
+	}
+
+	private void OnManualServiceCheckout(float amount, bool hasPaid)
+	{
+		if (!hasPaid || amount <= 0f)
+		{
+			return;
+		}
+
+		_manualServiceMoneySpent.Value += amount;
+		NotifyChanged();
+	}
+}
+
 public sealed class VisitedStationsStatTracker : StatTracker
 {
 	private readonly Dictionary<string, StationController> _stations = new();

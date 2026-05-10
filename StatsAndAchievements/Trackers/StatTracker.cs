@@ -132,4 +132,10 @@ public abstract class StatTracker
 			() => Events.Actions.ItemAcquired += listener,
 			() => Events.Actions.ItemAcquired -= listener
 		);
+
+	protected void SubscribeToMoneySpent(Action<float> listener) =>
+		Subscribe(
+			() => Events.Actions.MoneySpent += listener,
+			() => Events.Actions.MoneySpent -= listener
+		);
 }

@@ -7,6 +7,7 @@ public sealed class StatTrackerManager
 	public LicenseProgressStatTracker Licenses { get; }
 	public SteamEngineRequirementsStatTracker SteamEngineRequirements { get; }
 	public MoneyEarnedStatTracker MoneyEarned { get; }
+	public MoneySpentStatTracker MoneySpent { get; }
 	public VisitedStationsStatTracker VisitedStations { get; }
 	public OperatedVehiclesStatTracker OperatedVehicles { get; }
 	public JunctionsSwitchedStatTracker JunctionsSwitched { get; }
@@ -21,6 +22,7 @@ public sealed class StatTrackerManager
 		Licenses = new LicenseProgressStatTracker();
 		SteamEngineRequirements = new SteamEngineRequirementsStatTracker();
 		MoneyEarned = new MoneyEarnedStatTracker();
+		MoneySpent = new MoneySpentStatTracker();
 		VisitedStations = new VisitedStationsStatTracker();
 		OperatedVehicles = new OperatedVehiclesStatTracker();
 		JunctionsSwitched = new JunctionsSwitchedStatTracker();
@@ -37,7 +39,8 @@ public sealed class StatTrackerManager
 			SteamEngineRequirements,
 			Speed,
 			UnlockedGarages,
-			MoneyEarned
+			MoneyEarned,
+			MoneySpent
 		};
 
 		foreach (StatTracker tracker in Trackers)
