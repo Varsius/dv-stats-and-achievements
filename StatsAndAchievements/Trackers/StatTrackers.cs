@@ -693,6 +693,38 @@ public sealed class DerailmentsStatTracker : StatTracker
 	}
 }
 
+public sealed class TurntableRotationStatTracker : StatTracker
+{
+	private readonly SavedFloat _degreesRotated;
+
+	public override string Id => "turntable_rotation";
+	public override string Title => "Turntable Rotation";
+
+	public TurntableRotationStatTracker()
+	{
+		_degreesRotated = SavedFloat("turntable_rotation_degrees");
+	}
+
+	public override string Value() => $"{(int)TotalDegrees}°";
+	public float TotalDegrees => _degreesRotated.Value;
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToTurntableRotated(OnTurntableRotated);
+	}
+
+	private void OnTurntableRotated(float degrees)
+	{
+		if (degrees <= 0f)
+		{
+			return;
+		}
+
+		_degreesRotated.Value += degrees;
+		NotifyChanged();
+	}
+}
+
 public sealed class VisitedStationsStatTracker : StatTracker
 {
 	private readonly Dictionary<string, StationController> _stations = new();

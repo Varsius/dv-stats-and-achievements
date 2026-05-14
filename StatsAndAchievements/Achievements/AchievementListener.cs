@@ -166,6 +166,12 @@ namespace StatsAndAchievements.Achievements
 				() => Events.Actions.ItemAcquired += listener,
 				() => Events.Actions.ItemAcquired -= listener
 			);
+
+		protected void SubscribeToTurntableRotated(Action<float> listener) =>
+			Subscribe(
+				() => Events.Actions.TurntableRotated += listener,
+				() => Events.Actions.TurntableRotated -= listener
+			);
 	}
 
 	public abstract class ProgressAchievementListener : AchievementListener

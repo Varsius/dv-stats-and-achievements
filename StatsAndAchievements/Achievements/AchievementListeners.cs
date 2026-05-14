@@ -447,6 +447,33 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
+	public sealed class GetRotatedAchievementListener : SecretConditionAchievementListener
+	{
+		private const float RequiredRotationDegrees = 360f;
+
+		public override string Id => "get_rotated";
+		public override string Title => "Get Rotated";
+		public override string Description => @"
+			Rotate a turntable by one full rotation
+			";
+
+		private TurntableRotationStatTracker Tracker => Main.statTrackerManager.TurntableRotation;
+
+		protected override void SubscribeToEvents()
+		{
+			SubscribeToTrackerChanged(Tracker, OnTrackerChanged);
+			OnTrackerChanged();
+		}
+
+		private void OnTrackerChanged()
+		{
+			if (!IsUnlocked() && Tracker.TotalDegrees >= RequiredRotationDegrees)
+			{
+				TriggerUnlock();
+			}
+		}
+	}
+
 	// TODO: When we are able to detect if passenger jobs is installed alongside this mod, then conditionally include regional/express job
 	public sealed class AllRounderAchievementListener : ProgressAchievementListener
 	{

@@ -170,6 +170,12 @@ public abstract class StatTracker
 			() => Events.Actions.PlayerDerailed -= listener
 		);
 
+	protected void SubscribeToTurntableRotated(Action<float> listener) =>
+		Subscribe(
+			() => Events.Actions.TurntableRotated += listener,
+			() => Events.Actions.TurntableRotated -= listener
+		);
+
 	protected void SubscribeToPlayerTeleportStarted(Action listener) =>
 		Subscribe(
 			() => PlayerManager.PlayerTeleportStarted += listener,

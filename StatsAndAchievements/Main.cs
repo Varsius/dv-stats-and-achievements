@@ -182,7 +182,8 @@ public class Main
 		if (settings.EnableSecretAchievements)
 		{
 			categories.Add(CreateCategory("secret", "Secret", [
-				typeof(HomeSweetHomeAchievementListener)
+				typeof(HomeSweetHomeAchievementListener),
+				typeof(GetRotatedAchievementListener)
 			]));
 		}
 

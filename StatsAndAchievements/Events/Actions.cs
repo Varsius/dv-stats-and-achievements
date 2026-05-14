@@ -30,6 +30,7 @@ namespace StatsAndAchievements.Events
 		public static event Action<float>? VehicleDamageIncurred;
 		public static event Action<ResourceType, float>? ServiceResourceBought;
 		public static event Action? PlayerDerailed;
+		public static event Action<float>? TurntableRotated;
 		public static event Action<bool>? FastTravelCompleted;
 
 		public static void InvokeJobLicenseAcquired(JobLicenseType_v2 license)
@@ -85,6 +86,11 @@ namespace StatsAndAchievements.Events
 		public static void InvokePlayerDerailed()
 		{
 			PlayerDerailed?.Invoke();
+		}
+
+		public static void InvokeTurntableRotated(float degrees)
+		{
+			TurntableRotated?.Invoke(degrees);
 		}
 
 		public static void InvokeFastTravelCompleted(bool withLoco)
