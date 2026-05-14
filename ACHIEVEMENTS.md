@@ -105,7 +105,7 @@ TODO: include Roberts achievements here
 
 # Stats Without Achievement
 
-- Amount of service resources (fuel, sand, oil, ...)
+- Amount of service resources (fuel, sand, oil, ...) ✅ (untested)
 - Number of derailments / rerails
 - Number of spawns / removals with radio
 - Total time honked / bell ringed

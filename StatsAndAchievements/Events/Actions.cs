@@ -28,6 +28,7 @@ namespace StatsAndAchievements.Events
 		public static event Action<float, MoneySpentSource>? MoneySpent;
 		public static event Action<float>? CargoDamageIncurred;
 		public static event Action<float>? VehicleDamageIncurred;
+		public static event Action<ResourceType, float>? ServiceResourceBought;
 		public static event Action<bool>? FastTravelCompleted;
 
 		public static void InvokeJobLicenseAcquired(JobLicenseType_v2 license)
@@ -73,6 +74,11 @@ namespace StatsAndAchievements.Events
 		public static void InvokeVehicleDamageIncurred(float amount)
 		{
 			VehicleDamageIncurred?.Invoke(amount);
+		}
+
+		public static void InvokeServiceResourceBought(ResourceType resourceType, float amount)
+		{
+			ServiceResourceBought?.Invoke(resourceType, amount);
 		}
 
 		public static void InvokeFastTravelCompleted(bool withLoco)

@@ -580,6 +580,92 @@ public sealed class DamageCausedStatTracker : StatTracker
 	}
 }
 
+public sealed class ServiceResourcesStatTracker : StatTracker
+{
+	private readonly SavedFloat _fuelAmount;
+	private readonly SavedFloat _sandAmount;
+	private readonly SavedFloat _oilAmount;
+	private readonly SavedFloat _waterAmount;
+	private readonly SavedFloat _coalAmount;
+	private readonly SavedFloat _electricChargeAmount;
+
+	public override string Id => "service_resources";
+	public override string Title => "Service Resources";
+
+	public ServiceResourcesStatTracker()
+	{
+		_fuelAmount = SavedFloat("service_resource_fuel_amount");
+		_sandAmount = SavedFloat("service_resource_sand_amount");
+		_oilAmount = SavedFloat("service_resource_oil_amount");
+		_waterAmount = SavedFloat("service_resource_water_amount");
+		_coalAmount = SavedFloat("service_resource_coal_amount");
+		_electricChargeAmount = SavedFloat("service_resource_electric_charge_amount");
+	}
+
+	public override string Value() => string.Empty;
+	public float FuelAmount => _fuelAmount.Value;
+	public float SandAmount => _sandAmount.Value;
+	public float OilAmount => _oilAmount.Value;
+	public float WaterAmount => _waterAmount.Value;
+	public float CoalAmount => _coalAmount.Value;
+	public float ElectricChargeAmount => _electricChargeAmount.Value;
+
+	public override IReadOnlyList<DetailEntry> Details() =>
+	[
+		new DetailEntry("Fuel", FormatAmount(FuelAmount, "L")),
+		new DetailEntry("Sand", FormatAmount(SandAmount, "kg")),
+		new DetailEntry("Oil", FormatAmount(OilAmount, "L")),
+		new DetailEntry("Water", FormatAmount(WaterAmount, "L")),
+		new DetailEntry("Coal", FormatAmount(CoalAmount, "kg")),
+		new DetailEntry("Electric Charge", FormatAmount(ElectricChargeAmount, "kWh"))
+	];
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToServiceResourceBought(OnServiceResourceBought);
+	}
+
+	private void OnServiceResourceBought(ResourceType resourceType, float amount)
+	{
+		if (amount <= 0f)
+		{
+			return;
+		}
+
+		switch (resourceType)
+		{
+			case ResourceType.Fuel:
+				_fuelAmount.Value += amount;
+				break;
+			case ResourceType.Sand:
+				_sandAmount.Value += amount;
+				break;
+			case ResourceType.Oil:
+				_oilAmount.Value += amount;
+				break;
+			case ResourceType.Water:
+				_waterAmount.Value += amount;
+				break;
+			case ResourceType.Coal:
+				_coalAmount.Value += amount;
+				break;
+			case ResourceType.ElectricCharge:
+				_electricChargeAmount.Value += amount;
+				break;
+			default:
+				return;
+		}
+
+		NotifyChanged();
+	}
+
+	private static string FormatAmount(float amount, string unit)
+	{
+		string formattedAmount = amount % 1f == 0f ? $"{(int)amount}" : $"{amount:0.0}";
+		return $"{formattedAmount} {unit}";
+	}
+}
+
 public sealed class VisitedStationsStatTracker : StatTracker
 {
 	private readonly Dictionary<string, StationController> _stations = new();
