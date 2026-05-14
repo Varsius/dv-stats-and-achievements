@@ -568,9 +568,6 @@ public sealed class VisitedStationsStatTracker : StatTracker
 	private SavedBool VisitedStation(string stationName) => SavedBool($"station_visited_{stationName}");
 }
 
-// TODO: this should track the distances traveled with each loco instead.
-// Then, the achievement can check that each distance > 0.
-// Suggestions: convert this to a DistanceWithLocoStatTracker and make each individual loco a detail
 public sealed class OperatedVehiclesStatTracker : StatTracker
 {
 	private static readonly Dictionary<TrainCarType, string> TrackableVehicles = new()
@@ -688,6 +685,129 @@ public sealed class OperatedVehiclesStatTracker : StatTracker
 	}
 
 	private SavedBool OperatedVehicle(TrainCarType trainCarType) => SavedBool($"vehicle_operated_{trainCarType}");
+}
+
+public sealed class DistanceDrivenStatTracker : StatTracker
+{
+	private static readonly Dictionary<TrainCarType, string> TrackableVehicles = new()
+	{
+		{ TrainCarType.LocoShunter, "DE2 Shunter" },
+		{ TrainCarType.LocoSteamHeavy, "282 Steam Locomotive" },
+		{ TrainCarType.LocoS060, "S060 Steam Locomotive" },
+		{ TrainCarType.LocoRailbus, "Railbus" },
+		{ TrainCarType.LocoDM1U, "DM1U" },
+		{ TrainCarType.LocoDiesel, "DE6" },
+		{ TrainCarType.LocoDH4, "DH4" },
+		{ TrainCarType.LocoDM3, "DM3" },
+		{ TrainCarType.LocoMicroshunter, "Microshunter" }
+	};
+
+	private readonly Dictionary<TrainCarType, SavedFloat> _forwardDistanceByVehicle = new();
+	private readonly Dictionary<TrainCarType, SavedFloat> _backwardDistanceByVehicle = new();
+	private float _lastSampleTime = -1f;
+
+	public override string Id => "distance_driven";
+	public override string Title => "Distance Driven";
+
+	public DistanceDrivenStatTracker()
+	{
+		foreach (TrainCarType trainCarType in TrackableVehicles.Keys)
+		{
+			_forwardDistanceByVehicle[trainCarType] = SavedFloat($"distance_driven_{trainCarType}_forward");
+			_backwardDistanceByVehicle[trainCarType] = SavedFloat($"distance_driven_{trainCarType}_backward");
+		}
+	}
+
+	public override string Value() => FormatDistance(TotalDistance);
+	public float TotalDistance => TrackableVehicles.Keys.Sum(GetVehicleTotalDistance);
+	public float TotalForwardDistance => TrackableVehicles.Keys.Sum(GetForwardDistance);
+	public float TotalBackwardDistance => TrackableVehicles.Keys.Sum(GetBackwardDistance);
+	public override IReadOnlyList<DetailEntry> Details() =>
+	[
+		new DetailEntry("Forward", FormatDistance(TotalForwardDistance)),
+		new DetailEntry("Backward", FormatDistance(TotalBackwardDistance)),
+		..
+		TrackableVehicles
+			.OrderBy(vehicle => vehicle.Value)
+			.Select(vehicle => new DetailEntry(vehicle.Value, FormatDistance(GetVehicleTotalDistance(vehicle.Key))))
+	];
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToPlayerPositionChanged(OnHeartbeat);
+		SubscribeToCarChanged(_ => ResetSampling());
+	}
+
+	private void OnHeartbeat(Vector3 _)
+	{
+		float currentTime = Time.time;
+		if (_lastSampleTime < 0f)
+		{
+			_lastSampleTime = currentTime;
+			return;
+		}
+
+		float deltaTime = currentTime - _lastSampleTime;
+		_lastSampleTime = currentTime;
+		if (deltaTime <= 0f || FastTravelController.IsFastTravelling)
+		{
+			return;
+		}
+
+		TrainCar? trainCar = PlayerManager.Car;
+		if (trainCar == null || !TrackableVehicles.ContainsKey(trainCar.carType))
+		{
+			return;
+		}
+
+		float signedSpeed = Vector3.Dot(trainCar.transform.forward, trainCar.GetVelocity());
+		float distance = Mathf.Abs(signedSpeed) * deltaTime;
+		if (distance <= 0f)
+		{
+			return;
+		}
+
+		if (signedSpeed >= 0f)
+		{
+			_forwardDistanceByVehicle[trainCar.carType].Value += distance;
+		}
+		else
+		{
+			_backwardDistanceByVehicle[trainCar.carType].Value += distance;
+		}
+
+		NotifyChanged();
+	}
+
+	private void ResetSampling()
+	{
+		_lastSampleTime = -1f;
+	}
+
+	private float GetVehicleTotalDistance(TrainCarType trainCarType)
+	{
+		return GetForwardDistance(trainCarType) + GetBackwardDistance(trainCarType);
+	}
+
+	private float GetForwardDistance(TrainCarType trainCarType)
+	{
+		return _forwardDistanceByVehicle[trainCarType].Value;
+	}
+
+	private float GetBackwardDistance(TrainCarType trainCarType)
+	{
+		return _backwardDistanceByVehicle[trainCarType].Value;
+	}
+
+	private static string FormatDistance(float distanceInMeters)
+	{
+		if (distanceInMeters < 1000f)
+		{
+			return $"{(int)distanceInMeters} m";
+		}
+
+		return $"{distanceInMeters / 1000f:0.0} km";
+	}
 }
 
 public sealed class JunctionsSwitchedStatTracker : StatTracker

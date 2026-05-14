@@ -13,6 +13,7 @@ public sealed class StatTrackerManager
 	public MoneySpentStatTracker MoneySpent { get; }
 	public VisitedStationsStatTracker VisitedStations { get; }
 	public OperatedVehiclesStatTracker OperatedVehicles { get; }
+	public DistanceDrivenStatTracker DistanceDriven { get; }
 	public JunctionsSwitchedStatTracker JunctionsSwitched { get; }
 	public UnlockedGaragesStatTracker UnlockedGarages { get; }
 	public CompletedJobsStatTracker CompletedJobs { get; }
@@ -31,6 +32,7 @@ public sealed class StatTrackerManager
 		MoneySpent = new MoneySpentStatTracker();
 		VisitedStations = new VisitedStationsStatTracker();
 		OperatedVehicles = new OperatedVehiclesStatTracker();
+		DistanceDriven = new DistanceDrivenStatTracker();
 		JunctionsSwitched = new JunctionsSwitchedStatTracker();
 		UnlockedGarages = new UnlockedGaragesStatTracker();
 		CompletedJobs = new CompletedJobsStatTracker();
@@ -40,6 +42,7 @@ public sealed class StatTrackerManager
 			CompletedJobs,
 			VisitedStations,
 			OperatedVehicles,
+			DistanceDriven,
 			JunctionsSwitched,
 			Licenses,
 			SteamEngineRequirements,
