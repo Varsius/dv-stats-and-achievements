@@ -78,35 +78,27 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
-	// TODO: trigger while honking and not only when the honking ends
 	public sealed class MaximumHonkAchievementListener : ConditionAchievementListener
 	{
+		private const float RequiredHonkSeconds = 5f;
+
 		public override string Id => "maximum_honk";
 		public override string Title => "Maximum Honk";
 		public override string Description => @"
 			Use the horn for a honk of at least 5 seconds
 			";
 
-		private float _honkStartedAt = 0.0f;
+		private HornAndBellTimeStatTracker Tracker => Main.statTrackerManager.HornAndBellTime;
 
 		protected override void SubscribeToEvents()
 		{
-			SubscribeToHonkStarted(OnHonkStarted);
-			SubscribeToHonkEnded(OnHonkEnded);
+			SubscribeToTrackerChanged(Tracker, OnTrackerChanged);
+			OnTrackerChanged();
 		}
 
-		void OnHonkStarted()
+		private void OnTrackerChanged()
 		{
-			if (IsUnlocked()) return;
-
-			_honkStartedAt = Time.time;
-		}
-
-		void OnHonkEnded()
-		{
-			if (IsUnlocked()) return;
-
-			if (Time.time - _honkStartedAt > 5f)
+			if (!IsUnlocked() && Tracker.CurrentHornSessionDuration >= RequiredHonkSeconds)
 			{
 				TriggerUnlock();
 			}

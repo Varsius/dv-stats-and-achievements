@@ -86,6 +86,18 @@ public abstract class StatTracker
 			() => Events.EventWatch.HonkEnded -= listener
 		);
 
+	protected void SubscribeToBellStarted(Action listener) =>
+		Subscribe(
+			() => Events.EventWatch.BellStarted += listener,
+			() => Events.EventWatch.BellStarted -= listener
+		);
+
+	protected void SubscribeToBellEnded(Action listener) =>
+		Subscribe(
+			() => Events.EventWatch.BellEnded += listener,
+			() => Events.EventWatch.BellEnded -= listener
+		);
+
 	protected void SubscribeToUnlockedGaragesChanged(Action<int> listener) =>
 		Subscribe(
 			() => Events.EventWatch.UnlockedGaragesChanged += listener,

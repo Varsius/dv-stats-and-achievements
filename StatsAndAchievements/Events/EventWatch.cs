@@ -1,3 +1,5 @@
+using DV.CabControls;
+using DV.HUD;
 using DV.Utils;
 using System;
 using System.Collections.Generic;
@@ -14,13 +16,17 @@ namespace StatsAndAchievements.Events
 		private float _elapsed;
 		private float _previousSpeed;
 		private float _previousHorn;
+		private float _previousBell;
 		private int _previousUnlockedGarages = -1;
 		private static TrainCar? _trainCar;
+		private ControlImplBase? _bellControl;
 		private Action? _unsubscribeFromTrainCarEvents;
 
 		public static event Action<float>? SpeedIncreased;
 		public static event Action? HonkStarted;
 		public static event Action? HonkEnded;
+		public static event Action? BellStarted;
+		public static event Action? BellEnded;
 		public static event Action<int>? UnlockedGaragesChanged;
 
 		void OnEnable()
@@ -35,11 +41,14 @@ namespace StatsAndAchievements.Events
 		void OnDisable()
 		{
 			Main.Log("watch disabled");
+			PlayerManager.CarChanged -= OnCarChanged;
+			ResetAudioControlStates();
 			_unsubscribeFromTrainCarEvents?.Invoke();
 		}
 
 		private void OnCarChanged(TrainCar? newCar)
 		{
+			ResetAudioControlStates();
 			_unsubscribeFromTrainCarEvents?.Invoke();
 			_unsubscribeFromTrainCarEvents = null;
 
@@ -58,6 +67,8 @@ namespace StatsAndAchievements.Events
 		{
 			var simFlow = trainCar.SimController.simFlow;
 			var unsubscribeActions = new List<Action>();
+			Action<GameObject> onExternalInteractableLoaded = OnExternalInteractableLoaded;
+			Action<GameObject> onExternalInteractableAboutToBeUnloaded = _ => UnsubscribeBellControl();
 
 			if (simFlow.TryGetPort("horn.HORN", out var simPortHornHorn))
 			{
@@ -78,6 +89,18 @@ namespace StatsAndAchievements.Events
 			{
 				Main.Warning("Could not get simPort sand.AMOUNT");
 			}
+
+			SubscribeToBellControl(trainCar.GetComponent<LocoControlsReader>());
+			SubscribeToBellControl(trainCar.loadedExternalInteractables?.GetComponent<LocoControlsReader>());
+
+			trainCar.ExternalInteractableLoaded += onExternalInteractableLoaded;
+			trainCar.ExternalInteractableAboutToBeUnloaded += onExternalInteractableAboutToBeUnloaded;
+			unsubscribeActions.Add(() =>
+			{
+				trainCar.ExternalInteractableLoaded -= onExternalInteractableLoaded;
+				trainCar.ExternalInteractableAboutToBeUnloaded -= onExternalInteractableAboutToBeUnloaded;
+				UnsubscribeBellControl();
+			});
 
 			return () =>
 			{
@@ -126,6 +149,68 @@ namespace StatsAndAchievements.Events
 				HonkStarted?.Invoke();
 			}
 			_previousHorn = value;
+		}
+
+		private void OnExternalInteractableLoaded(GameObject loadedExternalInteractables)
+		{
+			SubscribeToBellControl(loadedExternalInteractables?.GetComponent<LocoControlsReader>());
+		}
+
+		private void SubscribeToBellControl(LocoControlsReader? locoControlsReader)
+		{
+			if (locoControlsReader == null || locoControlsReader.bell == null)
+			{
+				return;
+			}
+
+			ControlImplBase? bellControl = locoControlsReader.bell.GetComponent<ControlImplBase>();
+			if (bellControl == null || bellControl == _bellControl)
+			{
+				return;
+			}
+
+			UnsubscribeBellControl();
+			_bellControl = bellControl;
+			_bellControl.ValueChanged += CheckBellValueChanged;
+			CheckBellValue(_bellControl.Value);
+		}
+
+		private void UnsubscribeBellControl()
+		{
+			if (_bellControl == null)
+			{
+				return;
+			}
+
+			_bellControl.ValueChanged -= CheckBellValueChanged;
+			_bellControl = null;
+			CheckBellValue(0f);
+		}
+
+		private void CheckBellValueChanged(ValueChangedEventArgs value)
+		{
+			CheckBellValue(value.newValue);
+		}
+
+		private void CheckBellValue(float value)
+		{
+			if (value <= 0.1f && _previousBell > 0.1f)
+			{
+				Main.Log("Bell end");
+				BellEnded?.Invoke();
+			}
+			if (value > 0.1f && _previousBell <= 0.1f)
+			{
+				Main.Log("Bell start");
+				BellStarted?.Invoke();
+			}
+			_previousBell = value;
+		}
+
+		private void ResetAudioControlStates()
+		{
+			CheckHornHorn(0f);
+			CheckBellValue(0f);
 		}
 
 		private void CheckSandAmount(float value)

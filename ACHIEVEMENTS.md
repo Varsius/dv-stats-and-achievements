@@ -84,6 +84,9 @@ Complete XXX orders
 ### Home Sweet Home ✅
 Visit your home garage
 
+### Get Rotated ✅
+Rotate a turntable by one full rotation
+
 ### Shopaholic
 Buy every purchasable item in the game
 

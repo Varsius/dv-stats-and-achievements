@@ -9,6 +9,7 @@ public sealed class StatTrackerManager
 	public TeleportsStatTracker Teleports { get; }
 	public FastTravelsStatTracker FastTravels { get; }
 	public DistanceTravelledStatTracker DistanceTravelled { get; }
+	public HornAndBellTimeStatTracker HornAndBellTime { get; }
 	public MoneyEarnedStatTracker MoneyEarned { get; }
 	public MoneySpentStatTracker MoneySpent { get; }
 	public DamageCausedStatTracker DamageCaused { get; }
@@ -33,6 +34,7 @@ public sealed class StatTrackerManager
 		Teleports = new TeleportsStatTracker();
 		FastTravels = new FastTravelsStatTracker();
 		DistanceTravelled = new DistanceTravelledStatTracker();
+		HornAndBellTime = new HornAndBellTimeStatTracker();
 		MoneyEarned = new MoneyEarnedStatTracker();
 		MoneySpent = new MoneySpentStatTracker();
 		DamageCaused = new DamageCausedStatTracker();
@@ -59,6 +61,7 @@ public sealed class StatTrackerManager
 			Teleports,
 			FastTravels,
 			DistanceTravelled,
+			HornAndBellTime,
 			Speed,
 			UnlockedGarages,
 			MoneyEarned,

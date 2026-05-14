@@ -749,6 +749,150 @@ public sealed class CommsRadioOperationsStatTracker : StatTracker
 	}
 }
 
+public sealed class HornAndBellTimeStatTracker : StatTracker
+{
+	private readonly SavedFloat _hornTimeSeconds;
+	private readonly SavedFloat _bellTimeSeconds;
+	private float _hornStartedAt = -1f;
+	private float _bellStartedAt = -1f;
+	private float _currentHornSessionCommittedSeconds;
+	private float _currentBellSessionCommittedSeconds;
+
+	public override string Id => "horn_bell_time";
+	public override string Title => "Horn / Bell Time";
+
+	public HornAndBellTimeStatTracker()
+	{
+		_hornTimeSeconds = SavedFloat("horn_time_seconds");
+		_bellTimeSeconds = SavedFloat("bell_time_seconds");
+	}
+
+	public override string Value() => FormatDuration(TotalTimeSeconds);
+	public float TotalTimeSeconds => HornTimeSeconds + BellTimeSeconds;
+	public float HornTimeSeconds => _hornTimeSeconds.Value + CurrentActiveElapsedSeconds(_hornStartedAt);
+	public float BellTimeSeconds => _bellTimeSeconds.Value + CurrentActiveElapsedSeconds(_bellStartedAt);
+	public float CurrentHornSessionDuration => CurrentSessionDuration(_hornStartedAt, _currentHornSessionCommittedSeconds);
+	public float CurrentBellSessionDuration => CurrentSessionDuration(_bellStartedAt, _currentBellSessionCommittedSeconds);
+
+	public override IReadOnlyList<DetailEntry> Details() =>
+	[
+		new DetailEntry("Total", FormatDuration(TotalTimeSeconds)),
+		new DetailEntry("Horn", FormatDuration(HornTimeSeconds)),
+		new DetailEntry("Bell", FormatDuration(BellTimeSeconds))
+	];
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToHonkStarted(OnHonkStarted);
+		SubscribeToHonkEnded(OnHonkEnded);
+		SubscribeToBellStarted(OnBellStarted);
+		SubscribeToBellEnded(OnBellEnded);
+		// TODO: think about replacing with the event watch events
+		SubscribeToPlayerPositionChanged(OnHeartbeat);
+	}
+
+	private void OnHonkStarted()
+	{
+		if (_hornStartedAt >= 0f)
+		{
+			return;
+		}
+
+		_hornStartedAt = Time.time;
+		_currentHornSessionCommittedSeconds = 0f;
+		NotifyChanged();
+	}
+
+	private void OnHonkEnded()
+	{
+		FlushHornTime(keepActive: false);
+		_currentHornSessionCommittedSeconds = 0f;
+		NotifyChanged();
+	}
+
+	private void OnBellStarted()
+	{
+		if (_bellStartedAt >= 0f)
+		{
+			return;
+		}
+
+		_bellStartedAt = Time.time;
+		_currentBellSessionCommittedSeconds = 0f;
+		NotifyChanged();
+	}
+
+	private void OnBellEnded()
+	{
+		FlushBellTime(keepActive: false);
+		_currentBellSessionCommittedSeconds = 0f;
+		NotifyChanged();
+	}
+
+	private void OnHeartbeat(Vector3 _)
+	{
+		bool changed = FlushHornTime(keepActive: true) | FlushBellTime(keepActive: true);
+		if (changed)
+		{
+			NotifyChanged();
+		}
+	}
+
+	private bool FlushHornTime(bool keepActive)
+	{
+		return FlushActiveTime(_hornTimeSeconds, ref _hornStartedAt, ref _currentHornSessionCommittedSeconds, keepActive);
+	}
+
+	private bool FlushBellTime(bool keepActive)
+	{
+		return FlushActiveTime(_bellTimeSeconds, ref _bellStartedAt, ref _currentBellSessionCommittedSeconds, keepActive);
+	}
+
+	private static bool FlushActiveTime(SavedFloat totalTime, ref float startedAt, ref float committedSessionTime, bool keepActive)
+	{
+		if (startedAt < 0f)
+		{
+			return false;
+		}
+
+		float elapsed = Time.time - startedAt;
+		if (elapsed > 0f)
+		{
+			totalTime.Value += elapsed;
+			committedSessionTime += elapsed;
+		}
+
+		startedAt = keepActive ? Time.time : -1f;
+		return elapsed > 0f;
+	}
+
+	private static float CurrentActiveElapsedSeconds(float startedAt)
+	{
+		return startedAt >= 0f ? Mathf.Max(0f, Time.time - startedAt) : 0f;
+	}
+
+	private static float CurrentSessionDuration(float startedAt, float committedSessionTime)
+	{
+		return committedSessionTime + CurrentActiveElapsedSeconds(startedAt);
+	}
+
+	private static string FormatDuration(float seconds)
+	{
+		if (seconds < 60f)
+		{
+			return $"{(int)seconds} s";
+		}
+
+		TimeSpan duration = TimeSpan.FromSeconds(seconds);
+		if (duration.TotalHours >= 1d)
+		{
+			return $"{(int)duration.TotalHours}:{duration.Minutes:00}:{duration.Seconds:00}";
+		}
+
+		return $"{duration.Minutes}:{duration.Seconds:00}";
+	}
+}
+
 public sealed class TurntableRotationStatTracker : StatTracker
 {
 	private readonly SavedFloat _degreesRotated;
