@@ -666,6 +666,33 @@ public sealed class ServiceResourcesStatTracker : StatTracker
 	}
 }
 
+public sealed class DerailmentsStatTracker : StatTracker
+{
+	private readonly SavedInt _derailmentCount;
+
+	public override string Id => "derailments";
+	public override string Title => "Derailments";
+
+	public DerailmentsStatTracker()
+	{
+		_derailmentCount = SavedInt("derailment_count");
+	}
+
+	public override string Value() => $"{CurrentCount}";
+	public int CurrentCount => _derailmentCount.Value;
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToPlayerDerailed(OnPlayerDerailed);
+	}
+
+	private void OnPlayerDerailed()
+	{
+		_derailmentCount.Value++;
+		NotifyChanged();
+	}
+}
+
 public sealed class VisitedStationsStatTracker : StatTracker
 {
 	private readonly Dictionary<string, StationController> _stations = new();

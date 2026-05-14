@@ -164,6 +164,12 @@ public abstract class StatTracker
 			() => Events.Actions.ServiceResourceBought -= listener
 		);
 
+	protected void SubscribeToPlayerDerailed(Action listener) =>
+		Subscribe(
+			() => Events.Actions.PlayerDerailed += listener,
+			() => Events.Actions.PlayerDerailed -= listener
+		);
+
 	protected void SubscribeToPlayerTeleportStarted(Action listener) =>
 		Subscribe(
 			() => PlayerManager.PlayerTeleportStarted += listener,
