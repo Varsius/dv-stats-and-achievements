@@ -14,6 +14,7 @@ public sealed class StatTrackerManager
 	public DamageCausedStatTracker DamageCaused { get; }
 	public ServiceResourcesStatTracker ServiceResources { get; }
 	public DerailmentsStatTracker Derailments { get; }
+	public CommsRadioOperationsStatTracker CommsRadioOperations { get; }
 	public TurntableRotationStatTracker TurntableRotation { get; }
 	public VisitedStationsStatTracker VisitedStations { get; }
 	public OperatedVehiclesStatTracker OperatedVehicles { get; }
@@ -37,6 +38,7 @@ public sealed class StatTrackerManager
 		DamageCaused = new DamageCausedStatTracker();
 		ServiceResources = new ServiceResourcesStatTracker();
 		Derailments = new DerailmentsStatTracker();
+		CommsRadioOperations = new CommsRadioOperationsStatTracker();
 		TurntableRotation = new TurntableRotationStatTracker();
 		VisitedStations = new VisitedStationsStatTracker();
 		OperatedVehicles = new OperatedVehiclesStatTracker();
@@ -64,6 +66,7 @@ public sealed class StatTrackerManager
 			DamageCaused,
 			ServiceResources,
 			Derailments,
+			CommsRadioOperations,
 			TurntableRotation
 		};
 

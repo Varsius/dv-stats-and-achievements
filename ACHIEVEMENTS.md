@@ -105,8 +105,6 @@ TODO: include Roberts achievements here
 
 # Stats Without Achievement
 
-- Number of derailments ✅ (untested)
-- Number of spawns / removals with radio
 - Total time honked / bell ringed
 - Number of motors started
 - Number of jobs cancelled

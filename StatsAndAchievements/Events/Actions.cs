@@ -17,6 +17,13 @@ namespace StatsAndAchievements.Events
 		CommsRadioUtilityVehicleSummon
 	}
 
+	public enum CommsRadioActionType
+	{
+		Rerail,
+		CarRemoval,
+		UtilityVehicleSummon
+	}
+
 	public static class Actions
 	{
 		public static event Action<JobLicenseType_v2>? JobLicenseAcquired;
@@ -32,6 +39,7 @@ namespace StatsAndAchievements.Events
 		public static event Action? PlayerDerailed;
 		public static event Action<float>? TurntableRotated;
 		public static event Action<bool>? FastTravelCompleted;
+		public static event Action<CommsRadioActionType>? CommsRadioActionPerformed;
 
 		public static void InvokeJobLicenseAcquired(JobLicenseType_v2 license)
 		{
@@ -96,6 +104,11 @@ namespace StatsAndAchievements.Events
 		public static void InvokeFastTravelCompleted(bool withLoco)
 		{
 			FastTravelCompleted?.Invoke(withLoco);
+		}
+
+		public static void InvokeCommsRadioActionPerformed(CommsRadioActionType actionType)
+		{
+			CommsRadioActionPerformed?.Invoke(actionType);
 		}
 	}
 }

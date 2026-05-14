@@ -6,14 +6,18 @@ using HarmonyLib;
 
 namespace StatsAndAchievements.Patches;
 
+// TODO: this vibe-coded pile works but I do not like the way it is written
+// AI: remove shouldTrackAction and prefer clearity over duplication avoidance
 internal readonly struct CommsRadioMoneySpentState
 {
-	public CommsRadioMoneySpentState(float amount, double previousMoney)
+	public CommsRadioMoneySpentState(bool shouldTrackAction, float amount, double previousMoney)
 	{
+		ShouldTrackAction = shouldTrackAction;
 		Amount = amount;
 		PreviousMoney = previousMoney;
 	}
 
+	public bool ShouldTrackAction { get; }
 	public float Amount { get; }
 	public double PreviousMoney { get; }
 }
@@ -25,14 +29,15 @@ internal static class RerailControllerMoneySpentPatch
 	[HarmonyPrefix]
 	private static void OnUsePrefix(RerailController __instance, float ___rerailPrice, out CommsRadioMoneySpentState __state)
 	{
-		__state = CommsRadioMoneySpentHelper.CaptureState(__instance.CurrentState == RerailController.State.ConfirmRerail ? ___rerailPrice : 0f);
+		bool shouldTrackAction = __instance.CurrentState == RerailController.State.ConfirmRerail;
+		__state = CommsRadioMoneySpentHelper.CaptureState(shouldTrackAction, shouldTrackAction ? ___rerailPrice : 0f);
 	}
 
 	[HarmonyPatch(nameof(RerailController.OnUse))]
 	[HarmonyPostfix]
 	private static void OnUsePostfix(CommsRadioMoneySpentState __state)
 	{
-		CommsRadioMoneySpentHelper.InvokeIfMoneySpent(__state, Events.MoneySpentSource.CommsRadioRerail);
+		CommsRadioMoneySpentHelper.InvokeIfMoneySpent(__state, Events.MoneySpentSource.CommsRadioRerail, Events.CommsRadioActionType.Rerail);
 	}
 }
 
@@ -43,14 +48,15 @@ internal static class CommsRadioCarDeleterMoneySpentPatch
 	[HarmonyPrefix]
 	private static void OnUsePrefix(CommsRadioCarDeleter __instance, float ___removePrice, out CommsRadioMoneySpentState __state)
 	{
-		__state = CommsRadioMoneySpentHelper.CaptureState(__instance.CurrentState == CommsRadioCarDeleter.State.ConfirmDelete ? ___removePrice : 0f);
+		bool shouldTrackAction = __instance.CurrentState == CommsRadioCarDeleter.State.ConfirmDelete;
+		__state = CommsRadioMoneySpentHelper.CaptureState(shouldTrackAction, shouldTrackAction ? ___removePrice : 0f);
 	}
 
 	[HarmonyPatch(nameof(CommsRadioCarDeleter.OnUse))]
 	[HarmonyPostfix]
 	private static void OnUsePostfix(CommsRadioMoneySpentState __state)
 	{
-		CommsRadioMoneySpentHelper.InvokeIfMoneySpent(__state, Events.MoneySpentSource.CommsRadioCarRemoval);
+		CommsRadioMoneySpentHelper.InvokeIfMoneySpent(__state, Events.MoneySpentSource.CommsRadioCarRemoval, Events.CommsRadioActionType.CarRemoval);
 	}
 }
 
@@ -61,32 +67,39 @@ internal static class CommsRadioCrewVehicleMoneySpentPatch
 	[HarmonyPrefix]
 	private static void OnUsePrefix(CommsRadioCrewVehicle __instance, out CommsRadioMoneySpentState __state)
 	{
-		float amount = __instance.CurrentState == CommsRadioCrewVehicle.State.ConfirmSummon
+		bool shouldTrackAction = __instance.CurrentState == CommsRadioCrewVehicle.State.ConfirmSummon;
+		float amount = shouldTrackAction
 			? Traverse.Create(__instance).Property("SummonPrice").GetValue<float>()
 			: 0f;
-		__state = CommsRadioMoneySpentHelper.CaptureState(amount);
+		__state = CommsRadioMoneySpentHelper.CaptureState(shouldTrackAction, amount);
 	}
 
 	[HarmonyPatch(nameof(CommsRadioCrewVehicle.OnUse))]
 	[HarmonyPostfix]
 	private static void OnUsePostfix(CommsRadioMoneySpentState __state)
 	{
-		CommsRadioMoneySpentHelper.InvokeIfMoneySpent(__state, Events.MoneySpentSource.CommsRadioUtilityVehicleSummon);
+		CommsRadioMoneySpentHelper.InvokeIfMoneySpent(__state, Events.MoneySpentSource.CommsRadioUtilityVehicleSummon, Events.CommsRadioActionType.UtilityVehicleSummon);
 	}
 }
 
 internal static class CommsRadioMoneySpentHelper
 {
-	internal static CommsRadioMoneySpentState CaptureState(float amount)
+	internal static CommsRadioMoneySpentState CaptureState(bool shouldTrackAction, float amount)
 	{
 		double previousMoney = SingletonBehaviour<Inventory>.Instance?.PlayerMoney ?? 0d;
-		return new CommsRadioMoneySpentState(amount, previousMoney);
+		return new CommsRadioMoneySpentState(shouldTrackAction, amount, previousMoney);
 	}
 
-	internal static void InvokeIfMoneySpent(CommsRadioMoneySpentState state, Events.MoneySpentSource source)
+	internal static void InvokeIfMoneySpent(CommsRadioMoneySpentState state, Events.MoneySpentSource source, Events.CommsRadioActionType actionType)
 	{
+		if (!state.ShouldTrackAction)
+		{
+			return;
+		}
+
 		if (state.Amount <= 0f)
 		{
+			Events.Actions.InvokeCommsRadioActionPerformed(actionType);
 			return;
 		}
 
@@ -96,6 +109,7 @@ internal static class CommsRadioMoneySpentHelper
 			return;
 		}
 
+		Events.Actions.InvokeCommsRadioActionPerformed(actionType);
 		Events.Actions.InvokeMoneySpent(state.Amount, source);
 	}
 }

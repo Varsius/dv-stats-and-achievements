@@ -193,4 +193,10 @@ public abstract class StatTracker
 			() => Events.Actions.FastTravelCompleted += listener,
 			() => Events.Actions.FastTravelCompleted -= listener
 		);
+
+	protected void SubscribeToCommsRadioActionPerformed(Action<Events.CommsRadioActionType> listener) =>
+		Subscribe(
+			() => Events.Actions.CommsRadioActionPerformed += listener,
+			() => Events.Actions.CommsRadioActionPerformed -= listener
+		);
 }

@@ -693,6 +693,62 @@ public sealed class DerailmentsStatTracker : StatTracker
 	}
 }
 
+public sealed class CommsRadioOperationsStatTracker : StatTracker
+{
+	private readonly SavedInt _rerailCount;
+	private readonly SavedInt _carRemovalCount;
+	private readonly SavedInt _utilityVehicleSummonCount;
+
+	public override string Id => "comms_radio_operations";
+	public override string Title => "Comms Radio Operations";
+
+	public CommsRadioOperationsStatTracker()
+	{
+		_rerailCount = SavedInt("comms_radio_operation_rerail_count");
+		_carRemovalCount = SavedInt("comms_radio_operation_car_removal_count");
+		_utilityVehicleSummonCount = SavedInt("comms_radio_operation_utility_vehicle_summon_count");
+	}
+
+	public override string Value() => $"{TotalCount}";
+	public int TotalCount => RerailCount + CarRemovalCount + UtilityVehicleSummonCount;
+	public int RerailCount => _rerailCount.Value;
+	public int CarRemovalCount => _carRemovalCount.Value;
+	public int UtilityVehicleSummonCount => _utilityVehicleSummonCount.Value;
+
+	public override IReadOnlyList<DetailEntry> Details() =>
+	[
+		new DetailEntry("Total", $"{TotalCount}"),
+		new DetailEntry("Rerail", $"{RerailCount}"),
+		new DetailEntry("Car Removal", $"{CarRemovalCount}"),
+		new DetailEntry("Utility Vehicle Summon", $"{UtilityVehicleSummonCount}")
+	];
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToCommsRadioActionPerformed(OnCommsRadioActionPerformed);
+	}
+
+	private void OnCommsRadioActionPerformed(Events.CommsRadioActionType actionType)
+	{
+		switch (actionType)
+		{
+			case Events.CommsRadioActionType.Rerail:
+				_rerailCount.Value++;
+				break;
+			case Events.CommsRadioActionType.CarRemoval:
+				_carRemovalCount.Value++;
+				break;
+			case Events.CommsRadioActionType.UtilityVehicleSummon:
+				_utilityVehicleSummonCount.Value++;
+				break;
+			default:
+				return;
+		}
+
+		NotifyChanged();
+	}
+}
+
 public sealed class TurntableRotationStatTracker : StatTracker
 {
 	private readonly SavedFloat _degreesRotated;
