@@ -108,6 +108,4 @@ TODO: include Roberts achievements here
 
 # Stats Without Achievement
 
-- Total time honked / bell ringed
-- Number of motors started
 - Number of jobs cancelled

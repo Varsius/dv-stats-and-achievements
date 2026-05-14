@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DV.Logic.Job;
+using DV.Simulation.Cars;
 using DV.ThingTypes;
 using DV.ThingTypes.TransitionHelpers;
 using DV.Utils;
@@ -890,6 +891,76 @@ public sealed class HornAndBellTimeStatTracker : StatTracker
 		}
 
 		return $"{duration.Minutes}:{duration.Seconds:00}";
+	}
+}
+
+public sealed class LocoEnginesStartedStatTracker : StatTracker
+{
+	private readonly SavedInt _enginesStartedCount;
+	private BaseControlsOverrider? _currentControlsOverrider;
+
+	public override string Id => "loco_engines_started";
+	public override string Title => "Loco Engines Started";
+
+	public LocoEnginesStartedStatTracker()
+	{
+		_enginesStartedCount = SavedInt("loco_engines_started_count");
+	}
+
+	public override string Value() => $"{CurrentCount}";
+	public int CurrentCount => _enginesStartedCount.Value;
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToCarChanged(OnCarChanged);
+		Subscribe(() => { }, UnsubscribeFromCurrentReader);
+
+		if (PlayerManager.Car != null)
+		{
+			OnCarChanged(PlayerManager.Car);
+		}
+	}
+
+	private void OnCarChanged(TrainCar? trainCar)
+	{
+		UnsubscribeFromCurrentReader();
+
+		if (trainCar == null || !trainCar.IsLoco)
+		{
+			return;
+		}
+
+		BaseControlsOverrider? controlsOverrider = trainCar.SimController?.controlsOverrider;
+		if (controlsOverrider?.EngineOnReader == null)
+		{
+			return;
+		}
+
+		_currentControlsOverrider = controlsOverrider;
+		_currentControlsOverrider.EngineOnReader.StateChanged += OnEngineStateChanged;
+	}
+
+	private void OnEngineStateChanged(bool isOn)
+	{
+		if (!isOn)
+		{
+			return;
+		}
+
+		_enginesStartedCount.Value++;
+		NotifyChanged();
+	}
+
+	private void UnsubscribeFromCurrentReader()
+	{
+		if (_currentControlsOverrider?.EngineOnReader == null)
+		{
+			_currentControlsOverrider = null;
+			return;
+		}
+
+		_currentControlsOverrider.EngineOnReader.StateChanged -= OnEngineStateChanged;
+		_currentControlsOverrider = null;
 	}
 }
 
