@@ -63,6 +63,7 @@ public sealed class LicenseProgressStatTracker : StatTracker
 	}
 }
 
+// TODO: do not show in advanced stats screen
 public sealed class SteamEngineRequirementsStatTracker : StatTracker
 {
 	private readonly SavedBool _hasAcquiredSteamLicense;
@@ -1504,6 +1505,33 @@ public sealed class CompletedJobsStatTracker : StatTracker
 				return;
 		}
 
+		NotifyChanged();
+	}
+}
+
+public sealed class CancelledJobsStatTracker : StatTracker
+{
+	private readonly SavedInt _cancelledJobsCount;
+
+	public override string Id => "cancelled_jobs";
+	public override string Title => "Jobs Cancelled";
+
+	public CancelledJobsStatTracker()
+	{
+		_cancelledJobsCount = SavedInt("cancelled_jobs_count");
+	}
+
+	public override string Value() => $"{CurrentCount}";
+	public int CurrentCount => _cancelledJobsCount.Value;
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToJobCancellation(OnJobCancelled);
+	}
+
+	private void OnJobCancelled(Job _)
+	{
+		_cancelledJobsCount.Value++;
 		NotifyChanged();
 	}
 }

@@ -128,6 +128,12 @@ public abstract class StatTracker
 			() => Events.Actions.JobCompletion -= listener
 		);
 
+	protected void SubscribeToJobCancellation(Action<Job> listener) =>
+		Subscribe(
+			() => Events.Actions.JobCancellation += listener,
+			() => Events.Actions.JobCancellation -= listener
+		);
+
 	protected void SubscribeToPaintJobApplied(Action listener) =>
 		Subscribe(
 			() => Events.Actions.PaintJobApplied += listener,

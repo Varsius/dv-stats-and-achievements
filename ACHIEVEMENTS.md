@@ -105,7 +105,3 @@ Breaks overheated
 # Steam Engine Connoisseur
 
 TODO: include Roberts achievements here
-
-# Stats Without Achievement
-
-- Number of jobs cancelled

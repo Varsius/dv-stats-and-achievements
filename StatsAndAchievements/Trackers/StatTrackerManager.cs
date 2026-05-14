@@ -24,6 +24,7 @@ public sealed class StatTrackerManager
 	public JunctionsSwitchedStatTracker JunctionsSwitched { get; }
 	public UnlockedGaragesStatTracker UnlockedGarages { get; }
 	public CompletedJobsStatTracker CompletedJobs { get; }
+	public CancelledJobsStatTracker CancelledJobs { get; }
 
 	public IReadOnlyList<StatTracker> Trackers { get; }
 
@@ -50,10 +51,12 @@ public sealed class StatTrackerManager
 		JunctionsSwitched = new JunctionsSwitchedStatTracker();
 		UnlockedGarages = new UnlockedGaragesStatTracker();
 		CompletedJobs = new CompletedJobsStatTracker();
+		CancelledJobs = new CancelledJobsStatTracker();
 
 		Trackers = new StatTracker[]
 		{
 			CompletedJobs,
+			CancelledJobs,
 			VisitedStations,
 			OperatedVehicles,
 			DistanceDriven,

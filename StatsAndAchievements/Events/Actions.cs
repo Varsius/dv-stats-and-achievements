@@ -29,6 +29,7 @@ namespace StatsAndAchievements.Events
 		public static event Action<JobLicenseType_v2>? JobLicenseAcquired;
 		public static event Action<GeneralLicenseType_v2>? GeneralLicenseAcquired;
 		public static event Action<Job>? JobCompletion;
+		public static event Action<Job>? JobCancellation;
 		public static event Action? PaintJobApplied;
 		public static event Action<Vector3>? PlayerPositionChanged;
 		public static event Action<string>? ItemAcquired;
@@ -54,6 +55,11 @@ namespace StatsAndAchievements.Events
 		public static void InvokeJobCompletion(Job job)
 		{
 			JobCompletion?.Invoke(job);
+		}
+
+		public static void InvokeJobCancellation(Job job)
+		{
+			JobCancellation?.Invoke(job);
 		}
 
 		public static void InvokePaintJobApplied()
