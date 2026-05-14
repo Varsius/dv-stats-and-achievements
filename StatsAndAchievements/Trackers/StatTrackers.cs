@@ -418,6 +418,9 @@ public sealed class MoneySpentStatTracker : StatTracker
 	private readonly SavedFloat _careerManagerFeesMoneySpent;
 	private readonly SavedFloat _careerManagerLicensesMoneySpent;
 	private readonly SavedFloat _fastTravelMoneySpent;
+	private readonly SavedFloat _commsRadioRerailMoneySpent;
+	private readonly SavedFloat _commsRadioCarRemovalMoneySpent;
+	private readonly SavedFloat _commsRadioUtilityVehicleSummonMoneySpent;
 
 	public override string Id => "money_spent";
 	public override string Title => "Money Spent";
@@ -429,25 +432,33 @@ public sealed class MoneySpentStatTracker : StatTracker
 		_careerManagerFeesMoneySpent = SavedFloat("money_spent_career_manager_fees");
 		_careerManagerLicensesMoneySpent = SavedFloat("money_spent_career_manager_licenses");
 		_fastTravelMoneySpent = SavedFloat("money_spent_fast_travel");
+		_commsRadioRerailMoneySpent = SavedFloat("money_spent_comms_radio_rerail");
+		_commsRadioCarRemovalMoneySpent = SavedFloat("money_spent_comms_radio_car_removal");
+		_commsRadioUtilityVehicleSummonMoneySpent = SavedFloat("money_spent_comms_radio_utility_vehicle_summon");
 	}
 
 	public override string Value() => $"${(int)TotalValue}";
-	public float TotalValue => ItemShopValue + ManualServiceValue + CareerManagerFeesValue + CareerManagerLicensesValue + FastTravelValue;
+	public float TotalValue => ItemShopValue + ManualServiceValue + CareerManagerFeesValue + CareerManagerLicensesValue + FastTravelValue + CommsRadioRerailValue + CommsRadioCarRemovalValue + CommsRadioUtilityVehicleSummonValue;
 	public float ItemShopValue => _itemShopMoneySpent.Value;
 	public float ManualServiceValue => _manualServiceMoneySpent.Value;
 	public float CareerManagerFeesValue => _careerManagerFeesMoneySpent.Value;
 	public float CareerManagerLicensesValue => _careerManagerLicensesMoneySpent.Value;
 	public float FastTravelValue => _fastTravelMoneySpent.Value;
-	// TODO: Track comms radio payments.
+	public float CommsRadioRerailValue => _commsRadioRerailMoneySpent.Value;
+	public float CommsRadioCarRemovalValue => _commsRadioCarRemovalMoneySpent.Value;
+	public float CommsRadioUtilityVehicleSummonValue => _commsRadioUtilityVehicleSummonMoneySpent.Value;
 
 	public override IReadOnlyList<DetailEntry> Details() =>
 	[
 		new DetailEntry("Total", FormatMoney(TotalValue)),
 		new DetailEntry("Item Shop", FormatMoney(ItemShopValue)),
 		new DetailEntry("Manual Service", FormatMoney(ManualServiceValue)),
-		new DetailEntry("Career Manager Fees", FormatMoney(CareerManagerFeesValue)),
-		new DetailEntry("Career Manager Licenses", FormatMoney(CareerManagerLicensesValue)),
-		new DetailEntry("Fast Travel", FormatMoney(FastTravelValue))
+		new DetailEntry("Fees", FormatMoney(CareerManagerFeesValue)),
+		new DetailEntry("Licenses", FormatMoney(CareerManagerLicensesValue)),
+		new DetailEntry("Fast Travel", FormatMoney(FastTravelValue)),
+		new DetailEntry("Rerail", FormatMoney(CommsRadioRerailValue)),
+		new DetailEntry("Car Removal", FormatMoney(CommsRadioCarRemovalValue)),
+		new DetailEntry("Utility Vehicle Summon", FormatMoney(CommsRadioUtilityVehicleSummonValue))
 	];
 
 	protected override void SubscribeToEvents()
@@ -476,6 +487,15 @@ public sealed class MoneySpentStatTracker : StatTracker
 				break;
 			case Events.MoneySpentSource.FastTravel:
 				_fastTravelMoneySpent.Value += amount;
+				break;
+			case Events.MoneySpentSource.CommsRadioRerail:
+				_commsRadioRerailMoneySpent.Value += amount;
+				break;
+			case Events.MoneySpentSource.CommsRadioCarRemoval:
+				_commsRadioCarRemovalMoneySpent.Value += amount;
+				break;
+			case Events.MoneySpentSource.CommsRadioUtilityVehicleSummon:
+				_commsRadioUtilityVehicleSummonMoneySpent.Value += amount;
 				break;
 			default:
 				return;

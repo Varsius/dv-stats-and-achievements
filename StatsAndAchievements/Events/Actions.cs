@@ -11,7 +11,10 @@ namespace StatsAndAchievements.Events
 		ManualService,
 		CareerManagerFees,
 		CareerManagerLicense,
-		FastTravel
+		FastTravel,
+		CommsRadioRerail,
+		CommsRadioCarRemoval,
+		CommsRadioUtilityVehicleSummon
 	}
 
 	public static class Actions
