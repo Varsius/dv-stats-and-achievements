@@ -54,6 +54,17 @@ function ShouldSkipAssembly {
     return $true
 }
 
+# Check ilspycmd
+$IlspyCmd = Get-Command ilspycmd -ErrorAction SilentlyContinue
+
+if (-not $IlspyCmd) {
+    Write-Host "ilspycmd is not installed or not in PATH."
+    Write-Host ""
+    Write-Host "Install with:"
+    Write-Host "dotnet tool install --global ilspycmd"
+    exit 1
+}
+
 # Resolve game directory
 if ([string]::IsNullOrWhiteSpace($GameDirectory)) {
     $GameDirectory = Get-DvInstallDirFromTargets
@@ -64,7 +75,7 @@ if ([string]::IsNullOrWhiteSpace($GameDirectory)) {
 }
 
 if ([string]::IsNullOrWhiteSpace($GameDirectory)) {
-    Write-Error "No game directory provided and no DvInstallDir found in Directory.Build.targets"
+    Write-Host "No game directory provided and no DvInstallDir found in Directory.Build.targets"
     exit 1
 }
 
@@ -72,25 +83,14 @@ try {
     $GameDirectory = (Resolve-Path $GameDirectory).Path
 }
 catch {
-    Write-Error "Game directory does not exist: $GameDirectory"
+    Write-Host "Game directory does not exist: $GameDirectory"
     exit 1
 }
 
 $ManagedDir = Join-Path $GameDirectory "DerailValley_Data\Managed"
 
 if (!(Test-Path $ManagedDir)) {
-    Write-Error "Managed directory not found: $ManagedDir"
-    exit 1
-}
-
-# Check ilspycmd
-$IlspyCmd = Get-Command ilspycmd -ErrorAction SilentlyContinue
-
-if (-not $IlspyCmd) {
-    Write-Error "ilspycmd is not installed or not in PATH."
-    Write-Host ""
-    Write-Host "Install with:"
-    Write-Host "dotnet tool install --global ilspycmd"
+    Write-Host "Managed directory not found: $ManagedDir"
     exit 1
 }
 
@@ -113,7 +113,7 @@ if (-not $OutputDirectoryExisted) {
 $Dlls = Get-ChildItem -Path $ManagedDir -Filter "*.dll" | Sort-Object Name
 
 if ($Dlls.Count -eq 0) {
-    Write-Error "No DLLs found in $ManagedDir"
+    Write-Host "No DLLs found in $ManagedDir"
     exit 1
 }
 
@@ -131,7 +131,7 @@ foreach ($Dll in $Dlls) {
 }
 
 if ($DllsToProcess.Count -eq 0) {
-    Write-Error "No DLLs selected for decompilation"
+    Write-Host "No DLLs selected for decompilation"
     exit 1
 }
 
