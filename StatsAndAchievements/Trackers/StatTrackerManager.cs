@@ -11,6 +11,7 @@ public sealed class StatTrackerManager
 	public DistanceTravelledStatTracker DistanceTravelled { get; }
 	public MoneyEarnedStatTracker MoneyEarned { get; }
 	public MoneySpentStatTracker MoneySpent { get; }
+	public DamageCausedStatTracker DamageCaused { get; }
 	public VisitedStationsStatTracker VisitedStations { get; }
 	public OperatedVehiclesStatTracker OperatedVehicles { get; }
 	public DistanceDrivenStatTracker DistanceDriven { get; }
@@ -30,6 +31,7 @@ public sealed class StatTrackerManager
 		DistanceTravelled = new DistanceTravelledStatTracker();
 		MoneyEarned = new MoneyEarnedStatTracker();
 		MoneySpent = new MoneySpentStatTracker();
+		DamageCaused = new DamageCausedStatTracker();
 		VisitedStations = new VisitedStationsStatTracker();
 		OperatedVehicles = new OperatedVehiclesStatTracker();
 		DistanceDriven = new DistanceDrivenStatTracker();
@@ -52,7 +54,8 @@ public sealed class StatTrackerManager
 			Speed,
 			UnlockedGarages,
 			MoneyEarned,
-			MoneySpent
+			MoneySpent,
+			DamageCaused
 		};
 
 		foreach (StatTracker tracker in Trackers)

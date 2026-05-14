@@ -521,6 +521,65 @@ public sealed class MoneySpentStatTracker : StatTracker
 	}
 }
 
+public sealed class DamageCausedStatTracker : StatTracker
+{
+	private readonly SavedFloat _cargoDamageTotal;
+	private readonly SavedFloat _vehicleDamageTotal;
+
+	public override string Id => "damage_caused";
+	public override string Title => "Damage Caused";
+
+	public DamageCausedStatTracker()
+	{
+		_cargoDamageTotal = SavedFloat("cargo_damage_total");
+		_vehicleDamageTotal = SavedFloat("vehicle_damage_total");
+	}
+
+	public override string Value() => FormatMoney(TotalValue);
+	public float TotalValue => CargoDamageValue + VehicleDamageValue;
+	public float CargoDamageValue => _cargoDamageTotal.Value;
+	public float VehicleDamageValue => _vehicleDamageTotal.Value;
+
+	public override IReadOnlyList<DetailEntry> Details() =>
+	[
+		new DetailEntry("Cargo Damage", FormatMoney(CargoDamageValue)),
+		new DetailEntry("Vehicle Damage", FormatMoney(VehicleDamageValue))
+	];
+
+	protected override void SubscribeToEvents()
+	{
+		SubscribeToCargoDamageIncurred(OnCargoDamageIncurred);
+		SubscribeToVehicleDamageIncurred(OnVehicleDamageIncurred);
+	}
+
+	private void OnCargoDamageIncurred(float amount)
+	{
+		if (amount <= 0f)
+		{
+			return;
+		}
+
+		_cargoDamageTotal.Value += amount;
+		NotifyChanged();
+	}
+
+	private void OnVehicleDamageIncurred(float amount)
+	{
+		if (amount <= 0f)
+		{
+			return;
+		}
+
+		_vehicleDamageTotal.Value += amount;
+		NotifyChanged();
+	}
+
+	private static string FormatMoney(float amount)
+	{
+		return $"${(int)amount}";
+	}
+}
+
 public sealed class VisitedStationsStatTracker : StatTracker
 {
 	private readonly Dictionary<string, StationController> _stations = new();

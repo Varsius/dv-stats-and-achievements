@@ -146,6 +146,18 @@ public abstract class StatTracker
 			() => Events.Actions.MoneySpent -= listener
 		);
 
+	protected void SubscribeToCargoDamageIncurred(Action<float> listener) =>
+		Subscribe(
+			() => Events.Actions.CargoDamageIncurred += listener,
+			() => Events.Actions.CargoDamageIncurred -= listener
+		);
+
+	protected void SubscribeToVehicleDamageIncurred(Action<float> listener) =>
+		Subscribe(
+			() => Events.Actions.VehicleDamageIncurred += listener,
+			() => Events.Actions.VehicleDamageIncurred -= listener
+		);
+
 	protected void SubscribeToPlayerTeleportStarted(Action listener) =>
 		Subscribe(
 			() => PlayerManager.PlayerTeleportStarted += listener,

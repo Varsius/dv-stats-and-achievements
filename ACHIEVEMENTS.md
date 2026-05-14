@@ -105,9 +105,6 @@ TODO: include Roberts achievements here
 
 # Stats Without Achievement
 
-- Distance driven using each loco (forwards/backwards)
-- Money spent on comms radio ✅ (untested)
-- Total Cargo Damage
 - Amount of service resources (fuel, sand, oil, ...)
 - Number of derailments / rerails
 - Number of spawns / removals with radio
