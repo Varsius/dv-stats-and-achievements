@@ -8,6 +8,7 @@ namespace StatsAndAchievements.CareerManagerScreens;
 public class StatisticsScreen : ModularScreenHost
 {
 	private IReadOnlyList<StatTracker> _trackers = [];
+	private int? _returnSelectedIndex;
 
 	public StatisticsScreen()
 	{
@@ -62,6 +63,20 @@ public class StatisticsScreen : ModularScreenHost
 		}
 
 		Scroller?.SetOptions(options);
+
+		if (previous is TrackerDetailsScreen && _returnSelectedIndex.HasValue && Scroller != null)
+		{
+			int selectedIndex = _returnSelectedIndex.Value;
+			if (selectedIndex >= 0 && selectedIndex < _trackers.Count)
+			{
+				Scroller.SelectedIndex = selectedIndex;
+			}
+		}
+
+		if (previous is not TrackerDetailsScreen)
+		{
+			_returnSelectedIndex = null;
+		}
 	}
 	private void OnInput(InputAction action)
 	{
@@ -82,7 +97,7 @@ public class StatisticsScreen : ModularScreenHost
 				StatTracker tracker = _trackers[Scroller.SelectedIndex];
 				if (tracker.Details().Count > 0)
 				{
-					// TODO: add some kind of indicator, such that the users knows there is a submenu
+					_returnSelectedIndex = Scroller.SelectedIndex;
 					SwitchToScreen(new TrackerDetailsScreen(this, this, tracker));
 				}
 				break;
