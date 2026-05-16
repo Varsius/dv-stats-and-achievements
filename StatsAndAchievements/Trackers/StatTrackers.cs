@@ -1404,11 +1404,10 @@ public sealed class UnlockedGaragesStatTracker : StatTracker
 {
 	private static readonly Dictionary<Garage, string> TrackableGarages = new()
 	{
-		// TODO: rethink the display names, maybe use Bob, Dave, etc.
-		{ Garage.Bob, "BE2 Microshunter" },
-		{ Garage.Caboose, "Caboose" },
-		{ Garage.DM1U, "DM1U" },
-		{ Garage.DE6_Slug, "DE6 Slug" }
+		{ Garage.Bob, "Old Bob's Garage" },
+		{ Garage.Caboose, "Reginald's Garage" },
+		{ Garage.DM1U, "Olaf's Garage" },
+		{ Garage.DE6_Slug, "Steve's Garage" }
 	};
 
 	private readonly HashSet<Garage> _unlockedGarages = new();
