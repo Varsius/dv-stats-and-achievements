@@ -21,6 +21,7 @@ public abstract class StatTracker
 	public abstract string Id { get; }
 	public abstract string Title { get; }
 	public abstract string Value();
+	public virtual bool ShowInCareerManagerScreen => true;
 	public virtual IReadOnlyList<DetailEntry> Details() => [];
 
 	internal void Attach()

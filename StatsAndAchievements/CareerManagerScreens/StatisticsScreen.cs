@@ -1,5 +1,6 @@
 using DV.ServicePenalty.UI;
 using System.Collections.Generic;
+using System.Linq;
 using StatsAndAchievements.Trackers;
 
 namespace StatsAndAchievements.CareerManagerScreens;
@@ -40,7 +41,9 @@ public class StatisticsScreen : ModularScreenHost
 			return;
 		}
 
-		_trackers = Main.statTrackerManager.Trackers;
+		_trackers = Main.statTrackerManager.Trackers
+			.Where(tracker => tracker.ShowInCareerManagerScreen)
+			.ToList();
 
 		foreach (StatTracker tracker in _trackers)
 		{

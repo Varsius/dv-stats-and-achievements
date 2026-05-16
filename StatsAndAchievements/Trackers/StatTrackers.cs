@@ -63,7 +63,6 @@ public sealed class LicenseProgressStatTracker : StatTracker
 	}
 }
 
-// TODO: do not show in advanced stats screen
 public sealed class SteamEngineRequirementsStatTracker : StatTracker
 {
 	private readonly SavedBool _hasAcquiredSteamLicense;
@@ -73,6 +72,7 @@ public sealed class SteamEngineRequirementsStatTracker : StatTracker
 
 	public override string Id => "steamer_items_collected";
 	public override string Title => "Steamer Items Collected";
+	public override bool ShowInCareerManagerScreen => false;
 
 	public SteamEngineRequirementsStatTracker()
 	{
@@ -544,6 +544,7 @@ public sealed class DamageCausedStatTracker : StatTracker
 
 	public override IReadOnlyList<DetailEntry> Details() =>
 	[
+		new DetailEntry("Total", FormatMoney(TotalValue)),
 		new DetailEntry("Cargo Damage", FormatMoney(CargoDamageValue)),
 		new DetailEntry("Vehicle Damage", FormatMoney(VehicleDamageValue))
 	];
@@ -1144,7 +1145,7 @@ public sealed class OperatedVehiclesStatTracker : StatTracker
 	public override IReadOnlyList<DetailEntry> Details() =>
 		TrackableVehicles
 			.OrderBy(vehicle => vehicle.Value)
-			.Select(vehicle => new DetailEntry(vehicle.Value, _operatedVehicles.Contains(vehicle.Key) ? "Operated" : "Not Operated"))
+			.Select(vehicle => new DetailEntry(vehicle.Value, _operatedVehicles.Contains(vehicle.Key) ? "Yes" : "No"))
 			.ToList();
 
 	protected override void SubscribeToEvents()
@@ -1251,6 +1252,7 @@ public sealed class DistanceDrivenStatTracker : StatTracker
 	public float TotalBackwardDistance => TrackableVehicles.Keys.Sum(GetBackwardDistance);
 	public override IReadOnlyList<DetailEntry> Details() =>
 	[
+		new DetailEntry("Total", FormatDistance(TotalDistance)),
 		new DetailEntry("Forward", FormatDistance(TotalForwardDistance)),
 		new DetailEntry("Backward", FormatDistance(TotalBackwardDistance)),
 		..
@@ -1505,6 +1507,7 @@ public sealed class CompletedJobsStatTracker : StatTracker
 	public int ShuntingUnloadCount => _shuntingUnloadCount.Value;
 	public override IReadOnlyList<DetailEntry> Details() =>
 	[
+		new DetailEntry("Total", $"{TotalCompletedJobs}"),
 		new DetailEntry("Transport", $"{TransportCount}"),
 		new DetailEntry("Empty Haul", $"{EmptyHaulCount}"),
 		new DetailEntry("Shunting Load", $"{ShuntingLoadCount}"),
