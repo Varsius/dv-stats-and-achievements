@@ -44,10 +44,11 @@ public class StatisticsScreen : ModularScreenHost
 
 		foreach (StatTracker tracker in _trackers)
 		{
+			bool hasDetails = tracker.Details().Count > 0;
 			options.Add((
 				tmPro =>
 				{
-					tmPro.text = tracker.Title;
+					tmPro.text = hasDetails ? $"{tracker.Title}…" : tracker.Title;
 				},
 				tmPro =>
 				{

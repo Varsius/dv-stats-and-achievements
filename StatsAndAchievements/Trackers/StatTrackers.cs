@@ -895,6 +895,37 @@ public sealed class HornAndBellTimeStatTracker : StatTracker
 	}
 }
 
+public sealed class LoadingScreenTimeStatTracker : StatTracker
+{
+	private readonly SavedFloat _loadingScreenTimeSeconds;
+
+	public override string Id => "loading_screen_time";
+	public override string Title => "Loading Screen Time";
+
+	public LoadingScreenTimeStatTracker()
+	{
+		_loadingScreenTimeSeconds = SavedFloat("loading_screen_time_seconds");
+	}
+
+	public override string Value() => FormatDuration(_loadingScreenTimeSeconds.Value);
+
+	private static string FormatDuration(float seconds)
+	{
+		if (seconds < 60f)
+		{
+			return $"{(int)seconds} s";
+		}
+
+		TimeSpan duration = TimeSpan.FromSeconds(seconds);
+		if (duration.TotalHours >= 1d)
+		{
+			return $"{(int)duration.TotalHours}:{duration.Minutes:00}:{duration.Seconds:00}";
+		}
+
+		return $"{duration.Minutes}:{duration.Seconds:00}";
+	}
+}
+
 public sealed class LocoEnginesStartedStatTracker : StatTracker
 {
 	private readonly SavedInt _enginesStartedCount;
