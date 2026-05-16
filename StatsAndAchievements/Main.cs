@@ -167,8 +167,8 @@ public class Main
 		{
 			categories.Add(CreateCategory("advanced", "Advanced", [
 				typeof(SpeedDemonAchievementListener),
-				typeof(MarathonAchievementListener),
-				typeof(MaximumHonkAchievementListener)
+				// TODO: changing this into a milestone achievement might be a better fit, however then the name "Marathon" would not fit anymore
+				typeof(MarathonAchievementListener)
 			]));
 		}
 
@@ -183,7 +183,8 @@ public class Main
 		{
 			categories.Add(CreateCategory("secret", "Secret", [
 				typeof(HomeSweetHomeAchievementListener),
-				typeof(GetRotatedAchievementListener)
+				typeof(GetRotatedAchievementListener),
+				typeof(MaximumHonkAchievementListener)
 			]));
 		}
 

@@ -192,7 +192,7 @@ namespace StatsAndAchievements.Achievements
 		protected abstract float[] Milestones { get; }
 		protected abstract float CurrentValue { get; }
 
-		public override string Title => CurrentRank() > 0 ? $"{BaseTitle} {ToRoman(CurrentRank())}" : BaseTitle;
+		public override string Title => $"{BaseTitle} {ToRoman(DisplayRank())}";
 		public override string Description => CurrentRank() >= Milestones.Length
 			? MaxRankDescription
 			: GetMilestoneDescription(CurrentTarget());
@@ -205,6 +205,17 @@ namespace StatsAndAchievements.Achievements
 		protected int CurrentRank()
 		{
 			return CalculateRank(CurrentValue);
+		}
+
+		protected int DisplayRank()
+		{
+			int currentRank = CurrentRank();
+			if (currentRank >= Milestones.Length)
+			{
+				return Milestones.Length;
+			}
+
+			return currentRank + 1;
 		}
 
 		protected int CalculateRank(float value)

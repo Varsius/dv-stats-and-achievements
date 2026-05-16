@@ -13,3 +13,4 @@
 - Hot-Reloading of CareerManager
 - Give opinion and improvement suggestions on achievement unlocked notification (@Robert)
 - When going back in the CareerManager screens, the scroll index needs to be reset. Otherwise the previous screen is also "scrolled down"
+- Align scrollable indicator with base game

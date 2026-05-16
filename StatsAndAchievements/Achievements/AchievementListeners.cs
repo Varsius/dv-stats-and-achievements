@@ -49,9 +49,9 @@ namespace StatsAndAchievements.Achievements
 			Walk a marathon distance
 			";
 
-		public override string Value() => FormatDistance(Tracker.WalkingDistanceTravelled);
+		public override string Value() => FormatDistanceValue(Tracker.WalkingDistanceTravelled);
 		public override string Target() => "42.2 km";
-		public override string Progress() => $"{FormatDistance(Tracker.WalkingDistanceTravelled)}/42.2 km";
+		public override string Progress() => $"{FormatDistanceValue(Tracker.WalkingDistanceTravelled)}/42.2 km";
 
 		private DistanceTravelledStatTracker Tracker => Main.statTrackerManager.DistanceTravelled;
 
@@ -72,9 +72,9 @@ namespace StatsAndAchievements.Achievements
 		// TODO: distance formatting is implement in several places.
 		// This should also include meters and abstractions for very large numbers
 		// The same is true for money values
-		private static string FormatDistance(float distanceInMeters)
+		private static string FormatDistanceValue(float distanceInMeters)
 		{
-			return $"{distanceInMeters / 1000f:0.0} km";
+			return $"{distanceInMeters / 1000f:0.0}";
 		}
 	}
 
