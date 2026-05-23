@@ -1,18 +1,25 @@
-## TODO before initial release
+# Stats and Achievements
 
-- Implement all milestones, advanced stats (think about missing ones: walk distance?, number of teleports)
-- Write the actual README.md
-- Playtest! Also look at achievement names/descriptions
+Adds a set of unique achievements and advanced statistic tracking to Derail Valley.
+
+TODO Banner
+
+## Settings
+
+Provides the option to enable/disable individual achievement categories. The entire achievement mechanism will not be initialized, if all categories are disabled.
+The settings do not affect the tracking of stats, you will always be able to access your lifetime statistics in the career manager.
+
+## Mod Compatibility
+
+This mod should be compatible with most mods.
+If you are having problems, please disable the other mods to check if they are conflicting.
 
 ## Roadmap
-- Booklets for achievement info and completion
-- Sound effect for achievement progress and completion
-- Progress notification for some achievements (not too spammy)
-- Garage achievement dynamic target count
-- Localization
-- Hot-Reloading of CareerManager
-- Give opinion and improvement suggestions on achievement unlocked notification (@Robert)
-- When going back in the CareerManager screens, the scroll index needs to be reset. Otherwise the previous screen is also "scrolled down"
-- Align scrollable indicator with base game
-- Profile level achievemetns: save game that is indepent from individual sessions / accumulates them
-- Global achievement completion by users. Needs a backend server. Should be opt-in (disabled by default)
+- 13 more achievements planned, with an additional set of steam locomotive achievements currently being conceptualized
+- Custom booklets for achievement info and completion dispensed from the carreer manager
+- Sound effects for achievement progress and completion
+- Localizations of names and descriptions of stats and achievements to support other language in addition to English
+- Profile-level save game that accumulates stats and achievements from individual sessions
+
+## Contributing
+Please report bugs or improvement suggestions by creating an issue.
