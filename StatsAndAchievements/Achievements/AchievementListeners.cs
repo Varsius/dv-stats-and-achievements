@@ -12,15 +12,17 @@ namespace StatsAndAchievements.Achievements
 {
 	public sealed class SpeedDemonAchievementListener : ProgressAchievementListener
 	{
+		private const float RequiredSpeedKmh = 150f;
+
 		public override string Id => "speed_demon";
 		public override string Title => "Speed Demon";
 		public override string Description => @"
-			Reach a speed of 100km/h with any locomotive
+			Reach a speed of " + RequiredSpeedKmh + @"km/h with any locomotive
 			";
 
 		public override string Value() => Tracker.Value();
-		public override string Target() => "150 km/h";
-		public override string Progress() => $"{(int)Tracker.CurrentSpeed}/150 km/h";
+		public override string Target() => $"{(int)RequiredSpeedKmh} km/h";
+		public override string Progress() => $"{(int)Tracker.CurrentSpeed}/{(int)RequiredSpeedKmh} km/h";
 
 		private SpeedStatTracker Tracker => Main.statTrackerManager.Speed;
 
@@ -32,7 +34,7 @@ namespace StatsAndAchievements.Achievements
 
 		private void OnTrackerChanged()
 		{
-			if (!IsUnlocked() && Tracker.CurrentSpeed >= 150.0f)
+			if (!IsUnlocked() && Tracker.CurrentSpeed >= RequiredSpeedKmh)
 			{
 				TriggerUnlock();
 			}
@@ -247,13 +249,15 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
-	public sealed class CompleteTheMuseumAchievementListener : ConditionAchievementListener
+	public sealed class CompleteTheMuseumAchievementListener : ProgressAchievementListener
 	{
 		public override string Id => "complete_the_museum";
 		public override string Title => "Master Curator";
 		public override string Description => @"
 			Complete all locomotive restorations
 			";
+		public override string Value() => $"{CompletedRestorationCount()}";
+		public override string Target() => $"{TotalRestorationCount()}";
 
 		protected override void SubscribeToEvents()
 		{
@@ -276,12 +280,22 @@ namespace StatsAndAchievements.Achievements
 		private void CheckMuseumCompletion()
 		{
 			if (IsUnlocked()) return;
-			if (LocoRestorationController.allLocoRestorationControllers.Count == 0) return;
+			if (TotalRestorationCount() == 0) return;
 
-			if (LocoRestorationController.allLocoRestorationControllers.All(controller => controller.State == LocoRestorationController.RestorationState.S10_PaintJobDone))
+			if (CompletedRestorationCount() >= TotalRestorationCount())
 			{
 				TriggerUnlock();
 			}
+		}
+
+		private static int TotalRestorationCount()
+		{
+			return LocoRestorationController.allLocoRestorationControllers.Count;
+		}
+
+		private static int CompletedRestorationCount()
+		{
+			return LocoRestorationController.allLocoRestorationControllers.Count(controller => controller.State == LocoRestorationController.RestorationState.S10_PaintJobDone);
 		}
 	}
 

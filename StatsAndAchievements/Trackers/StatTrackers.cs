@@ -27,11 +27,26 @@ public sealed class SpeedStatTracker : StatTracker
 
 	protected override void SubscribeToEvents()
 	{
-		SubscribeToSpeedIncreased(OnSpeedIncreased);
+		SubscribeToPlayerPositionChanged(OnHeartbeat);
+		SubscribeToCarChanged(_ => SampleCurrentSpeed());
+
+		SampleCurrentSpeed();
 	}
 
-	private void OnSpeedIncreased(float speed)
+	private void OnHeartbeat(Vector3 _)
 	{
+		SampleCurrentSpeed();
+	}
+
+	private void SampleCurrentSpeed()
+	{
+		TrainCar? trainCar = PlayerManager.Car;
+		if (trainCar == null)
+		{
+			return;
+		}
+
+		float speed = trainCar.GetVelocity().magnitude * 3.6f;
 		if (speed <= _maxSpeed.Value)
 		{
 			return;
@@ -1100,15 +1115,15 @@ public sealed class OperatedVehiclesStatTracker : StatTracker
 {
 	private static readonly Dictionary<TrainCarType, string> TrackableVehicles = new()
 	{
-		{ TrainCarType.LocoShunter, "DE2 Shunter" },
-		{ TrainCarType.LocoSteamHeavy, "282 Steam Locomotive" },
-		{ TrainCarType.LocoS060, "S060 Steam Locomotive" },
+		{ TrainCarType.LocoShunter, "DE2" },
+		{ TrainCarType.LocoSteamHeavy, "S282" },
+		{ TrainCarType.LocoS060, "S060" },
 		{ TrainCarType.LocoRailbus, "Railbus" },
 		{ TrainCarType.LocoDM1U, "DM1U" },
 		{ TrainCarType.LocoDiesel, "DE6" },
 		{ TrainCarType.LocoDH4, "DH4" },
 		{ TrainCarType.LocoDM3, "DM3" },
-		{ TrainCarType.LocoMicroshunter, "Microshunter" }
+		{ TrainCarType.LocoMicroshunter, "BE2" }
 	};
 
 	private static readonly Dictionary<TrainCarType, GeneralLicenseType?> RequiredLicenses = new()
@@ -1219,15 +1234,15 @@ public sealed class DistanceDrivenStatTracker : StatTracker
 {
 	private static readonly Dictionary<TrainCarType, string> TrackableVehicles = new()
 	{
-		{ TrainCarType.LocoShunter, "DE2 Shunter" },
-		{ TrainCarType.LocoSteamHeavy, "282 Steam Locomotive" },
-		{ TrainCarType.LocoS060, "S060 Steam Locomotive" },
+		{ TrainCarType.LocoShunter, "DE2" },
+		{ TrainCarType.LocoSteamHeavy, "S282" },
+		{ TrainCarType.LocoS060, "S060" },
 		{ TrainCarType.LocoRailbus, "Railbus" },
 		{ TrainCarType.LocoDM1U, "DM1U" },
 		{ TrainCarType.LocoDiesel, "DE6" },
 		{ TrainCarType.LocoDH4, "DH4" },
 		{ TrainCarType.LocoDM3, "DM3" },
-		{ TrainCarType.LocoMicroshunter, "Microshunter" }
+		{ TrainCarType.LocoMicroshunter, "BE2" }
 	};
 
 	private readonly Dictionary<TrainCarType, SavedFloat> _forwardDistanceByVehicle = new();
