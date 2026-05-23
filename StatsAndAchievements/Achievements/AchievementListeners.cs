@@ -19,8 +19,8 @@ namespace StatsAndAchievements.Achievements
 			";
 
 		public override string Value() => Tracker.Value();
-		public override string Target() => "100 km/h";
-		public override string Progress() => $"{(int)Tracker.CurrentSpeed}/100 km/h";
+		public override string Target() => "150 km/h";
+		public override string Progress() => $"{(int)Tracker.CurrentSpeed}/150 km/h";
 
 		private SpeedStatTracker Tracker => Main.statTrackerManager.Speed;
 
@@ -32,7 +32,7 @@ namespace StatsAndAchievements.Achievements
 
 		private void OnTrackerChanged()
 		{
-			if (!IsUnlocked() && Tracker.CurrentSpeed >= 100.0f)
+			if (!IsUnlocked() && Tracker.CurrentSpeed >= 150.0f)
 			{
 				TriggerUnlock();
 			}
@@ -78,7 +78,7 @@ namespace StatsAndAchievements.Achievements
 		}
 	}
 
-	public sealed class MaximumHonkAchievementListener : ConditionAchievementListener
+	public sealed class MaximumHonkAchievementListener : SecretConditionAchievementListener
 	{
 		private const float RequiredHonkSeconds = 5f;
 
@@ -250,7 +250,7 @@ namespace StatsAndAchievements.Achievements
 	public sealed class CompleteTheMuseumAchievementListener : ConditionAchievementListener
 	{
 		public override string Id => "complete_the_museum";
-		public override string Title => "Complete the Museum";
+		public override string Title => "Master Curator";
 		public override string Description => @"
 			Complete all locomotive restorations
 			";
@@ -352,7 +352,7 @@ namespace StatsAndAchievements.Achievements
 		public override string Id => "graphic_design_is_my_passion";
 		public override string Title => "Graphic Design is my Passion";
 		public override string Description => @"
-			Do a paint job
+			Restore the paint job of any demonstrator locomotive in the museum
 			";
 
 		protected override void SubscribeToEvents()
@@ -473,9 +473,19 @@ namespace StatsAndAchievements.Achievements
 
 		public override string Id => "all_rounder";
 		public override string Title => "All-Rounder";
-		public override string Description => @"
-				Complete a job of each type
-				";
+		public override string Description
+		{
+			get
+			{
+				List<string> remainingJobTypes = GetRemainingJobTypes();
+				if (remainingJobTypes.Count == 0)
+				{
+					return "Complete a job of each type";
+				}
+
+				return $"Complete a job of each type\n\nNot completed yet: {string.Join(", ", remainingJobTypes)}";
+			}
+		}
 
 		public override string Value() => $"{CountCompletedTypes()}";
 		public override string Target() => $"{RequiredJobTypeCount}";
@@ -504,6 +514,16 @@ namespace StatsAndAchievements.Achievements
 			if (Tracker.ShuntingLoadCount > 0) count++;
 			if (Tracker.ShuntingUnloadCount > 0) count++;
 			return count;
+		}
+
+		private List<string> GetRemainingJobTypes()
+		{
+			List<string> remainingJobTypes = new List<string>();
+			if (Tracker.TransportCount == 0) remainingJobTypes.Add("Transport");
+			if (Tracker.EmptyHaulCount == 0) remainingJobTypes.Add("Empty Haul");
+			if (Tracker.ShuntingLoadCount == 0) remainingJobTypes.Add("Shunting Load");
+			if (Tracker.ShuntingUnloadCount == 0) remainingJobTypes.Add("Shunting Unload");
+			return remainingJobTypes;
 		}
 	}
 
