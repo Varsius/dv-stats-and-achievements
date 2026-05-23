@@ -77,6 +77,15 @@ public class AchievementScreen : IModularScreen
 			));
 		}
 
+		if (_category.Id != "career")
+		{
+			options.Add((
+				tmPro => { tmPro.text = "Coming Soon"; },
+				tmPro => { tmPro.text = string.Empty; },
+				() => false
+			));
+		}
+
 		_host.Scroller?.SetOptions(options);
 	}
 

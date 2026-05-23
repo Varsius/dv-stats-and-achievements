@@ -14,3 +14,5 @@
 - Give opinion and improvement suggestions on achievement unlocked notification (@Robert)
 - When going back in the CareerManager screens, the scroll index needs to be reset. Otherwise the previous screen is also "scrolled down"
 - Align scrollable indicator with base game
+- Profile level achievemetns: save game that is indepent from individual sessions / accumulates them
+- Global achievement completion by users. Needs a backend server. Should be opt-in (disabled by default)

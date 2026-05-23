@@ -110,7 +110,15 @@ public class Main
 			achievementManager.Detach();
 		}
 
-		achievementManager = new AchievementManager(BuildAchievementCategories());
+		try
+		{
+			achievementManager = new AchievementManager(BuildAchievementCategories());
+		}
+		catch (Exception ex)
+		{
+			achievementManager = null!;
+			ModEntry.Logger.LogException("Failed to rebuild achievement manager:", ex);
+		}
 	}
 
 	public static void RebuildStatTrackerManager()
@@ -149,17 +157,17 @@ public class Main
 		{
 			categories.Add(CreateCategory("career", "Career", [
 				typeof(AllRounderAchievementListener),
-				typeof(VisitAllStationsAchievementListener),
-				typeof(CompleteTheMuseumAchievementListener),
-				typeof(DriveEveryVehicleAchievementListener),
+				typeof(SteamEngineRequirementsAchievementListener),
+				typeof(FirstFragileJobCompletionAchievementListener),
+				typeof(TheEngineerAchievementListener),
 				typeof(FirstHazmatJobCompletionAchievementListener),
 				typeof(FirstMilitaryJobCompletionAchievementListener),
-				typeof(FirstFragileJobCompletionAchievementListener),
-				typeof(TheEndAchievementListener),
-				typeof(TheEngineerAchievementListener),
-				typeof(GraphicDesignIsMyPassionAchievementListener),
 				typeof(GarageSaleEnthusiastAchievementListener),
-				typeof(SteamEngineRequirementsAchievementListener),
+				typeof(VisitAllStationsAchievementListener),
+				typeof(DriveEveryVehicleAchievementListener),
+				typeof(GraphicDesignIsMyPassionAchievementListener),
+				typeof(CompleteTheMuseumAchievementListener),
+				typeof(TheEndAchievementListener)
 			]));
 		}
 

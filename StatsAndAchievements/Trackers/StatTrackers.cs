@@ -889,10 +889,10 @@ public sealed class HornAndBellTimeStatTracker : StatTracker
 		TimeSpan duration = TimeSpan.FromSeconds(seconds);
 		if (duration.TotalHours >= 1d)
 		{
-			return $"{(int)duration.TotalHours}:{duration.Minutes:00}:{duration.Seconds:00}";
+			return $"{(int)duration.TotalHours}:{duration.Minutes:00}:{duration.Seconds:00} h";
 		}
 
-		return $"{duration.Minutes}:{duration.Seconds:00}";
+		return $"{duration.Minutes}:{duration.Seconds:00} min";
 	}
 }
 
@@ -920,10 +920,10 @@ public sealed class LoadingScreenTimeStatTracker : StatTracker
 		TimeSpan duration = TimeSpan.FromSeconds(seconds);
 		if (duration.TotalHours >= 1d)
 		{
-			return $"{(int)duration.TotalHours}:{duration.Minutes:00}:{duration.Seconds:00}";
+			return $"{(int)duration.TotalHours}:{duration.Minutes:00}:{duration.Seconds:00} h";
 		}
 
-		return $"{duration.Minutes}:{duration.Seconds:00}";
+		return $"{duration.Minutes}:{duration.Seconds:00} min";
 	}
 }
 
