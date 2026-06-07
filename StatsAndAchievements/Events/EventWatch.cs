@@ -1,5 +1,8 @@
 using DV.CabControls;
 using DV.HUD;
+using DV.Simulation.Cars;
+using DV.Simulation.Controllers;
+using DV.Simulation.Ports;
 using DV.Utils;
 using System;
 using System.Collections.Generic;
@@ -19,7 +22,9 @@ namespace StatsAndAchievements.Events
 		private float _previousBell;
 		private int _previousUnlockedGarages = -1;
 		private static TrainCar? _trainCar;
-		private ControlImplBase? _bellControl;
+		private bool _hornNeutralAt0 = true;
+		private string? _subscribedBellPortId;
+		private Action? _unsubscribeBellPort;
 		private Action? _unsubscribeFromTrainCarEvents;
 
 		public static event Action<float>? SpeedIncreased;
@@ -42,13 +47,17 @@ namespace StatsAndAchievements.Events
 		{
 			Main.Log("watch disabled");
 			PlayerManager.CarChanged -= OnCarChanged;
+			EndActiveAudioControls("watch disabled");
 			ResetAudioControlStates();
+			UnsubscribeBellPort();
 			_unsubscribeFromTrainCarEvents?.Invoke();
 		}
 
 		private void OnCarChanged(TrainCar? newCar)
 		{
+			EndActiveAudioControls("car changed");
 			ResetAudioControlStates();
+			UnsubscribeBellPort();
 			_unsubscribeFromTrainCarEvents?.Invoke();
 			_unsubscribeFromTrainCarEvents = null;
 
@@ -65,19 +74,32 @@ namespace StatsAndAchievements.Events
 
 		private Action SubscribeToTrainCarEvents(TrainCar trainCar)
 		{
-			var simFlow = trainCar.SimController.simFlow;
 			var unsubscribeActions = new List<Action>();
+			Action<GameObject> onInteriorLoaded = OnInteriorLoaded;
+			Action<GameObject> onInteriorAboutToBeUnloaded = _ => UnsubscribeBellPort();
 			Action<GameObject> onExternalInteractableLoaded = OnExternalInteractableLoaded;
-			Action<GameObject> onExternalInteractableAboutToBeUnloaded = _ => UnsubscribeBellControl();
+			Action<GameObject> onExternalInteractableAboutToBeUnloaded = _ => UnsubscribeBellPort();
 
-			if (simFlow.TryGetPort("horn.HORN", out var simPortHornHorn))
+			var simController = trainCar.SimController;
+			if (simController == null)
 			{
-				simPortHornHorn.ValueUpdatedInternally += CheckHornHorn;
-				unsubscribeActions.Add(() => simPortHornHorn.ValueUpdatedInternally -= CheckHornHorn);
+				Main.Warning("Train car has no SimController");
+				return () => { };
+			}
+
+			var simFlow = simController.simFlow;
+			HornControl? hornControl = simController.controlsOverrider?.Horn;
+			_hornNeutralAt0 = hornControl?.neutralAt0 ?? true;
+			string hornPortId = hornControl?.portId ?? "horn.HORN";
+			if (simFlow.TryGetPort(hornPortId, out var simPortHorn))
+			{
+				simPortHorn.ValueUpdatedInternally += CheckHornHorn;
+				unsubscribeActions.Add(() => simPortHorn.ValueUpdatedInternally -= CheckHornHorn);
+				_previousHorn = simPortHorn.Value;
 			}
 			else
 			{
-				Main.Warning("Could not get simPort horn.Horn");
+				Main.Warning($"Could not get simPort {hornPortId}");
 			}
 
 			if (simFlow.TryGetPort("sand.AMOUNT", out var simPortSandAmount))
@@ -90,16 +112,24 @@ namespace StatsAndAchievements.Events
 				Main.Warning("Could not get simPort sand.AMOUNT");
 			}
 
-			SubscribeToBellControl(trainCar.GetComponent<LocoControlsReader>());
-			SubscribeToBellControl(trainCar.loadedExternalInteractables?.GetComponent<LocoControlsReader>());
+			SubscribeToBellPort(simFlow, trainCar.GetComponent<LocoControlsReader>());
+			SubscribeToBellPort(simFlow, trainCar.loadedExternalInteractables?.GetComponent<LocoControlsReader>());
+			if (_unsubscribeBellPort == null)
+			{
+				SubscribeToBellControl(trainCar);
+			}
 
+			trainCar.InteriorLoaded += onInteriorLoaded;
+			trainCar.InteriorAboutToBeUnloaded += onInteriorAboutToBeUnloaded;
 			trainCar.ExternalInteractableLoaded += onExternalInteractableLoaded;
 			trainCar.ExternalInteractableAboutToBeUnloaded += onExternalInteractableAboutToBeUnloaded;
 			unsubscribeActions.Add(() =>
 			{
+				trainCar.InteriorLoaded -= onInteriorLoaded;
+				trainCar.InteriorAboutToBeUnloaded -= onInteriorAboutToBeUnloaded;
 				trainCar.ExternalInteractableLoaded -= onExternalInteractableLoaded;
 				trainCar.ExternalInteractableAboutToBeUnloaded -= onExternalInteractableAboutToBeUnloaded;
-				UnsubscribeBellControl();
+				UnsubscribeBellPort();
 			});
 
 			return () =>
@@ -138,14 +168,14 @@ namespace StatsAndAchievements.Events
 
 		private void CheckHornHorn(float value)
 		{
-			if (value <= 0.1f && _previousHorn > 0.1f)
+			bool wasActive = IsHornActive(_previousHorn);
+			bool isActive = IsHornActive(value);
+			if (!isActive && wasActive)
 			{
-				Main.Log("Honk end");
 				HonkEnded?.Invoke();
 			}
-			if (value > 0.1f && _previousHorn <= 0.1f)
+			if (isActive && !wasActive)
 			{
-				Main.Log("Honk start");
 				HonkStarted?.Invoke();
 			}
 			_previousHorn = value;
@@ -153,37 +183,93 @@ namespace StatsAndAchievements.Events
 
 		private void OnExternalInteractableLoaded(GameObject loadedExternalInteractables)
 		{
-			SubscribeToBellControl(loadedExternalInteractables?.GetComponent<LocoControlsReader>());
+			if (_trainCar?.SimController == null)
+			{
+				Main.Warning("External interactable loaded but train car SimController is missing");
+				return;
+			}
+
+			SubscribeToBellPort(_trainCar.SimController.simFlow, loadedExternalInteractables?.GetComponent<LocoControlsReader>());
+			if (_unsubscribeBellPort == null && _trainCar != null)
+			{
+				SubscribeToBellControl(_trainCar);
+			}
 		}
 
-		private void SubscribeToBellControl(LocoControlsReader? locoControlsReader)
+		private void OnInteriorLoaded(GameObject loadedInterior)
+		{
+			if (_trainCar?.SimController == null)
+			{
+				Main.Warning("Interior loaded but train car SimController is missing");
+				return;
+			}
+
+			SubscribeToBellPort(_trainCar.SimController.simFlow, loadedInterior?.GetComponent<LocoControlsReader>());
+			if (_unsubscribeBellPort == null && _trainCar != null)
+			{
+				SubscribeToBellControl(_trainCar);
+			}
+		}
+
+		private void SubscribeToBellPort(LocoSim.Implementations.SimulationFlow simFlow, LocoControlsReader? locoControlsReader)
 		{
 			if (locoControlsReader == null || locoControlsReader.bell == null)
 			{
 				return;
 			}
 
-			ControlImplBase? bellControl = locoControlsReader.bell.GetComponent<ControlImplBase>();
-			if (bellControl == null || bellControl == _bellControl)
+			InteractablePortFeeder? bellPortFeeder = locoControlsReader.bell.GetComponent<InteractablePortFeeder>();
+			if (bellPortFeeder == null || string.IsNullOrEmpty(bellPortFeeder.portId) || bellPortFeeder.portId == _subscribedBellPortId)
 			{
 				return;
 			}
 
-			UnsubscribeBellControl();
-			_bellControl = bellControl;
-			_bellControl.ValueChanged += CheckBellValueChanged;
-			CheckBellValue(_bellControl.Value);
+			if (!simFlow.TryGetPort(bellPortFeeder.portId, out var simPortBell))
+			{
+				Main.Warning($"Could not get simPort {bellPortFeeder.portId}");
+				return;
+			}
+
+			UnsubscribeBellPort();
+			_subscribedBellPortId = bellPortFeeder.portId;
+			_unsubscribeBellPort = () => simPortBell.ValueUpdatedInternally -= CheckBellValue;
+			simPortBell.ValueUpdatedInternally += CheckBellValue;
+			_previousBell = simPortBell.Value;
 		}
 
-		private void UnsubscribeBellControl()
+		private void SubscribeToBellControl(TrainCar trainCar)
 		{
-			if (_bellControl == null)
+			InteriorControlsManager? controlsManager =
+				trainCar.loadedInterior?.GetComponent<InteriorControlsManager>()
+				?? trainCar.loadedInterior?.GetComponentInChildren<InteriorControlsManager>()
+				?? trainCar.interior?.GetComponentInChildren<InteriorControlsManager>();
+			if (controlsManager == null)
 			{
 				return;
 			}
 
-			_bellControl.ValueChanged -= CheckBellValueChanged;
-			_bellControl = null;
+			if (!controlsManager.TryGetControl(InteriorControlsManager.ControlType.Bell, out var bellReference) || bellReference.controlImplBase == null)
+			{
+				return;
+			}
+
+			UnsubscribeBellPort();
+			_subscribedBellPortId = "control_fallback";
+			_unsubscribeBellPort = () => bellReference.controlImplBase.ValueChanged -= CheckBellValueChanged;
+			bellReference.controlImplBase.ValueChanged += CheckBellValueChanged;
+			_previousBell = bellReference.controlImplBase.Value;
+		}
+
+		private void UnsubscribeBellPort()
+		{
+			if (_unsubscribeBellPort == null)
+			{
+				return;
+			}
+
+			_unsubscribeBellPort.Invoke();
+			_unsubscribeBellPort = null;
+			_subscribedBellPortId = null;
 			CheckBellValue(0f);
 		}
 
@@ -196,12 +282,10 @@ namespace StatsAndAchievements.Events
 		{
 			if (value <= 0.1f && _previousBell > 0.1f)
 			{
-				Main.Log("Bell end");
 				BellEnded?.Invoke();
 			}
 			if (value > 0.1f && _previousBell <= 0.1f)
 			{
-				Main.Log("Bell start");
 				BellStarted?.Invoke();
 			}
 			_previousBell = value;
@@ -209,8 +293,31 @@ namespace StatsAndAchievements.Events
 
 		private void ResetAudioControlStates()
 		{
-			CheckHornHorn(0f);
-			CheckBellValue(0f);
+			_previousHorn = _hornNeutralAt0 ? 0f : 0.5f;
+			_previousBell = 0f;
+		}
+
+		private bool IsHornActive(float value)
+		{
+			if (_hornNeutralAt0)
+			{
+				return value > 0.1f;
+			}
+
+			return Mathf.Abs(value - 0.5f) > 0.1f;
+		}
+
+		private void EndActiveAudioControls(string reason)
+		{
+			if (IsHornActive(_previousHorn))
+			{
+				HonkEnded?.Invoke();
+			}
+
+			if (_previousBell > 0.1f)
+			{
+				BellEnded?.Invoke();
+			}
 		}
 
 		private void CheckSandAmount(float value)

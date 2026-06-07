@@ -805,7 +805,6 @@ public sealed class HornAndBellTimeStatTracker : StatTracker
 		SubscribeToHonkEnded(OnHonkEnded);
 		SubscribeToBellStarted(OnBellStarted);
 		SubscribeToBellEnded(OnBellEnded);
-		// TODO: think about replacing with the event watch events
 		SubscribeToPlayerPositionChanged(OnHeartbeat);
 	}
 
@@ -849,31 +848,39 @@ public sealed class HornAndBellTimeStatTracker : StatTracker
 
 	private void OnHeartbeat(Vector3 _)
 	{
-		bool changed = FlushHornTime(keepActive: true) | FlushBellTime(keepActive: true);
-		if (changed)
+		float hornCommitted = FlushHornTime(keepActive: true);
+		float bellCommitted = FlushBellTime(keepActive: true);
+		if (hornCommitted <= 0f && bellCommitted <= 0f)
 		{
-			NotifyChanged();
+			return;
 		}
+
+		NotifyChanged();
 	}
 
-	private bool FlushHornTime(bool keepActive)
+	private static float CurrentActiveElapsedSeconds(float startedAt)
+	{
+		return startedAt >= 0f ? Mathf.Max(0f, Time.time - startedAt) : 0f;
+	}
+
+	private float FlushHornTime(bool keepActive)
 	{
 		return FlushActiveTime(_hornTimeSeconds, ref _hornStartedAt, ref _currentHornSessionCommittedSeconds, keepActive);
 	}
 
-	private bool FlushBellTime(bool keepActive)
+	private float FlushBellTime(bool keepActive)
 	{
 		return FlushActiveTime(_bellTimeSeconds, ref _bellStartedAt, ref _currentBellSessionCommittedSeconds, keepActive);
 	}
 
-	private static bool FlushActiveTime(SavedFloat totalTime, ref float startedAt, ref float committedSessionTime, bool keepActive)
+	private static float FlushActiveTime(SavedFloat totalTime, ref float startedAt, ref float committedSessionTime, bool keepActive)
 	{
 		if (startedAt < 0f)
 		{
-			return false;
+			return 0f;
 		}
 
-		float elapsed = Time.time - startedAt;
+		float elapsed = CurrentActiveElapsedSeconds(startedAt);
 		if (elapsed > 0f)
 		{
 			totalTime.Value += elapsed;
@@ -881,12 +888,7 @@ public sealed class HornAndBellTimeStatTracker : StatTracker
 		}
 
 		startedAt = keepActive ? Time.time : -1f;
-		return elapsed > 0f;
-	}
-
-	private static float CurrentActiveElapsedSeconds(float startedAt)
-	{
-		return startedAt >= 0f ? Mathf.Max(0f, Time.time - startedAt) : 0f;
+		return elapsed;
 	}
 
 	private static float CurrentSessionDuration(float startedAt, float committedSessionTime)

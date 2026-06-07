@@ -100,7 +100,12 @@ namespace StatsAndAchievements.Achievements
 
 		private void OnTrackerChanged()
 		{
-			if (!IsUnlocked() && Tracker.CurrentHornSessionDuration >= RequiredHonkSeconds)
+			if (IsUnlocked())
+			{
+				return;
+			}
+
+			if (Tracker.CurrentHornSessionDuration >= RequiredHonkSeconds)
 			{
 				TriggerUnlock();
 			}
