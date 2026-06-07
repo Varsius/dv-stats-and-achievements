@@ -1,8 +1,8 @@
 # Stats and Achievements
 
-Adds a set of unique achievements and advanced statistic tracking to Derail Valley.
+Adds advanced statistic tracking and a set of unique achievements to Derail Valley.
 
-TODO Banner
+![Banner](banner.png)
 
 ## Settings
 

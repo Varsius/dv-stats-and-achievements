@@ -1,5 +1,0 @@
-- Single line namespaces (; instead of {})
-- Split up AchievementListeners.cs and StatTrackers.cs into seperate files
-- Integrate SavedValues.cs and Settings.cs in directory structure, root should only contain Main.cs
-- Remove ununsed imports
-- Factor out common formatting functions like distance or money value formatting
