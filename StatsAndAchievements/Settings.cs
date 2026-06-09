@@ -21,6 +21,9 @@ public class Settings : UnityModManager.ModSettings, IDrawable
 	[XmlIgnore]
 	public Action<Settings>? OnSettingsSaved;
 
+	[XmlIgnore]
+	public Action<Settings>? OnSettingsChanged;
+
 	public override void Save(UnityModManager.ModEntry modEntry)
 	{
 		Save(this, modEntry);
@@ -29,5 +32,6 @@ public class Settings : UnityModManager.ModSettings, IDrawable
 
 	public void OnChange()
 	{
+		OnSettingsChanged?.Invoke(this);
 	}
 }

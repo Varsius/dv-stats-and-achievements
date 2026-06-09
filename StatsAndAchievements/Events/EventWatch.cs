@@ -339,7 +339,6 @@ namespace StatsAndAchievements.Events
 				return;
 			}
 
-			Main.Debug($"Unlocked garages ({unlockedGaragesCount}): {string.Join(", ", unlockablesManager.UnlockedGarages.Select(garage => garage.ToString()))}");
 			_previousUnlockedGarages = unlockedGaragesCount;
 			UnlockedGaragesChanged?.Invoke(unlockedGaragesCount);
 		}

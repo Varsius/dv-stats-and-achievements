@@ -29,6 +29,7 @@ public class Main
 
 	private static Harmony? _harmony;
 	private static GameObject? watchGO;
+	private static bool _settingsChanged;
 	public static AchievementManager achievementManager = null!;
 	public static StatTrackerManager statTrackerManager = null!;
 	public static Settings settings = null!;
@@ -41,6 +42,7 @@ public class Main
 		try
 		{
 			settings = UnityModManager.ModSettings.Load<Settings>(modEntry);
+			settings.OnSettingsChanged += _ => _settingsChanged = true;
 
 			_harmony = new Harmony(modEntry.Info.Id);
 			_harmony.PatchAll(Assembly.GetExecutingAssembly());
@@ -97,10 +99,12 @@ public class Main
 	{
 		settings.Save(modEntry);
 
-		if (statTrackerManager != null)
+		if (_settingsChanged && statTrackerManager != null)
 		{
 			RebuildAchievementManager();
 		}
+
+		_settingsChanged = false;
 	}
 
 	public static void RebuildAchievementManager()
