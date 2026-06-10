@@ -1,3 +1,6 @@
+# Note: `gh pr create` with `GITHUB_TOKEN` also requires the repo setting
+# Settings -> Actions -> General -> Workflow permissions ->
+# "Allow GitHub Actions to create and approve pull requests".
 name: Release
 
 on:
