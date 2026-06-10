@@ -1,9 +1,9 @@
 {
-	"Id": "StatsAndAchievements",
-	"Version": "1.0.0",
-	"DisplayName": "StatsAndAchievements",
-	"Author": "DVG Connoisseurs",
-	"EntryMethod": "StatsAndAchievements.Main.Load",
-	"ManagerVersion": "0.27.3",
-	"Repository": "https://raw.githubusercontent.com/Varsius/dv-stats-and-achievements/main/repository.json"
+  "Id": "StatsAndAchievements",
+  "Version": "1.0.0",
+  "DisplayName": "StatsAndAchievements",
+  "Author": "DVG Connoisseurs",
+  "EntryMethod": "StatsAndAchievements.Main.Load",
+  "ManagerVersion": "0.27.3",
+  "Repository": "https://raw.githubusercontent.com/Varsius/dv-stats-and-achievements/main/repository.json"
 }
