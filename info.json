@@ -5,5 +5,7 @@
   "Author": "DVG Connoisseurs",
   "EntryMethod": "StatsAndAchievements.Main.Load",
   "ManagerVersion": "0.27.3",
+  "Requirements": ["CareerManagerAPI"],
+  "LoadAfter": ["CareerManagerAPI"],
   "Repository": "https://raw.githubusercontent.com/Varsius/dv-stats-and-achievements/main/repository.json"
 }
