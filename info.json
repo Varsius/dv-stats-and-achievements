@@ -1,6 +1,6 @@
 {
   "Id": "StatsAndAchievements",
-  "Version": "1.0.1",
+  "Version": "1.0.2",
   "DisplayName": "StatsAndAchievements",
   "Author": "DVG Connoisseurs",
   "EntryMethod": "StatsAndAchievements.Main.Load",

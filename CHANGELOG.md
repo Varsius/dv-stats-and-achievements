@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.0.2
+
 - Suppress error logs from TryGetPort
 
 ## 1.0.1

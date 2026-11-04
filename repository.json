@@ -2,6 +2,11 @@
   "Releases": [
     {
       "Id": "StatsAndAchievements",
+      "Version": "1.0.2",
+      "DownloadUrl": "https://github.com/Varsius/dv-stats-and-achievements/releases/download/1.0.2/StatsAndAchievements_1.0.2.zip"
+    },
+    {
+      "Id": "StatsAndAchievements",
       "Version": "1.0.1",
       "DownloadUrl": "https://github.com/Varsius/dv-stats-and-achievements/releases/download/1.0.1/StatsAndAchievements_1.0.1.zip"
     },
