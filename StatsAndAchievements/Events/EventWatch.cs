@@ -6,7 +6,6 @@ using DV.Simulation.Ports;
 using DV.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace StatsAndAchievements.Events
@@ -91,25 +90,17 @@ namespace StatsAndAchievements.Events
 			HornControl? hornControl = simController.controlsOverrider?.Horn;
 			_hornNeutralAt0 = hornControl?.neutralAt0 ?? true;
 			string hornPortId = hornControl?.portId ?? "horn.HORN";
-			if (simFlow.TryGetPort(hornPortId, out var simPortHorn))
+			if (simFlow.fullPortIdToPort.TryGetValue(hornPortId, out var simPortHorn))
 			{
 				simPortHorn.ValueUpdatedInternally += CheckHornHorn;
 				unsubscribeActions.Add(() => simPortHorn.ValueUpdatedInternally -= CheckHornHorn);
 				_previousHorn = simPortHorn.Value;
 			}
-			else
-			{
-				Main.Warning($"Could not get simPort {hornPortId}");
-			}
 
-			if (simFlow.TryGetPort("sand.AMOUNT", out var simPortSandAmount))
+			if (simFlow.fullPortIdToPort.TryGetValue("sand.AMOUNT", out var simPortSandAmount))
 			{
 				simPortSandAmount.ValueUpdatedInternally += CheckSandAmount;
 				unsubscribeActions.Add(() => simPortSandAmount.ValueUpdatedInternally -= CheckSandAmount);
-			}
-			else
-			{
-				Main.Warning("Could not get simPort sand.AMOUNT");
 			}
 
 			SubscribeToBellPort(simFlow, trainCar.GetComponent<LocoControlsReader>());
@@ -224,9 +215,8 @@ namespace StatsAndAchievements.Events
 				return;
 			}
 
-			if (!simFlow.TryGetPort(bellPortFeeder.portId, out var simPortBell))
+			if (!simFlow.fullPortIdToPort.TryGetValue(bellPortFeeder.portId, out var simPortBell))
 			{
-				Main.Warning($"Could not get simPort {bellPortFeeder.portId}");
 				return;
 			}
 
